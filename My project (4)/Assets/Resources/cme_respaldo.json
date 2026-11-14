@@ -1,0 +1,41 @@
+[
+  {
+    "activityID": "2026-11-10T14:24:00-CME-001",
+    "startTime": "2026-11-10T14:24Z",
+    "sourceLocation": "N15W22",
+    "note": "Eyección de Masa Coronal (CME) tipo halo parcial observada por SOHO/LASCO C2 dirigiéndose hacia el sector interior del sistema solar.",
+    "cmeAnalyses": [
+      {
+        "speed": 780.0,
+        "type": "C",
+        "isMostAccurate": true
+      }
+    ]
+  },
+  {
+    "activityID": "2026-11-12T08:12:00-CME-001",
+    "startTime": "2026-11-12T08:12Z",
+    "sourceLocation": "S12E08",
+    "note": "Nube de plasma solar rápida con frente magnético intenso detectada por STEREO-A y SOHO.",
+    "cmeAnalyses": [
+      {
+        "speed": 940.0,
+        "type": "O",
+        "isMostAccurate": true
+      }
+    ]
+  },
+  {
+    "activityID": "2026-11-13T19:45:00-CME-001",
+    "startTime": "2026-11-13T19:45Z",
+    "sourceLocation": "N08E14",
+    "note": "Nube de plasma moderada expulsada desde la región activa 13890.",
+    "cmeAnalyses": [
+      {
+        "speed": 610.0,
+        "type": "S",
+        "isMostAccurate": true
+      }
+    ]
+  }
+]

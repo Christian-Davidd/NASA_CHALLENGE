@@ -49,6 +49,13 @@ public sealed class AstronautController2D : MonoBehaviour
 
     private void Update()
     {
+        if (CommsTowerCMEEvent.IsMinigameActive)
+        {
+            moveInput = Vector2.zero;
+            UpdateSprite();
+            return;
+        }
+
         var keyboard = Keyboard.current;
         if (keyboard == null) return;
 
@@ -100,9 +107,58 @@ public sealed class AstronautController2D : MonoBehaviour
 
     private void Interact()
     {
+        float searchRadius = Mathf.Max(interactionRadius, 2.2f);
+        var hits = Physics2D.OverlapCircleAll(transform.position, searchRadius);
+
+        foreach (var hit in hits)
+        {
+            var tower = hit.GetComponent<CommsTowerCMEEvent>();
+            if (tower != null)
+            {
+                statusMessage = tower.InteractFromPlayer();
+                statusUntil = Time.time + 3f;
+                poseUntil = Time.time + interactionPoseDuration;
+                return;
+            }
+        }
+
+        foreach (var hit in hits)
+        {
+            var crop = hit.GetComponent<MarsCropPlot2D>();
+            if (crop != null)
+            {
+                statusMessage = crop.InteractFromPlayer();
+                statusUntil = Time.time + 3f;
+                poseUntil = Time.time + interactionPoseDuration;
+                return;
+            }
+        }
+
+        MarsSampleNode2D closestSample = null;
+        float bestSampleDist = float.MaxValue;
+        foreach (var hit in hits)
+        {
+            var sample = hit.GetComponent<MarsSampleNode2D>();
+            if (sample == null || sample.IsCollected) continue;
+            float d = Vector2.Distance(transform.position, hit.ClosestPoint(transform.position));
+            if (d < bestSampleDist)
+            {
+                bestSampleDist = d;
+                closestSample = sample;
+            }
+        }
+
+        if (closestSample != null)
+        {
+            statusMessage = closestSample.CollectSample();
+            statusUntil = Time.time + 3f;
+            poseUntil = Time.time + interactionPoseDuration;
+            return;
+        }
+
         if (nearbyInteractable == null)
         {
-            statusMessage = "No hay una formación geológica al alcance.";
+            statusMessage = "Acércate a la Torre, Cultivos o una Muestra y presiona [E].";
             statusUntil = Time.time + 2f;
             return;
         }
