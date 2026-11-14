@@ -28,8 +28,8 @@ jobs:
           import urllib.request
 
           CCMC_FLR_URL = "https://ccmc.gsfc.nasa.gov/DONKI/WS/get/FLR"
-          TEMP_PATH = "Assets/Resources/flr_temp.json"
-          FINAL_PATH = "Assets/Resources/estadisticas_tormenta_marte.json"
+          TEMP_PATH = "nasa-data/flr_temp.json"
+          FINAL_PATH = "nasa-data/estadisticas_tormenta_marte.json"
 
           # Parámetros del juego (7 min = 420s / 5 días = 84s por día)
           DURACION_MAX_PARTIDA_SEG = 420.0
