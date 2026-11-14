@@ -1,0 +1,41 @@
+[
+  {
+    "activityID": "2024-05-10T06:54:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2024-05-10T06:54Z",
+    "sourceLocation": "S18W89",
+    "activeRegionNum": 13664,
+    "note": "Respaldo Historico NASA: Eyeccion de masa coronal de alta velocidad asociada a la supertormenta solar de mayo 2024.",
+    "cmeAnalyses": [
+      {
+        "time21_5": "2024-05-10T09:12Z",
+        "latitude": -15.0,
+        "longitude": 42.0,
+        "halfAngle": 45.0,
+        "speed": 1250.0,
+        "type": "O",
+        "isMostAccurate": true
+      }
+    ]
+  },
+  {
+    "activityID": "2024-05-11T01:23:00-CME-002",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2024-05-11T01:23Z",
+    "sourceLocation": "S17W90",
+    "activeRegionNum": 13664,
+    "note": "Respaldo Historico NASA: Segunda nube de plasma coronal con interferencia electromagnetica moderada.",
+    "cmeAnalyses": [
+      {
+        "time21_5": "2024-05-11T04:30Z",
+        "latitude": -12.0,
+        "longitude": 50.0,
+        "halfAngle": 35.0,
+        "speed": 780.0,
+        "type": "C",
+        "isMostAccurate": true
+      }
+    ]
+  }
+]
+
