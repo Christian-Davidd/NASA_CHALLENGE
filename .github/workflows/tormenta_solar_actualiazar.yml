@@ -18,7 +18,7 @@ jobs:
 
       - name: Consultar NASA DONKI FLR y generar estadisticas (ultimos 7 dias)
         run: |
-          mkdir -p Assets/Resources
+          mkdir -p nasa-data
           python3 - << 'EOF'
           from datetime import datetime, timedelta, timezone
           import json
@@ -142,10 +142,10 @@ jobs:
 
       - name: Subir JSON actualizado al repositorio
         run: |
-          if [ -f Assets/Resources/estadisticas_tormenta_marte.json ]; then
+          if [ -f nasa-data/estadisticas_tormenta_marte.json ]; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add Assets/Resources/estadisticas_tormenta_marte.json
+            git add nasa-data/estadisticas_tormenta_marte.json
             if git diff --staged --quiet; then
               echo "Sin cambios nuevos respecto a la ultima consulta."
             else
