@@ -10,7 +10,7 @@ Es una ilustración vectorial hecha para el juego, no una extracción de la mall
 
 `Layers` contiene los recortes superior e inferior de las cuatro vistas neutras. Comparten el lienzo y pivote de los sprites completos para alinearse en un personaje por capas.
 
-`Source` contiene el generador vectorial, los SVG editables y el generador de poses. `render_z2_walks.cjs` rasteriza las cuatro nuevas poses verticales. Los PNG de `Sprites` y `Layers` son los recursos listos para Unity.
+`Source` conserva los maestros y SVG editables. Las herramientas de generación están en `Tools/AssetGeneration/AstronautaZ2`; `render_z2_walks.cjs` rasteriza las cuatro poses verticales. Los PNG de `Sprites` y `Layers` son los recursos listos para Unity.
 
 ## NASA references
 

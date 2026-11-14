@@ -1,0 +1,8 @@
+{
+  "name": "mars-outpost-asset-generation",
+  "private": true,
+  "description": "Rasterize Unity environment and astronaut source artwork.",
+  "dependencies": {
+    "sharp": "^0.35.5"
+  }
+}

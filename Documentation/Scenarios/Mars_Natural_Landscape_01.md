@@ -4,8 +4,8 @@ Escena 2D top-down amplia para recorrer con el astronauta Z-2 del proyecto. El t
 
 ## Escena jugable
 
-- `Assets/Scenes/Mars_Natural_Landscape_01.unity` mide **108 × 72 unidades** y es la primera escena de `EditorBuildSettings`, para que el emulador arranque en el entorno nuevo.
-- Se conservó `Mars_Outpost_01` y se mantuvo `SampleScene` como escena disponible.
+- `My project (4)/Assets/Scenes/Mars_Natural_Landscape_01.unity` mide **108 × 72 unidades**. La aplicación arranca en la portada; el botón **Despegar** abre este escenario.
+- `SampleScene` se conserva como plantilla técnica para generar escenas. También se conservaron las escenas de los módulos del equipo (`Entrenamiento`, `RelevoMarte` y `Tormenta`).
 - El astronauta usa los sprites ya existentes de frente, espalda, perfiles, caminata e interacción. Su altura de sprite es aproximadamente **2,14 unidades**; los bloques mayores miden cerca de **4 unidades de alto** y los menores se dispersan alrededor de ellos.
 - **WASD o flechas:** movimiento en ocho direcciones. **E:** registrar una muestra geológica cuando el personaje esté junto al macizo, el escarpe escalonado o el talud.
 - La cámara ortográfica sigue al jugador y se limita a los bordes del mapa. Hay Rigidbody2D, colisiones del jugador, rocas, formaciones y límites exteriores.
@@ -17,8 +17,8 @@ Escena 2D top-down amplia para recorrer con el astronauta Z-2 del proyecto. El t
 - `Assets/Scripts/Gameplay/AstronautController2D.cs`: movimiento con WASD o flechas, poses de caminata y orientación, consulta de interacción con E y aviso del resultado de la interacción. No muestra un recordatorio fijo de controles.
 - `Assets/Scripts/Gameplay/MarsCameraFollow2D.cs`: cámara con seguimiento suave y límites del mapa.
 - `Assets/Scripts/Gameplay/MarsInteractable2D.cs`: registro de muestras en tres formaciones geológicas.
-- `Source/generate_natural_assets.cjs` genera **34 SVG editables y sus PNG**.
-- `Source/create_natural_scene.py` genera la escena, los prefabs y las vistas previas. La distribución es determinista para facilitar cambios repetibles.
+- `Tools/AssetGeneration/MarsNaturalLandscape01/generate_natural_assets.cjs` genera **33 SVG editables y sus PNG**. Solo conserva assets usados por la versión actual; el antiguo marcador ovalado de la explanada se retiró.
+- `Tools/AssetGeneration/MarsNaturalLandscape01/create_natural_scene.py` genera la escena, los prefabs y las vistas previas. La distribución es determinista para facilitar cambios repetibles.
 
 ## Referencias geológicas
 
@@ -26,4 +26,4 @@ Las fotografías compartidas guían la paleta y las formas generales. Para las f
 
 ## Vistas previas
 
-`Mars_Natural_Landscape_01_preview.png` muestra el mapa completo; `Mars_Natural_Landscape_01_detail.png` encuadra al astronauta a una escala similar a la cámara de juego.
+`Previews/Mars_Natural_Landscape_01_preview.png` muestra el mapa completo; `Previews/Mars_Natural_Landscape_01_detail.png` encuadra al astronauta a una escala similar a la cámara de juego.

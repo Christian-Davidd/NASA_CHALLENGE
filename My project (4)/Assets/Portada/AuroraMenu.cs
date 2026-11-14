@@ -18,9 +18,9 @@ public sealed class AuroraMenu : MonoBehaviour
     static readonly Color Line = new(0.33f, 0.72f, 0.79f, 0.32f);
     static readonly Color Panel = new(0.036f, 0.10f, 0.15f, 0.97f);
 
-    [SerializeField] string gameplayScene = "";
+    [SerializeField] string gameplayScene = "Mars_Natural_Landscape_01";
     [SerializeField] int missionStage;
-    enum Page { Home, Options, Help, Credits, Confirm, Flight, Pause, Result, Loading }
+    enum Page { Home, Options, Help, Credits, Confirm, Flight, Pause, Result, Loading, LoadError }
     Page page;
     RectTransform root, screen, hero, orbit, pilot;
     RawImage heroGlow;
@@ -31,6 +31,7 @@ public sealed class AuroraMenu : MonoBehaviour
     AudioSource audioSource;
     AudioClip click, signal;
     Text status, volumeLabel;
+    string loadError;
     Button firstButton;
     Slider volume;
     Toggle motion;
@@ -119,6 +120,7 @@ public sealed class AuroraMenu : MonoBehaviour
             case Page.Pause: DrawPause(); break;
             case Page.Result: DrawResult(); break;
             case Page.Loading: DrawDialog("Despegando…", "Cargando la misión"); break;
+            case Page.LoadError: DrawLoadError(); break;
         }
         EventSystem.current.SetSelectedGameObject(firstButton ? firstButton.gameObject : null);
     }
@@ -136,7 +138,7 @@ public sealed class AuroraMenu : MonoBehaviour
         Label(screen, "Mars", 102, 326, 765, 122, 116, Cyan, true);
         Label(screen, "Entrena hoy, explora mañana,\npara el beneficio de todos.",
             111, 452, 645, 66, 25, White);
-        Action("Despegar", 111, 552, 407, StartDemo, true);
+        Action("Despegar", 111, 552, 407, LaunchGameplay, true);
         Action("Opciones", 111, 625, 195, () => Show(Page.Options));
         Action("Cómo jugar", 323, 625, 195, () => Show(Page.Help));
         Action("Salir", 111, 698, 195, () => Show(Page.Confirm));
@@ -282,10 +284,9 @@ public sealed class AuroraMenu : MonoBehaviour
 
     void BeginMission()
     {
-        if (missionStage == 0 && !string.IsNullOrWhiteSpace(gameplayScene) && Application.CanStreamedLevelBeLoaded(gameplayScene))
+        if (missionStage == 0)
         {
-            Show(Page.Loading);
-            SceneManager.LoadSceneAsync(gameplayScene);
+            LaunchGameplay();
             return;
         }
         remaining = missionStage == 2 ? 26 : MissionTime;
@@ -293,6 +294,35 @@ public sealed class AuroraMenu : MonoBehaviour
         collected = 0;
         movement = 0;
         Show(Page.Flight);
+    }
+
+    void LaunchGameplay()
+    {
+        if (string.IsNullOrWhiteSpace(gameplayScene))
+            gameplayScene = "Mars_Natural_Landscape_01";
+
+        if (!Application.CanStreamedLevelBeLoaded(gameplayScene))
+        {
+            loadError = $"No se encuentra la escena {gameplayScene} en Build Settings.";
+            Debug.LogError(loadError);
+            Show(Page.LoadError);
+            return;
+        }
+
+        Show(Page.Loading);
+        var operation = SceneManager.LoadSceneAsync(gameplayScene, LoadSceneMode.Single);
+        if (operation == null)
+        {
+            loadError = "Unity no pudo iniciar la carga del escenario de Marte.";
+            Debug.LogError(loadError);
+            Show(Page.LoadError);
+        }
+    }
+
+    void DrawLoadError()
+    {
+        DrawDialog("No se pudo cargar", loadError);
+        Action("Volver a la portada", 491, 608, 618, () => Show(Page.Home), true);
     }
 
     void DrawFlight()

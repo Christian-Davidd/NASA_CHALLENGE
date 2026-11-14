@@ -6,7 +6,8 @@ import re
 import uuid
 from PIL import Image
 
-PROJECT = Path(__file__).resolve().parents[5]
+REPO_ROOT = Path(__file__).resolve().parents[3]
+PROJECT = REPO_ROOT / "My project (4)"
 ASSETS = PROJECT / "Assets"
 PACK = ASSETS / "Art" / "Environment" / "MarsNaturalLandscape01"
 SCENE = ASSETS / "Scenes" / "Mars_Natural_Landscape_01.unity"
@@ -14,8 +15,9 @@ SCENE_META = SCENE.with_name(SCENE.name + ".meta")
 TEMPLATE = ASSETS / "Scenes" / "SampleScene.unity"
 PPU = 448.0
 MAP_W, MAP_H = 108.0, 72.0
-PREVIEW = PROJECT / "Mars_Natural_Landscape_01_preview.png"
-DETAIL_PREVIEW = PROJECT / "Mars_Natural_Landscape_01_detail.png"
+PREVIEW_DIR = REPO_ROOT / "Previews"
+PREVIEW = PREVIEW_DIR / "Mars_Natural_Landscape_01_preview.png"
+DETAIL_PREVIEW = PREVIEW_DIR / "Mars_Natural_Landscape_01_detail.png"
 PREFABS = PACK / "Prefabs"
 
 guid_by_path = {}
@@ -351,6 +353,7 @@ def composite_node(n,dest,clip=None):
 
 for n in sorted((n for n in nodes if n['sprite']),key=lambda n:n['order']):
     composite_node(n,canvas)
+PREVIEW_DIR.mkdir(parents=True, exist_ok=True)
 canvas.convert("RGB").save(PREVIEW,quality=96)
 
 # Close-up at the player spawn, showing the astronaut against the walkable terrain.

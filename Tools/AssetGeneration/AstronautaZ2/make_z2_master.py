@@ -4,10 +4,12 @@ from pathlib import Path
 import sys
 import types
 
-ROOT = Path(__file__).resolve().parent
-SOURCE = ROOT / "base_builder.py"
-MASTER = ROOT / "master"
-LAYER_SVG = ROOT / "layers"
+PROJECT = Path(__file__).resolve().parents[3] / "My project (4)"
+ASSET_SOURCE = PROJECT / "Assets" / "Art" / "Characters" / "AstronautaZ2" / "Source"
+ROOT = ASSET_SOURCE
+SOURCE = Path(__file__).resolve().with_name("base_builder.py")
+MASTER = ASSET_SOURCE / "master"
+LAYER_SVG = ASSET_SOURCE / "layers"
 MASTER.mkdir(parents=True, exist_ok=True)
 LAYER_SVG.mkdir(parents=True, exist_ok=True)
 

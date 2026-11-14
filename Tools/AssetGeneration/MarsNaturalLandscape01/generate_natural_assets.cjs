@@ -2,7 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
 
-const root = path.resolve(__dirname, '..');
+const project = path.resolve(__dirname, '../../../My project (4)');
+const root = path.join(project, 'Assets', 'Art', 'Environment', 'MarsNaturalLandscape01');
 const dirs = {
   ground: path.join(root, 'Ground'),
   detail: path.join(root, 'Ground', 'Details'),
@@ -109,13 +110,6 @@ const edgeMaskDefs=(id,w,h)=>`<filter id="edgeFade" x="-20%" y="-20%" width="140
   ${contour(1110,2170,505,325,7,28,'#dfb58b',.27,8)}`;
   const definition=gradients+`<pattern id="softGrain" width="512" height="512" patternUnits="userSpaceOnUse">${Array.from({length:65},()=>{let x=Math.round(rnd()*512),y=Math.round(rnd()*512),rx=2+rnd()*10;return `<circle cx="${x}" cy="${y}" r="${rx.toFixed(1)}" fill="${pick(['#684f42','#ecd0a5','#937054'])}" opacity=".${(8+Math.floor(rnd()*12))}"/>`;}).join('')}${Array.from({length:8},()=>{let x=rnd()*512,y=rnd()*512;return `<path d="M${x.toFixed(0)} ${y.toFixed(0)}q${(10+rnd()*44).toFixed(0)} -6 ${(-10+rnd()*45).toFixed(0)} 5" stroke="#755849" stroke-width="2" opacity=".16" fill="none"/>`;}).join('')}</pattern>`;
   add('landscape_regolith_base.svg',w,h,zones,definition,'ground');
-}
-
-// A broad, level regolith apron intentionally kept free of rocks for a future base.
-{
-  const w=1900,h=1320,mask=edgeMaskDefs('softEdge',w,h);
-  const body=`<g mask="url(#softEdge)"><rect width="${w}" height="${h}" fill="#c79d76" opacity=".86"/><path d="M180 650Q215 335 560 272Q925 188 1322 270Q1665 348 1730 655Q1695 1002 1335 1080Q959 1172 565 1080Q217 992 180 650Z" fill="#dfbb91" opacity=".3"/><path d="M262 686Q485 550 712 611T1130 574Q1426 530 1642 680M290 749Q504 632 735 686T1142 646Q1400 610 1608 748M336 813Q541 713 766 759T1155 720Q1373 691 1563 812" fill="none" stroke="#8c6b50" stroke-width="8" opacity=".2" stroke-linecap="round"/><path d="M315 663Q505 570 704 624T1120 588Q1402 551 1580 679M357 724Q543 642 745 696T1135 661Q1369 631 1545 738" fill="none" stroke="#efd3aa" stroke-width="10" opacity=".36" stroke-linecap="round"/><path d="M512 405q90-28 161-8m485 33q90-25 153-7M431 902q84-20 145-4m686-38q68-15 118 2" fill="none" stroke="#87684f" stroke-width="5" opacity=".18" stroke-linecap="round"/></g>`;
-  add('base_landing_regolith_clearance.svg',w,h,body,gradients+mask,'regions');
 }
 
 // Rock specimens: faceted, layered forms with warm gray linework and restrained highlights.

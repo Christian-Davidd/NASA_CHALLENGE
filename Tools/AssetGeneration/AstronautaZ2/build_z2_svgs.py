@@ -2,7 +2,8 @@
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
-ROOT = Path(__file__).resolve().parent
+PROJECT = Path(__file__).resolve().parents[3] / "My project (4)"
+ROOT = PROJECT / "Assets" / "Art" / "Characters" / "AstronautaZ2" / "Source"
 MASTER = ROOT / "master"
 POSES = ROOT / "poses"
 POSES.mkdir(parents=True, exist_ok=True)

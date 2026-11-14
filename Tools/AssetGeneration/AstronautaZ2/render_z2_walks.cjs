@@ -3,8 +3,10 @@ const path = require('path');
 const crypto = require('crypto');
 const sharp = require('sharp');
 
-const root = path.resolve(__dirname, '..');
-const poses = path.join(__dirname, 'poses');
+const project = path.resolve(__dirname, '../../../My project (4)');
+const root = path.join(project, 'Assets', 'Art', 'Characters', 'AstronautaZ2');
+const source = path.join(root, 'Source');
+const poses = path.join(source, 'poses');
 const sprites = path.join(root, 'Sprites');
 const metaTemplate = fs.readFileSync(
   path.join(sprites, 'char_astronauta_frente_neutro_z2_v01.png.meta'), 'utf8'
