@@ -32,6 +32,9 @@ namespace JuniorAstronaut.TerrenoCME
         private string mensajeResultado = "Sistema nominal. Acércate a la torre y pulsa [E] para operar.";
         private float acumuladorCiencia = 0f;
         private bool datosCargados = false;
+        private bool mostrarTarjetaEducativa = false;
+        private string tituloTarjetaEducativa = "";
+        private string cuerpoTarjetaEducativa = "";
 
         private void Awake()
         {
@@ -81,7 +84,7 @@ namespace JuniorAstronaut.TerrenoCME
 
             if (indiceEventoActual >= eventosDePartida.Count)
             {
-                indiceEventoActual = 0; // Reinicia el ciclo si quieres seguir probando
+                indiceEventoActual = 0;
             }
 
             eventoActual = eventosDePartida[indiceEventoActual];
@@ -95,6 +98,7 @@ namespace JuniorAstronaut.TerrenoCME
                 tipoActualNasa = string.IsNullOrEmpty(eventoActual.cmeAnalyses[0].type) ? "S" : eventoActual.cmeAnalyses[0].type;
             }
 
+            mostrarTarjetaEducativa = false;
             alertaActiva = true;
             tiempoParaImpacto = duracionAvisoSegundos;
             ActualizarColorTorre();
@@ -117,7 +121,6 @@ namespace JuniorAstronaut.TerrenoCME
             }
             else if (!antenaEncendida && !antenaDanada)
             {
-                // Si está apagada, la batería se recupera un poco con los paneles
                 bateria = Mathf.Clamp(bateria + 2.5f * Time.deltaTime, 0f, 100f);
             }
 
@@ -161,6 +164,28 @@ namespace JuniorAstronaut.TerrenoCME
             }
 
             ActualizarColorTorre();
+            PrepararTarjetaEducativa();
+        }
+
+        private void PrepararTarjetaEducativa()
+        {
+            mostrarTarjetaEducativa = true;
+            string descripcionTipo = tipoActualNasa switch
+            {
+                "S" => "Tipo S (Lenta, menos de 500 km/s)",
+                "C" => "Tipo C (Común, 500 a 999 km/s)",
+                "O" => "Tipo O (Ocasional y Rápida, 1,000 a 1,999 km/s)",
+                "R" => "Tipo R (Rara y Muy Peligrosa, 2,000 a 2,999 km/s)",
+                "ER" => "Tipo ER (Extremadamente Rara, más de 3,000 km/s)",
+                _ => $"Tipo {tipoActualNasa}"
+            };
+
+            tituloTarjetaEducativa = $"💡 Ciencia NASA para Astronautas Junior ({eventoActual?.activityID})";
+            cuerpoTarjetaEducativa =
+                $"¿Qué es una CME? Una Eyección de Masa Coronal es como una burbuja gigante de viento eléctrico que el Sol lanza al espacio.\n" +
+                $"• Esta tormenta real viajó a {velocidadActualKmS:F0} km/s — Escala oficial: {descripcionTipo}.\n" +
+                $"• Decisión de ingeniería: Apagar la antena detiene el envío de datos a la Tierra, pero protege los circuitos contra sobrecargas.\n" +
+                $"🔬 Fuente real: NASA DONKI (Space Weather Database)";
         }
 
         public void InteractuarDesdeAstronauta()
@@ -199,25 +224,24 @@ namespace JuniorAstronaut.TerrenoCME
 
             if (antenaDanada)
             {
-                visualTorre.CambiarColor(new Color(0.9f, 0.2f, 0.2f)); // Rojo = Dañada
+                visualTorre.CambiarColor(new Color(0.9f, 0.2f, 0.2f));
             }
             else if (alertaActiva)
             {
-                visualTorre.CambiarColor(new Color(1f, 0.8f, 0.1f)); // Amarillo = Alerta CME
+                visualTorre.CambiarColor(new Color(1f, 0.8f, 0.1f));
             }
             else if (antenaEncendida)
             {
-                visualTorre.CambiarColor(new Color(0.2f, 0.85f, 0.4f)); // Verde = Activa
+                visualTorre.CambiarColor(new Color(0.2f, 0.85f, 0.4f));
             }
             else
             {
-                visualTorre.CambiarColor(new Color(0.5f, 0.55f, 0.6f)); // Gris = Apagada segura
+                visualTorre.CambiarColor(new Color(0.5f, 0.55f, 0.6f));
             }
         }
 
         private void OnGUI()
         {
-            // HUD simple para pruebas rápidas en escena terreno
             GUI.Box(new Rect(15, 15, 520, 115), "MARS: OUTPOST 01 — Zona 5: Torre de Comunicaciones (DONKI CME)");
 
             string estadoAntenaTexto = antenaDanada
@@ -231,7 +255,6 @@ namespace JuniorAstronaut.TerrenoCME
             GUI.Label(new Rect(30, 90, 490, 22),
                 $"Controles: [A / D] o [Flechas] Caminar   |   [E] Interactuar cerca de la Torre");
 
-            // Botón rápido para probar la siguiente tormenta CME sin esperar
             if (datosCargados && !alertaActiva && eventosDePartida.Count > 0)
             {
                 if (GUI.Button(new Rect(550, 15, 220, 35), "⚡ Simular Siguiente CME Real"))
@@ -240,7 +263,6 @@ namespace JuniorAstronaut.TerrenoCME
                 }
             }
 
-            // Aviso de interacción cuando el astronauta está cerca de la torre
             if (astronauta != null && astronauta.EstaCercaDeLaTorre)
             {
                 string accion = antenaDanada
@@ -249,7 +271,6 @@ namespace JuniorAstronaut.TerrenoCME
                 GUI.Box(new Rect(15, 140, 340, 34), accion);
             }
 
-            // Panel de Alerta de Nube de Plasma (CME) Real de la NASA
             if (alertaActiva && eventoActual != null)
             {
                 GUI.color = new Color(1f, 0.85f, 0.3f);
@@ -269,7 +290,20 @@ namespace JuniorAstronaut.TerrenoCME
                 GUI.Box(new Rect(15, 185, 520, 55), "Bitácora de Misión");
                 GUI.Label(new Rect(30, 210, 490, 25), mensajeResultado);
             }
+
+            // Tarjeta Educativa NASA para niños (7-12 años) tras cada tormenta
+            if (mostrarTarjetaEducativa)
+            {
+                GUI.color = new Color(0.25f, 0.75f, 1f);
+                GUI.Box(new Rect(15, 250, 560, 155), tituloTarjetaEducativa);
+                GUI.color = Color.white;
+
+                GUI.Label(new Rect(30, 278, 530, 90), cuerpoTarjetaEducativa);
+                if (GUI.Button(new Rect(445, 368, 115, 28), "Entendido 👍"))
+                {
+                    mostrarTarjetaEducativa = false;
+                }
+            }
         }
     }
 }
-
