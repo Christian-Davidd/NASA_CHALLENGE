@@ -1,0 +1,156 @@
+name: Actualizar Datos NASA DONKI (FLR - Tormenta Solar)
+
+on:
+  schedule:
+    # Desfasado 15 min respecto al workflow de CME para evitar colisiones simultáneas en Git
+    - cron: '15 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch-nasa-flr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Consultar NASA DONKI FLR y generar estadisticas (ultimos 7 dias)
+        run: |
+          mkdir -p Assets/Resources
+          python3 - << 'EOF'
+          from datetime import datetime, timedelta, timezone
+          import json
+          import math
+          import os
+          import urllib.parse
+          import urllib.request
+
+          CCMC_FLR_URL = "https://ccmc.gsfc.nasa.gov/DONKI/WS/get/FLR"
+          TEMP_PATH = "Assets/Resources/flr_temp.json"
+          FINAL_PATH = "Assets/Resources/estadisticas_tormenta_marte.json"
+
+          # Parámetros del juego (7 min = 420s / 5 días = 84s por día)
+          DURACION_MAX_PARTIDA_SEG = 420.0
+          TOTAL_DIAS_JUEGO = 5
+          MIN_TORMENTA_SEG = 15.0
+          MAX_TORMENTA_SEG = 40.0
+          DIAS_DATOS_NASA = 7
+          CLASES_VALIDAS = ("C", "M", "X")
+
+          def escalar_duracion(duracion_real_min):
+              factor = (min(180.0, max(10.0, duracion_real_min)) - 10.0) / (180.0 - 10.0)
+              return round(MIN_TORMENTA_SEG + factor * (MAX_TORMENTA_SEG - MIN_TORMENTA_SEG), 1)
+
+          def parsear_llamarada(flr):
+              clase_str = (flr.get("classType") or "C1.0").strip().upper()
+              letra = clase_str[0]
+              inicio = flr.get("beginTime")
+              pico = flr.get("peakTime")
+              fin = flr.get("endTime")
+
+              duracion_real_min = 30.0
+              if inicio and fin:
+                  t0 = datetime.fromisoformat(inicio.replace("Z", "+00:00"))
+                  t1 = datetime.fromisoformat(fin.replace("Z", "+00:00"))
+                  duracion_real_min = max(5.0, (t1 - t0).total_seconds() / 60.0)
+              elif inicio and pico:
+                  t0 = datetime.fromisoformat(inicio.replace("Z", "+00:00"))
+                  tp = datetime.fromisoformat(pico.replace("Z", "+00:00"))
+                  duracion_real_min = max(10.0, ((tp - t0).total_seconds() / 60.0) * 2.0)
+
+              return {
+                  "categoria": letra,
+                  "duracion_escalada_seg": escalar_duracion(duracion_real_min),
+              }
+
+          ahora_utc = datetime.now(timezone.utc)
+          inicio_utc = ahora_utc - timedelta(days=DIAS_DATOS_NASA)
+          start_str = inicio_utc.strftime("%Y-%m-%d")
+          end_str = ahora_utc.strftime("%Y-%m-%d")
+
+          query = urllib.parse.urlencode({"startDate": start_str, "endDate": end_str})
+          url = f"{CCMC_FLR_URL}?{query}"
+          print(f"Consultando: {url}")
+
+          try:
+              req = urllib.request.Request(
+                  url,
+                  headers={
+                      "User-Agent": "Unity6-MarsSim-GitHubAction/1.0",
+                      "Accept": "application/json",
+                  },
+              )
+              with urllib.request.urlopen(req, timeout=30) as resp:
+                  if resp.status != 200:
+                      raise RuntimeError(f"HTTP {resp.status}")
+                  contenido = resp.read().decode("utf-8").strip()
+                  datos_crudos = [] if (not contenido or contenido == "null") else (json.loads(contenido) or [])
+
+              eventos = [
+                  parsear_llamarada(f)
+                  for f in datos_crudos
+                  if (f.get("classType") or "")[:1] in CLASES_VALIDAS
+              ]
+
+              total = len(eventos)
+              soles_transcurridos = DIAS_DATOS_NASA / 1.02749
+              lambda_por_dia = total / soles_transcurridos if total > 0 else 0.15
+              prob_aparicion_por_dia = round(1 - math.exp(-lambda_por_dia), 4)
+              seg_por_dia = round(DURACION_MAX_PARTIDA_SEG / TOTAL_DIAS_JUEGO, 1)
+
+              if total > 0:
+                  conteos = {"C": 0, "M": 0, "X": 0}
+                  for ev in eventos:
+                      conteos[ev["categoria"]] += 1
+                  pesos_clase = {k: round(v / total, 4) for k, v in conteos.items()}
+                  duracion_media_seg = round(
+                      sum(ev["duracion_escalada_seg"] for ev in eventos) / total, 1
+                  )
+              else:
+                  pesos_clase = {"C": 0.70, "M": 0.25, "X": 0.05}
+                  duracion_media_seg = 22.0
+
+              estadisticas = {
+                  "ultima_actualizacion_utc": ahora_utc.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                  "fuente": CCMC_FLR_URL,
+                  "ventana_datos_nasa": f"{start_str} a {end_str}",
+                  "total_llamaradas_semana": total,
+                  "tasa_media_por_dia": round(lambda_por_dia, 2),
+                  "probabilidad_evento_por_dia": prob_aparicion_por_dia,
+                  "duracion_media_tormenta_seg": duracion_media_seg,
+                  "configuracion_tiempo_juego": {
+                      "duracion_max_partida_seg": DURACION_MAX_PARTIDA_SEG,
+                      "total_dias_juego": TOTAL_DIAS_JUEGO,
+                      "segundos_por_dia": seg_por_dia,
+                  },
+                  "distribucion_severidad": pesos_clase,
+              }
+
+              with open(TEMP_PATH, "w", encoding="utf-8") as f:
+                  json.dump(estadisticas, f, indent=2, ensure_ascii=False)
+
+              os.replace(TEMP_PATH, FINAL_PATH)
+              print(f"JSON actualizado correctamente ({total} llamaradas | Prob/día: {prob_aparicion_por_dia}).")
+
+          except Exception as e:
+              if os.path.exists(TEMP_PATH):
+                  os.remove(TEMP_PATH)
+              print(f"Respuesta no valida ({e}). Se mantiene el archivo anterior.")
+          EOF
+
+      - name: Subir JSON actualizado al repositorio
+        run: |
+          if [ -f Assets/Resources/estadisticas_tormenta_marte.json ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add Assets/Resources/estadisticas_tormenta_marte.json
+            if git diff --staged --quiet; then
+              echo "Sin cambios nuevos respecto a la ultima consulta."
+            else
+              git commit -m "chore: actualizar estadisticas semanales NASA DONKI FLR"
+              git pull --rebase origin HEAD:${{ github.ref_name }}
+              git push origin HEAD:${{ github.ref_name }}
+            fi
+          fi
