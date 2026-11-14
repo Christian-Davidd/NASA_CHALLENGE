@@ -1,5 +1,6 @@
 """Create pose variants from the supplied NASA Z-2-inspired vector model."""
 from pathlib import Path
+import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parent
 MASTER = ROOT / "master"
@@ -64,4 +65,45 @@ for side, source_name in (
         name = f"char_astronauta_lado_{side}_{pose}_z2_v01.svg"
         (POSES / name).write_text(svg, encoding="utf-8")
 
-print(f"Wrote {4 + len(POSES_SPEC) * 2} SVG sprites to {POSES}")
+# Two subtle walk phases for each vertical-facing view. Keep the hip swing small
+# and flex the lower leg at the knee so the padded suit bends without looking
+# like the entire straight leg has been rotated from the waist.
+SVG_NS = "http://www.w3.org/2000/svg"
+ET.register_namespace("", SVG_NS)
+for direction in ("frente", "espalda"):
+    source_path = MASTER / f"char_astronauta_{direction}_neutro_v02.svg"
+    for phase, left_hip, right_hip, left_knee, right_knee in (
+        ("caminar_01", 2, 0, 7, 0),
+        ("caminar_02", 0, -2, 0, -7),
+    ):
+        root = ET.parse(source_path).getroot()
+        legs = {
+            leg.attrib.get("transform"): leg
+            for leg in root.iter(f"{{{SVG_NS}}}g")
+            if leg.attrib.get("transform", "").startswith("translate(212,524)")
+            or leg.attrib.get("transform", "").startswith("translate(300,524)")
+        }
+        for x, hip_angle, knee_angle in (
+            (212, left_hip, left_knee), (300, right_hip, right_knee)
+        ):
+            leg = next((g for t, g in legs.items() if t.startswith(f"translate({x},524)")), None)
+            if leg is None:
+                raise ValueError(f"Could not find expected {direction} leg pivot at x={x}")
+            leg.set("transform", f"translate({x},524) rotate({hip_angle})")
+            children = list(leg)
+            # The first six elements draw the thigh. The rest form the padded
+            # knee, shin and boot, which pivot together around the knee joint.
+            if len(children) < 15:
+                raise ValueError(f"Unexpected leg structure in {source_path.name}")
+            lower_leg = ET.Element(f"{{{SVG_NS}}}g", {
+                "transform": f"rotate({knee_angle} 0 142)"
+            })
+            for child in children[6:]:
+                leg.remove(child)
+                lower_leg.append(child)
+            leg.append(lower_leg)
+        svg = ET.tostring(root, encoding="unicode")
+        out_name = f"char_astronauta_{direction}_{phase}_z2_v01.svg"
+        (POSES / out_name).write_text(prepare(svg), encoding="utf-8")
+
+print(f"Wrote {4 + len(POSES_SPEC) * 2 + 4} SVG sprites to {POSES}")

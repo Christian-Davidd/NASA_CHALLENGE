@@ -6,11 +6,11 @@ Es una ilustración vectorial hecha para el juego, no una extracción de la mall
 
 ## Sprites
 
-`Sprites` contiene cuatro vistas neutras (frente, espalda y ambos perfiles) y cinco poses laterales en las dos direcciones: dos cuadros de caminata, interacción, reparación y alerta. Cada imagen es un PNG transparente de 640 × 960 con un pivote común y una escala de importación de Unity de 448 Pixels Per Unit.
+`Sprites` contiene cuatro vistas neutras (frente, espalda y ambos perfiles), dos cuadros de caminata frontal, dos traseros y cinco poses laterales en las dos direcciones: caminata, interacción, reparación y alerta. Cada imagen es un PNG transparente de 640 × 960 con un pivote común y una escala de importación de Unity de 448 Pixels Per Unit. Las piernas alternan su avance al caminar hacia arriba o abajo.
 
 `Layers` contiene los recortes superior e inferior de las cuatro vistas neutras. Comparten el lienzo y pivote de los sprites completos para alinearse en un personaje por capas.
 
-`Source` contiene el generador vectorial, los SVG editables y el generador de poses. Los PNG de `Sprites` y `Layers` son los recursos listos para Unity.
+`Source` contiene el generador vectorial, los SVG editables y el generador de poses. `render_z2_walks.cjs` rasteriza las cuatro nuevas poses verticales. Los PNG de `Sprites` y `Layers` son los recursos listos para Unity.
 
 ## NASA references
 
