@@ -1,0 +1,47 @@
+name: Actualizar Datos NASA DONKI (CME)
+
+on:
+  schedule:
+    - cron: '0 */6 * * *' # Se ejecuta automáticamente cada 6 horas
+  workflow_dispatch:       # Te permite ejecutarlo manualmente con un botón
+
+permissions:
+  contents: write
+
+jobs:
+  fetch-nasa-donki:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Consultar NASA DONKI CME (ultimos 7 dias)
+        run: |
+          mkdir -p nasa-data
+          START_DATE=$(date -u -d "7 days ago" +%Y-%m-%d)
+          END_DATE=$(date -u +%Y-%m-%d)
+          URL="https://ccmc.gsfc.nasa.gov/DONKI/WS/get/CME?startDate=${START_DATE}&endDate=${END_DATE}"
+          echo "Consultando: $URL"
+
+          HTTP_CODE=$(curl -sS -w "%{http_code}" -o nasa-data/cme_temp.json "$URL")
+          if [ "$HTTP_CODE" -eq 200 ] && grep -q '^[[:space:]]*\[' nasa-data/cme_temp.json; then
+            mv nasa-data/cme_temp.json nasa-data/cme_semana.json
+            echo "JSON actualizado correctamente."
+          else
+            rm -f nasa-data/cme_temp.json
+            echo "Respuesta no valida (HTTP $HTTP_CODE). Se mantiene el archivo anterior."
+          fi
+
+      - name: Subir JSON actualizado al repositorio
+        run: |
+          if [ -f nasa-data/cme_semana.json ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add nasa-data/cme_semana.json
+            if git diff --staged --quiet; then
+              echo "Sin cambios nuevos respecto a la ultima consulta."
+            else
+              git commit -m "chore: actualizar datos semanales NASA DONKI CME"
+              git push
+            fi
+          fi
