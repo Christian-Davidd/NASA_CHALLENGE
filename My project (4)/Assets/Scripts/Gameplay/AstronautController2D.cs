@@ -269,12 +269,24 @@ public sealed class AstronautController2D : MonoBehaviour
             }
         }
 
+        MarsScenePortal2D closestPortal = null;
+        float bestPortalDist = float.MaxValue;
         foreach (var hit in hits)
         {
             var portal = hit.GetComponent<MarsScenePortal2D>();
             if (portal == null) continue;
 
-            portal.Interact(gameObject);
+            float d = Vector2.Distance(transform.position, hit.ClosestPoint(transform.position));
+            if (d < bestPortalDist)
+            {
+                bestPortalDist = d;
+                closestPortal = portal;
+            }
+        }
+
+        if (closestPortal != null)
+        {
+            closestPortal.Interact(gameObject);
             return;
         }
 
