@@ -107,6 +107,15 @@ public sealed class AstronautController2D : MonoBehaviour
 
     private void Interact()
     {
+        var rover = FindFirstObjectByType<RobotCompanionFollow2D>();
+        if (rover != null && rover.TryDeliverSample(transform, out string roverMessage))
+        {
+            statusMessage = roverMessage;
+            statusUntil = Time.time + 4f;
+            poseUntil = Time.time + interactionPoseDuration;
+            return;
+        }
+
         float searchRadius = Mathf.Max(interactionRadius, 2.2f);
         var hits = Physics2D.OverlapCircleAll(transform.position, searchRadius);
 
@@ -139,7 +148,7 @@ public sealed class AstronautController2D : MonoBehaviour
         foreach (var hit in hits)
         {
             var sample = hit.GetComponent<MarsSampleNode2D>();
-            if (sample == null || sample.IsCollected) continue;
+            if (sample == null || !sample.IsAvailable) continue;
             float d = Vector2.Distance(transform.position, hit.ClosestPoint(transform.position));
             if (d < bestSampleDist)
             {

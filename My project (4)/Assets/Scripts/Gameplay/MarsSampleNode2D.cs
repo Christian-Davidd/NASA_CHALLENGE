@@ -9,7 +9,8 @@ using UnityEngine;
 public sealed class MarsSampleNode2D : MonoBehaviour
 {
     private static readonly HashSet<MarsSampleNode2D> AllNodes = new HashSet<MarsSampleNode2D>();
-    public static int TotalSamples => AllNodes.Count;
+    private static int bonusSamples;
+    public static int TotalSamples => AllNodes.Count + bonusSamples;
     public static int CollectedSamples { get; private set; }
 
     [Header("Datos de la Muestra")]
@@ -17,7 +18,53 @@ public sealed class MarsSampleNode2D : MonoBehaviour
     [SerializeField] private string sampleDescription = "Muestra de regolito y minerales marcianos.";
 
     public bool IsCollected { get; private set; }
+    public bool IsAvailable => isActiveAndEnabled && !IsCollected && reservedBy == null;
+    private RobotCompanionFollow2D reservedBy;
     private MarsWorldPlaceholder2D placeholder;
+
+    public static void AddBonusSample()
+    {
+        bonusSamples++;
+        RecalculateCollectedCount();
+    }
+
+    public static bool AllMapSamplesCollected =>
+        AllNodes.Count > 0 && CollectedSamples - bonusSamples == AllNodes.Count;
+
+    public static void GetAvailableSamples(UnityEngine.SceneManagement.Scene scene, List<MarsSampleNode2D> results)
+    {
+        results.Clear();
+        foreach (var node in AllNodes)
+        {
+            if (node != null && node.gameObject.scene == scene && node.IsAvailable)
+                results.Add(node);
+        }
+    }
+
+    public bool TryReserveForRover(RobotCompanionFollow2D rover)
+    {
+        if (rover == null || !IsAvailable) return false;
+        reservedBy = rover;
+        UpdateVisuals();
+        return true;
+    }
+
+    public void ReleaseRoverReservation(RobotCompanionFollow2D rover)
+    {
+        if (reservedBy != rover) return;
+        reservedBy = null;
+        UpdateVisuals();
+    }
+
+    public bool TryDeliverFromRover(RobotCompanionFollow2D rover, out string message)
+    {
+        message = null;
+        if (!isActiveAndEnabled || IsCollected || rover == null || reservedBy != rover) return false;
+
+        reservedBy = null;
+        message = CollectSample();
+        return true;
+    }
 
     private static readonly Color UncollectedColor = new Color(1.0f, 0.78f, 0.18f, 0.94f);
     private static readonly Color CollectedColor = new Color(0.42f, 0.55f, 0.62f, 0.65f);
@@ -29,23 +76,23 @@ public sealed class MarsSampleNode2D : MonoBehaviour
 
     private void OnEnable()
     {
-        if (AllNodes.Add(this) && IsCollected)
-        {
-            RecalculateCollectedCount();
-        }
+        AllNodes.Add(this);
         RecalculateCollectedCount();
         UpdateVisuals();
     }
 
     private void OnDisable()
     {
+        reservedBy = null;
         AllNodes.Remove(this);
+        if (AllNodes.Count == 0)
+            bonusSamples = 0;
         RecalculateCollectedCount();
     }
 
     private static void RecalculateCollectedCount()
     {
-        int count = 0;
+        int count = bonusSamples;
         foreach (var node in AllNodes)
         {
             if (node != null && node.IsCollected)
@@ -58,6 +105,8 @@ public sealed class MarsSampleNode2D : MonoBehaviour
     {
         if (IsCollected)
             return $"{sampleLabel}: ya fue recolectada.";
+        if (reservedBy != null)
+            return "El rover lleva esta muestra.";
 
         IsCollected = true;
         RecalculateCollectedCount();
@@ -78,6 +127,10 @@ public sealed class MarsSampleNode2D : MonoBehaviour
                 sampleLabel,
                 "Recolectada ✓"
             );
+        }
+        else if (reservedBy != null)
+        {
+            placeholder.SetVisualState(CollectedColor, sampleLabel, "Recogida por el rover");
         }
         else
         {
