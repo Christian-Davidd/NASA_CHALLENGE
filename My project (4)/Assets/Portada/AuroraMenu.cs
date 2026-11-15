@@ -18,7 +18,7 @@ public sealed class AuroraMenu : MonoBehaviour
     static readonly Color Line = new(0.33f, 0.72f, 0.79f, 0.32f);
     static readonly Color Panel = new(0.036f, 0.10f, 0.15f, 0.97f);
 
-    [SerializeField] string gameplayScene = "Mars_Natural_Landscape_01";
+    [SerializeField] string cinematicScene = "FirstOnMars_Cinematic";
     [SerializeField] int missionStage;
     enum Page { Home, Options, Help, Credits, Confirm, Flight, Pause, Result, Loading, LoadError }
     Page page;
@@ -138,7 +138,7 @@ public sealed class AuroraMenu : MonoBehaviour
         Label(screen, "Mars", 102, 326, 765, 122, 116, Cyan, true);
         Label(screen, "Entrena hoy, explora mañana,\npara el beneficio de todos.",
             111, 452, 645, 66, 25, White);
-        Action("Despegar", 111, 552, 407, LaunchGameplay, true);
+        Action("Despegar", 111, 552, 407, LaunchCinematic, true);
         Action("Opciones", 111, 625, 195, () => Show(Page.Options));
         Action("Cómo jugar", 323, 625, 195, () => Show(Page.Help));
         Action("Salir", 111, 698, 195, () => Show(Page.Confirm));
@@ -286,7 +286,7 @@ public sealed class AuroraMenu : MonoBehaviour
     {
         if (missionStage == 0)
         {
-            LaunchGameplay();
+            LaunchCinematic();
             return;
         }
         remaining = missionStage == 2 ? 26 : MissionTime;
@@ -296,24 +296,24 @@ public sealed class AuroraMenu : MonoBehaviour
         Show(Page.Flight);
     }
 
-    void LaunchGameplay()
+    void LaunchCinematic()
     {
-        if (string.IsNullOrWhiteSpace(gameplayScene))
-            gameplayScene = "Mars_Natural_Landscape_01";
+        if (string.IsNullOrWhiteSpace(cinematicScene))
+            cinematicScene = "FirstOnMars_Cinematic";
 
-        if (!Application.CanStreamedLevelBeLoaded(gameplayScene))
+        if (!Application.CanStreamedLevelBeLoaded(cinematicScene))
         {
-            loadError = $"No se encuentra la escena {gameplayScene} en Build Settings.";
+            loadError = $"No se encuentra la escena de la cinemática {cinematicScene} en Build Settings.";
             Debug.LogError(loadError);
             Show(Page.LoadError);
             return;
         }
 
         Show(Page.Loading);
-        var operation = SceneManager.LoadSceneAsync(gameplayScene, LoadSceneMode.Single);
+        var operation = SceneManager.LoadSceneAsync(cinematicScene, LoadSceneMode.Single);
         if (operation == null)
         {
-            loadError = "Unity no pudo iniciar la carga del escenario de Marte.";
+            loadError = "Unity no pudo iniciar la cinemática de despegue.";
             Debug.LogError(loadError);
             Show(Page.LoadError);
         }

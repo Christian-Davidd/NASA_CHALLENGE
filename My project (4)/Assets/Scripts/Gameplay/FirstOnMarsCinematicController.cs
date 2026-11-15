@@ -6,21 +6,21 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
-/// <summary>Plays the bilingual First on Mars intro before opening the existing cover scene.</summary>
+/// <summary>Plays the bilingual launch cinematic, then opens the Mars gameplay scene.</summary>
 [DisallowMultipleComponent]
 public sealed class FirstOnMarsCinematicController : MonoBehaviour
 {
     [SerializeField] private VideoPlayer videoPlayer;
     [SerializeField] private VideoClip spanishClip;
     [SerializeField] private VideoClip englishClip;
-    [SerializeField] private string coverScene = "Portada";
+    [SerializeField] private string gameplayScene = "Mars_Natural_Landscape_01";
 
     private Button spanishButton;
     private Button englishButton;
     private Image spanishButtonImage;
     private Image englishButtonImage;
     private Text statusText;
-    private bool isLoadingCover;
+    private bool isLoadingGameplay;
 
     private static readonly Color PanelColor = new(0.025f, 0.055f, 0.075f, 0.78f);
     private static readonly Color SelectedColor = new(0.67f, 0.30f, 0.17f, 0.98f);
@@ -32,7 +32,7 @@ public sealed class FirstOnMarsCinematicController : MonoBehaviour
         if (videoPlayer == null)
         {
             Debug.LogError("No se encontró el reproductor de la cinemática.", this);
-            LoadCover();
+            LoadGameplay();
             return;
         }
 
@@ -50,14 +50,14 @@ public sealed class FirstOnMarsCinematicController : MonoBehaviour
         videoPlayer.loopPointReached += OnVideoEnded;
         videoPlayer.errorReceived += OnVideoError;
 
-        // The paired AVI master contains the Spanish titles. English starts when requested.
+        // Start in Spanish; the language controls can switch to the English clip.
         PlaySpanish();
     }
 
     private void Update()
     {
         if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
-            LoadCover();
+            LoadGameplay();
     }
 
     private void OnDestroy()
@@ -98,7 +98,7 @@ public sealed class FirstOnMarsCinematicController : MonoBehaviour
 
         spanishButton = CreateButton(panelRect, font, "ESPAÑOL", new Vector2(-172f, -42f), 148f, PlaySpanish, out spanishButtonImage);
         englishButton = CreateButton(panelRect, font, "ENGLISH", new Vector2(-18f, -42f), 148f, PlayEnglish, out englishButtonImage);
-        CreateButton(panelRect, font, "OMITIR / SKIP", new Vector2(165f, -42f), 168f, LoadCover, out _);
+        CreateButton(panelRect, font, "OMITIR / SKIP", new Vector2(165f, -42f), 168f, LoadGameplay, out _);
 
         var statusObject = new GameObject("Cinematic Status", typeof(RectTransform), typeof(Text));
         var statusRect = statusObject.GetComponent<RectTransform>();
@@ -162,7 +162,7 @@ public sealed class FirstOnMarsCinematicController : MonoBehaviour
 
     private void Play(VideoClip clip)
     {
-        CancelInvoke(nameof(LoadCover));
+        CancelInvoke(nameof(LoadGameplay));
         if (clip == null)
         {
             ShowStatus("No se encontró esta versión de la cinemática.");
@@ -183,13 +183,13 @@ public sealed class FirstOnMarsCinematicController : MonoBehaviour
         player.Play();
     }
 
-    private void OnVideoEnded(VideoPlayer player) => LoadCover();
+    private void OnVideoEnded(VideoPlayer player) => LoadGameplay();
 
     private void OnVideoError(VideoPlayer player, string message)
     {
         Debug.LogWarning("No se pudo reproducir la cinemática: " + message, this);
-        ShowStatus("La cinemática no se pudo reproducir. Abriendo la portada…");
-        Invoke(nameof(LoadCover), 2f);
+        ShowStatus("La cinemática no se pudo reproducir. Abriendo Marte…");
+        Invoke(nameof(LoadGameplay), 2f);
     }
 
     private void SetSelectedLanguage(bool spanish)
@@ -203,14 +203,18 @@ public sealed class FirstOnMarsCinematicController : MonoBehaviour
         if (statusText != null) statusText.text = message;
     }
 
-    private void LoadCover()
+    private void LoadGameplay()
     {
-        if (isLoadingCover) return;
-        isLoadingCover = true;
+        if (isLoadingGameplay) return;
         if (videoPlayer != null) videoPlayer.Stop();
-        if (Application.CanStreamedLevelBeLoaded(coverScene))
-            SceneManager.LoadScene(coverScene, LoadSceneMode.Single);
-        else
-            Debug.LogError("La escena Portada no está disponible en Build Settings.", this);
+        if (!Application.CanStreamedLevelBeLoaded(gameplayScene))
+        {
+            ShowStatus($"No se encuentra la escena {gameplayScene} en Build Settings.");
+            Debug.LogError("La escena de Marte no está disponible en Build Settings.", this);
+            return;
+        }
+
+        isLoadingGameplay = true;
+        SceneManager.LoadScene(gameplayScene, LoadSceneMode.Single);
     }
 }

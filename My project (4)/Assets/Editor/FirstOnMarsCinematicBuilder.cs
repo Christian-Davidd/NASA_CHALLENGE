@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -12,6 +13,7 @@ public static class FirstOnMarsCinematicBuilder
     private const string EnglishVideoPath = "Assets/Video/FirstOnMars/FirstOnMars_English.mp4";
     private const string IntroScenePath = "Assets/Scenes/FirstOnMars_Cinematic.unity";
     private const string CoverScenePath = "Assets/Scenes/Portada.unity";
+    private const string GameplaySceneName = "Mars_Natural_Landscape_01";
 
     public static void BuildIntroScene()
     {
@@ -46,21 +48,25 @@ public static class FirstOnMarsCinematicBuilder
         serialized.FindProperty("videoPlayer").objectReferenceValue = videoPlayer;
         serialized.FindProperty("spanishClip").objectReferenceValue = spanishClip;
         serialized.FindProperty("englishClip").objectReferenceValue = englishClip;
-        serialized.FindProperty("coverScene").stringValue = "Portada";
+        serialized.FindProperty("gameplayScene").stringValue = GameplaySceneName;
         serialized.ApplyModifiedPropertiesWithoutUndo();
 
         EditorSceneManager.SaveScene(scene, IntroScenePath);
-        PutIntroBeforeCoverInBuildSettings();
+        PutCoverThenIntroInBuildSettings();
         Debug.Log($"Cinemática creada: ES {spanishClip.frameCount} fotogramas; EN {englishClip.frameCount} fotogramas.");
     }
 
-    private static void PutIntroBeforeCoverInBuildSettings()
+    private static void PutCoverThenIntroInBuildSettings()
     {
         var scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
-        scenes.RemoveAll(scene => scene.path == IntroScenePath);
-        var coverIndex = scenes.FindIndex(scene => scene.path == CoverScenePath);
+        scenes.RemoveAll(scene => scene.path == IntroScenePath || scene.path == CoverScenePath);
+        var cover = new EditorBuildSettingsScene(CoverScenePath, true);
+        var existingCover = EditorBuildSettings.scenes.FirstOrDefault(scene => scene.path == CoverScenePath);
+        if (existingCover != null) cover.enabled = existingCover.enabled;
+        cover.enabled = true;
         var intro = new EditorBuildSettingsScene(IntroScenePath, true);
-        scenes.Insert(coverIndex >= 0 ? coverIndex : 0, intro);
+        scenes.Insert(0, cover);
+        scenes.Insert(1, intro);
         EditorBuildSettings.scenes = scenes.ToArray();
     }
 }
