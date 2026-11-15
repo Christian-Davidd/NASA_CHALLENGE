@@ -116,7 +116,7 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
     private void OnGUI()
     {
         if (!Application.isPlaying) return;
-        if (CommsTowerCMEEvent.IsMinigameActive || MarsSpaceshipStation2D.IsMinigameActive || string.IsNullOrEmpty(labelTitle)) return;
+        if (CommsTowerCMEEvent.IsMinigameActive || MarsSpaceshipStation2D.IsMinigameActive || MarsMissionHUD.IsScienceLabOpen || string.IsNullOrEmpty(labelTitle)) return;
 
         var cam = Camera.main;
         if (cam == null) return;

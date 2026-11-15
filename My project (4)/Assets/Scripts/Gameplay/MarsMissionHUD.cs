@@ -32,18 +32,33 @@ public sealed class MarsMissionHUD : MonoBehaviour
     private Vector2 discoveryScroll;
     private readonly Queue<MarsSampleNode2D> pendingAnalyses = new();
     private readonly MarsScienceLab scienceLab = new();
+    private static MarsMissionHUD activeInstance;
     private MarsSampleNode2D displayedDiscovery;
+    private MarsDiscovery displayedDiscoveryData;
+    private bool displayedByRover;
     private MarsSampleNode2D activeAnalysis;
+    private MarsDiscovery activeAnalysisData;
+    private bool activeAnalysisByRover;
     public static bool IsScienceLabOpen { get; private set; }
 
     private Camera cachedCam;
     private Vector3 lastShakeOffset;
     private bool hasShakeOffset;
 
+    private void Awake()
+    {
+        activeInstance = this;
+    }
+
+    private void OnEnable()
+    {
+        activeInstance = this;
+    }
+
     private void Update()
     {
         ObserveDiscovery();
-        if (activeAnalysis != null ||
+        if (activeAnalysisData != null ||
             CommsTowerCMEEvent.IsMinigameActive ||
             MarsSpaceshipStation2D.IsMinigameActive ||
             (DONKIFLRManager.Instance != null && DONKIFLRManager.Instance.MisionFallida))
@@ -52,7 +67,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
         while (pendingAnalyses.Count > 0)
         {
             var node = pendingAnalyses.Dequeue();
-            if (node == null) continue;
+            if (node == null || node.Discovery == null) continue;
             OpenAnalysis(node);
             break;
         }
@@ -84,9 +99,12 @@ public sealed class MarsMissionHUD : MonoBehaviour
     private void OnDisable()
     {
         RevertCameraShake();
-        if (activeAnalysis != null)
+        if (activeInstance == this)
+            activeInstance = null;
+        if (activeAnalysisData != null || activeAnalysis != null)
         {
             activeAnalysis = null;
+            activeAnalysisData = null;
             IsScienceLabOpen = false;
         }
     }
@@ -102,7 +120,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
 
     private void OnGUI()
     {
-        if (activeAnalysis != null)
+        if (activeAnalysisData != null)
         {
             if (scienceLab.Draw())
                 CloseAnalysis();
@@ -518,10 +536,32 @@ public sealed class MarsMissionHUD : MonoBehaviour
         );
     }
 
+    internal static bool OpenExternalAnalysis(MarsDiscovery discovery, bool byRover = false)
+    {
+        if (activeInstance == null || discovery == null) return false;
+        if (discovery.isEquipment)
+            activeInstance.ShowDiscovery(discovery, byRover, null);
+        else
+            activeInstance.OpenAnalysis(discovery, byRover, null);
+        return true;
+    }
+
     private void ObserveDiscovery()
     {
+        if (MarsSampleNode2D.DiscoveryVersion < lastDiscoveryVersion)
+        {
+            lastDiscoveryVersion = MarsSampleNode2D.DiscoveryVersion;
+            pendingAnalyses.Clear();
+            activeAnalysis = null;
+            activeAnalysisData = null;
+            IsScienceLabOpen = false;
+            displayedDiscovery = null;
+            displayedDiscoveryData = null;
+            discoveryVisibleUntil = 0;
+        }
+
         var node = MarsSampleNode2D.LatestDiscovery;
-        if (node == null || node.gameObject.scene != gameObject.scene ||
+        if (node == null || node.Discovery == null ||
             lastDiscoveryVersion == MarsSampleNode2D.DiscoveryVersion) return;
 
         lastDiscoveryVersion = MarsSampleNode2D.DiscoveryVersion;
@@ -533,36 +573,58 @@ public sealed class MarsMissionHUD : MonoBehaviour
 
     private void ShowDiscovery(MarsSampleNode2D node)
     {
+        if (node == null || node.Discovery == null) return;
+        ShowDiscovery(node.Discovery, node.DeliveredByRover, node);
+    }
+
+    private void ShowDiscovery(MarsDiscovery discovery, bool byRover, MarsSampleNode2D node)
+    {
+        if (discovery == null) return;
         displayedDiscovery = node;
+        displayedDiscoveryData = discovery;
+        displayedByRover = byRover;
         discoveryVisibleUntil = Time.unscaledTimeAsDouble + DiscoveryDisplaySeconds;
         discoveryScroll = Vector2.zero;
-        discoveryReference = node.Discovery.LoadReference();
+        discoveryReference = discovery.LoadReference();
     }
 
     private void OpenAnalysis(MarsSampleNode2D node)
     {
+        if (node == null || node.Discovery == null) return;
+        OpenAnalysis(node.Discovery, node.DeliveredByRover, node);
+    }
+
+    private void OpenAnalysis(MarsDiscovery discovery, bool byRover, MarsSampleNode2D node)
+    {
         activeAnalysis = node;
-        scienceLab.Open(node.Discovery);
+        activeAnalysisData = discovery;
+        activeAnalysisByRover = byRover;
+        scienceLab.Open(discovery);
         IsScienceLabOpen = true;
     }
 
     private void CloseAnalysis()
     {
         var node = activeAnalysis;
+        var discovery = activeAnalysisData;
+        bool byRover = activeAnalysisByRover;
         activeAnalysis = null;
+        activeAnalysisData = null;
         IsScienceLabOpen = false;
-        ShowDiscovery(node);
+        ShowDiscovery(discovery, byRover, node);
     }
 
     private void DibujarHallazgo()
     {
-        if (displayedDiscovery == null || Time.unscaledTimeAsDouble >= discoveryVisibleUntil ||
+        var discovery = displayedDiscoveryData != null
+            ? displayedDiscoveryData
+            : (displayedDiscovery != null ? displayedDiscovery.Discovery : null);
+        if (discovery == null || Time.unscaledTimeAsDouble >= discoveryVisibleUntil ||
             CommsTowerCMEEvent.IsMinigameActive ||
             MarsSpaceshipStation2D.IsMinigameActive ||
             (DONKIFLRManager.Instance != null && DONKIFLRManager.Instance.MisionFallida)) return;
 
-        var node = displayedDiscovery;
-        var discovery = node.Discovery;
+        bool byRover = displayedDiscoveryData != null ? displayedByRover : displayedDiscovery.DeliveredByRover;
         float width = Mathf.Min(560f, Screen.width - 32f);
         float height = Mathf.Min(585f, Screen.height - 32f);
         if (width < 180f || height < 80f) return;
@@ -588,7 +650,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
         float contentWidth = width - 42f;
         float titleHeight = discoveryTitleStyle.CalcHeight(new GUIContent(discovery.title), contentWidth);
         string detail = discovery.isEquipment ? "Instrumento científico" : $"Análisis con {discovery.instrument}";
-        detail += node.DeliveredByRover ? " · Entregado por el rover" : " · Recogido por el astronauta";
+        detail += byRover ? " · Entregado por el rover" : " · Recogido por el astronauta";
         float detailHeight = discoveryTextStyle.CalcHeight(new GUIContent(detail), contentWidth);
         string description = discovery.description;
         float descriptionHeight = discoveryTextStyle.CalcHeight(new GUIContent(description), contentWidth);

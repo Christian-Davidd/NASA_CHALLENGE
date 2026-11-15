@@ -812,6 +812,7 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
     private void DibujarProcesoLaboratorio(Rect area)
     {
         bool tieneMuestra = MarsSampleNode2D.HasHeldSample;
+        var heldDiscovery = MarsSampleNode2D.HeldDiscovery;
         bool bloqueoCME = CommsTowerCMEEvent.HaySobrecargaActivaPorCME;
 
         float colW = (area.width - 24f) / 3f;
@@ -830,7 +831,7 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
 
         string sampleStatus = tieneMuestra
             ? $"En contenedor EVA: {MarsSampleNode2D.HeldSampleLabel}"
-            : "Sin muestra en mano (Modo Simulación)";
+            : "Sin muestra en mano (Recoge 1 afuera)";
         DrawProgressBar(new Rect(bay1.x + 14f, bay1.y + 122f, bay1.width - 28f, 24f), p1Done ? 1f : 0f,
             sampleStatus, new Color(0.28f, 0.92f, 0.56f, 1f));
 
@@ -838,7 +839,7 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
             p1Done ? "✓ CÁMARA SELLADA AL VACÍO" : "INSERTAR TUBO Y SELLAR CÁMARA", buttonStyle))
         {
             step1Toggle = true;
-            statusBanner = "PASO 2: Desliza el láser UV Raman al 100% sobre la roca para leer su composición química.";
+            statusBanner = "PASO 2: Ejecuta el análisis científico con el instrumento real de la NASA.";
             statusBannerColor = new Color(0.35f, 0.96f, 0.62f, 1f);
         }
 
@@ -848,32 +849,51 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
             $"<b>Progreso Geológico:</b> {MarsSampleNode2D.CollectedSamples} / {MarsSampleNode2D.TotalSamples} muestras.\n• Protección Planetaria NASA: evita mezclar microorganismos terrestres con muestras marcianas.",
             bodyStyle);
 
-        // PASO 2: Barrido Láser Espectrómetro UV (SHERLOC)
-        DrawStepBay(bay2, "PASO 2: ESPECTRÓMETRO LÁSER UV", p2Done, p1Done && !p2Done);
-        GUI.Label(new Rect(bay2.x + 12f, bay2.y + 38f, bay2.width - 24f, 76f),
-            "Un haz <b>láser ultravioleta (como SHERLOC en Perseverance)</b> ilumina los granos minerales sin destruirlos y mide la frecuencia de la luz reflejada.",
-            bodyStyle);
+        // PASO 2: Laboratorio Científico NASA (MAHLI / SAM / CheMin) + Foto real NASA
+        string instrumentLabel = heldDiscovery != null ? heldDiscovery.instrument : "MAHLI / SAM / CheMin";
+        DrawStepBay(bay2, $"PASO 2: INSTRUMENTO {instrumentLabel}", p2Done, p1Done && !p2Done);
 
-        DrawProgressBar(new Rect(bay2.x + 14f, bay2.y + 122f, bay2.width - 28f, 24f), step2Value / 100f,
-            $"Barrido Espectral Raman: {step2Value:F0}%", new Color(0.32f, 0.96f, 0.58f, 1f));
+        Texture2D refPhoto = heldDiscovery != null ? heldDiscovery.LoadReference() : null;
+        if (refPhoto != null)
+        {
+            GUI.DrawTexture(new Rect(bay2.x + 14f, bay2.y + 38f, bay2.width - 28f, 96f), refPhoto, ScaleMode.ScaleToFit);
+        }
+        else
+        {
+            GUI.Label(new Rect(bay2.x + 12f, bay2.y + 38f, bay2.width - 24f, 96f),
+                "Aquí puedes verificar los hallazgos obtenidos con los instrumentos de Curiosity: <b>MAHLI</b> (cámara macro), <b>SAM</b> (gases) y <b>CheMin</b> (rayos X).",
+                bodyStyle);
+        }
 
         GUI.enabled = p1Done;
-        step2Value = GUI.HorizontalSlider(new Rect(bay2.x + 16f, bay2.y + 158f, bay2.width - 32f, 24f), step2Value, 0f, 100f);
-        if (GUI.Button(new Rect(bay2.x + 14f, bay2.y + 190f, bay2.width - 28f, 36f),
-            p2Done ? "✓ ESPECTRO MINERAL LEÍDO" : "ESCANEAR CON LÁSER UV AL 100%", buttonStyle))
+        if (heldDiscovery != null)
+        {
+            if (GUI.Button(new Rect(bay2.x + 14f, bay2.y + 142f, bay2.width - 28f, 36f),
+                $"🔬 ABRIR MINIJUEGO {heldDiscovery.instrument} (NASA)", buttonStyle))
+            {
+                step2Value = 100f;
+                CerrarConsola();
+                MarsMissionHUD.OpenExternalAnalysis(heldDiscovery);
+                return;
+            }
+        }
+
+        step2Value = GUI.HorizontalSlider(new Rect(bay2.x + 16f, bay2.y + 186f, bay2.width - 32f, 20f), step2Value, 0f, 100f);
+        if (GUI.Button(new Rect(bay2.x + 14f, bay2.y + 210f, bay2.width - 28f, 34f),
+            p2Done ? "✓ VERIFICACIÓN COMPLETADA" : "CONFIRMAR LECTURA DE DATOS", buttonStyle))
         {
             step2Value = 100f;
-            statusBanner = "PASO 3: Registra los datos espectrales para vaciar tu contenedor (0/1) y salir por otra muestra.";
+            statusBanner = "PASO 3: Cataloga la muestra para vaciar tu contenedor (0/1) y salir por otra.";
             statusBannerColor = new Color(0.28f, 0.98f, 0.56f, 1f);
         }
         GUI.enabled = true;
 
-        Rect diag2 = new Rect(bay2.x + 14f, bay2.y + 238f, bay2.width - 28f, bay2.height - 252f);
+        Rect diag2 = new Rect(bay2.x + 14f, bay2.y + 252f, bay2.width - 28f, bay2.height - 266f);
         DrawBoxWithBorder(diag2, new Color(0.05f, 0.09f, 0.14f, 1f), new Color(0.22f, 0.68f, 0.45f, 1f), 1.5f);
-        float sNorm = step2Value / 100f;
-        GUI.Label(new Rect(diag2.x + 8f, diag2.y + 8f, diag2.width - 16f, diag2.height - 16f),
-            $"<b>Picos Detectados:</b>\n• Hematita (Fe₂O₃): {(sNorm * 42f):F0}%\n• Silicatos / Olivino: {(sNorm * 35f):F0}%\n• Sulfatos Hidratados (H₂O): {(sNorm * 23f):F0}%",
-            bodyStyle);
+        string infoTexto = heldDiscovery != null
+            ? $"<b>{heldDiscovery.title}</b> ({heldDiscovery.credit})\n{heldDiscovery.description}"
+            : "Recoge muestras reales en Marte [E] para ejecutar los minijuegos de <b>MAHLI</b>, <b>SAM</b> y <b>CheMin</b> y ver su fotografía oficial NASA.";
+        GUI.Label(new Rect(diag2.x + 8f, diag2.y + 8f, diag2.width - 16f, diag2.height - 16f), infoTexto, bodyStyle);
 
         // PASO 3: Catalogación y Liberación del Contenedor (1/1 -> 0/1)
         DrawStepBay(bay3, "PASO 3: CATALOGAR MUESTRA", false, p2Done);
@@ -887,24 +907,23 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
         if (GUI.Button(new Rect(bay3.x + 14f, bay3.y + 150f, bay3.width - 28f, 52f),
             tieneMuestra
                 ? "🔬 CATALOGAR Y GUARDAR MUESTRA\n(LIBERAR CONTENEDOR EVA)"
-                : "🔬 COMPLETAR PRÁCTICA DE LABORATORIO", primaryActionBtnStyle))
+                : "🔬 COMPLETAR REGISTRO EN NAVE", primaryActionBtnStyle))
         {
             if (tieneMuestra)
             {
                 MarsSampleNode2D.TryDeliverHeldSampleToShip(out string msg);
-                tarjetaTitulo = "¡MUESTRA MARCIANA ANALIZADA Y CATALOGADA!";
-                tarjetaCuerpo =
-                    $"{msg}\n\n" +
-                    "• 1. Bio-Aislamiento (Glovebox): Sellaste la muestra al vacío como en las misiones Apollo.\n" +
-                    "• 2. Espectrometría Raman UV: Identificaste óxidos de hierro (hematita) y minerales hidratados que prueban que Marte tuvo agua líquida.\n" +
-                    "• 3. Contenedor EVA libre (0/1): ¡Ya puedes salir a la superficie marciana a recoger la siguiente muestra!";
+                tarjetaTitulo = heldDiscovery != null
+                    ? $"MUESTRA CATALOGADA: {heldDiscovery.title.ToUpperInvariant()}"
+                    : "¡MUESTRA MARCIANA ANALIZADA Y CATALOGADA!";
+                tarjetaCuerpo = heldDiscovery != null
+                    ? $"{msg}\n\n• Instrumento: {heldDiscovery.instrument} ({heldDiscovery.credit})\n• Resumen NASA: {heldDiscovery.description}\n• Contenedor EVA libre (0/1): ya puedes salir a recoger otra muestra."
+                    : $"{msg}\n\n• Contenedor EVA libre (0/1): ¡Ya puedes salir a la superficie marciana a recoger la siguiente muestra!";
             }
             else
             {
-                tarjetaTitulo = "¡SIMULACIÓN DE ESPECTROMETRÍA COMPLETADA!";
+                tarjetaTitulo = "LABORATORIO LISTO PARA NUEVAS MUESTRAS";
                 tarjetaCuerpo =
-                    "Practicaste el procedimiento real de análisis geológico planetario.\n\n" +
-                    "• Recuerda salir a la superficie de Marte, recoger una muestra geológica con [E] (llevas 1 a la vez en tu contenedor hermético) y traerla aquí para registrarla.";
+                    "Recoge una muestra en la superficie de Marte con [E] para jugar su minijuego NASA (MAHLI / SAM / CheMin), ver su fotografía oficial y luego traerla aquí para catalogarla.";
             }
             mostrarTarjetaEducativa = true;
         }

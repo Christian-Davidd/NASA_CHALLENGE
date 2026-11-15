@@ -21,6 +21,8 @@ public sealed class MarsSampleNode2D : MonoBehaviour
     public static string HeldSampleKey { get; private set; }
     public static string HeldSampleLabel { get; private set; }
     public static string HeldSampleDescription { get; private set; }
+    public static string HeldDiscoveryId { get; private set; }
+    internal static MarsDiscovery HeldDiscovery => MarsDiscovery.Find(HeldDiscoveryId);
     public static bool HasHeldSample => !string.IsNullOrEmpty(HeldSampleKey);
 
     public static int TotalSamples => Mathf.Max(knownMapSamplesTotal, KnownMapSampleKeys.Count) + bonusAnalyzedCount;
@@ -68,7 +70,9 @@ public sealed class MarsSampleNode2D : MonoBehaviour
         HeldSampleKey = null;
         HeldSampleLabel = null;
         HeldSampleDescription = null;
+        HeldDiscoveryId = null;
         LatestDiscovery = null;
+        DiscoveryVersion = 0;
         foreach (var node in AllNodes)
         {
             if (node == null) continue;
@@ -90,6 +94,7 @@ public sealed class MarsSampleNode2D : MonoBehaviour
         HeldSampleKey = $"ROVER_BONUS_{System.Guid.NewGuid():N}";
         HeldSampleLabel = "[MUESTRA ROVER EXTRA]";
         HeldSampleDescription = fact;
+        HeldDiscoveryId = null;
         message = $"¡Recibiste la muestra extra del rover! Vuelve a la Nave para analizarla. {fact}";
         return true;
     }
@@ -121,6 +126,7 @@ public sealed class MarsSampleNode2D : MonoBehaviour
         HeldSampleKey = null;
         HeldSampleLabel = null;
         HeldSampleDescription = null;
+        HeldDiscoveryId = null;
 
         message = $"✅ Muestra {label} analizada y guardada en la Nave ({CollectedSamples}/{TotalSamples}). ¡Ya puedes salir por otra!";
         return true;
@@ -239,6 +245,7 @@ public sealed class MarsSampleNode2D : MonoBehaviour
         HeldSampleKey = NodeKey;
         HeldSampleLabel = Discovery != null ? Discovery.title : sampleLabel;
         HeldSampleDescription = Discovery != null ? $"{Discovery.instrument}: {Discovery.title}" : sampleDescription;
+        HeldDiscoveryId = Discovery != null ? Discovery.id : discoveryId;
 
         if (Discovery != null)
         {
