@@ -8,6 +8,11 @@ using UnityEngine;
 [RequireComponent(typeof(SpriteRenderer))]
 public sealed class MarsWorldPlaceholder2D : MonoBehaviour
 {
+    /// <summary>
+    /// Permite ocultar todas las etiquetas de la escena desde cualquier otro script.
+    /// </summary>
+    public static bool GlobalHideAllLabels = false;
+
     [Header("Etiqueta e Identificación")]
     [SerializeField] private string labelTitle = "[PLACEHOLDER]";
     [SerializeField] private string labelSubtitle = "Reemplazar con asset final";
@@ -16,7 +21,18 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
     [SerializeField] private float labelHeightOffset = 1.35f;
     [SerializeField] private bool tintSpriteWithSquareColor = true;
 
+    [Header("Control de Visibilidad en Juego")]
+    [Tooltip("Desmarcar para ocultar completamente la etiqueta de este objeto en Play Mode.")]
+    [SerializeField] private bool showLabelInGame = true;
+    [Tooltip("Si está activo, la etiqueta solo aparece cuando el jugador está cerca.")]
+    [SerializeField] private bool onlyShowNearPlayer = true;
+    [SerializeField] private float detectionRadius = 4.0f;
+    [SerializeField] private string playerTag = "Player";
+
     private SpriteRenderer spriteRenderer;
+    private Transform cachedPlayer;
+    private float nextPlayerSearchTime;
+
     private static Sprite fallbackSquareSprite;
     private GUIStyle titleStyle;
     private GUIStyle subtitleStyle;
@@ -32,6 +48,12 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
     {
         get => labelSubtitle;
         set => labelSubtitle = value;
+    }
+
+    public bool ShowLabelInGame
+    {
+        get => showLabelInGame;
+        set => showLabelInGame = value;
     }
 
     private void Awake()
@@ -50,6 +72,7 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
         labelTitle = title;
         labelSubtitle = subtitle;
         tintSpriteWithSquareColor = tintSprite;
+
         if (spriteRenderer == null)
             spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer != null)
@@ -113,10 +136,32 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
         return fallbackSquareSprite;
     }
 
+    private bool IsPlayerWithinRange()
+    {
+        if (cachedPlayer == null && Time.unscaledTime >= nextPlayerSearchTime)
+        {
+            nextPlayerSearchTime = Time.unscaledTime + 1f;
+            GameObject playerObj = GameObject.FindWithTag(playerTag);
+            if (playerObj != null)
+                cachedPlayer = playerObj.transform;
+        }
+
+        // Si no existe ningún objeto con el tag Player en la escena, no bloquea la etiqueta
+        if (cachedPlayer == null)
+            return true;
+
+        float sqrDist = ((Vector2)transform.position - (Vector2)cachedPlayer.position).sqrMagnitude;
+        return sqrDist <= detectionRadius * detectionRadius;
+    }
+
     private void OnGUI()
     {
         if (!Application.isPlaying) return;
+        if (!showLabelInGame || GlobalHideAllLabels) return;
         if (CommsTowerCMEEvent.IsMinigameActive || MarsSpaceshipStation2D.IsMinigameActive || MarsMissionHUD.IsScienceLabOpen || string.IsNullOrEmpty(labelTitle)) return;
+
+        if (onlyShowNearPlayer && !IsPlayerWithinRange())
+            return;
 
         var cam = Camera.main;
         if (cam == null) return;
@@ -125,7 +170,6 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
         Vector3 screenPos = cam.WorldToScreenPoint(worldPos);
         if (screenPos.z <= 0f) return;
 
-        // Solo dibujar etiquetas que estén dentro o cerca de la vista de cámara
         if (screenPos.x < -120f || screenPos.x > Screen.width + 120f ||
             screenPos.y < -80f || screenPos.y > Screen.height + 80f)
             return;
@@ -145,7 +189,6 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
         GUI.color = new Color(0.06f, 0.08f, 0.12f, 0.86f);
         GUI.DrawTexture(boxRect, labelBgTex);
 
-        // Borde superior del color del cuadrado
         GUI.color = new Color(squareColor.r, squareColor.g, squareColor.b, 0.95f);
         GUI.DrawTexture(new Rect(boxRect.x, boxRect.y, boxRect.width, 3f), labelBgTex);
         GUI.color = prevColor;
@@ -195,5 +238,11 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
     {
         Gizmos.color = squareColor;
         Gizmos.DrawWireCube(transform.position, transform.lossyScale);
+
+        if (onlyShowNearPlayer && showLabelInGame)
+        {
+            Gizmos.color = new Color(squareColor.r, squareColor.g, squareColor.b, 0.25f);
+            Gizmos.DrawWireSphere(transform.position, detectionRadius);
+        }
     }
 }
