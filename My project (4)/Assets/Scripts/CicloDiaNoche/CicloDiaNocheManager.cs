@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.SceneManagement;
 using MarteSim.ClimaEspacial;
 
 namespace MarteSim.CicloDiaNoche
@@ -9,7 +10,7 @@ namespace MarteSim.CicloDiaNoche
     {
         public static CicloDiaNocheManager Instance { get; private set; }
 
-        [Header("Regla de Partida (7 min = 420s / 5 días)")]
+        [Header("Escala de juego (7 min = 5 soles, 84 s por sol)")]
         [SerializeField] private float duracionTotalPartidaSeg = 420f;
         [SerializeField] private int totalDiasJuego = 5;
         [Range(0f, 1f)]
@@ -58,8 +59,11 @@ namespace MarteSim.CicloDiaNoche
             }
             Instance = this;
 
-            if (camaraPrincipal == null)
-                camaraPrincipal = Camera.main;
+            if (gradienteLuzSolar == null || gradienteSkyboxHorizonte == null || curvaIntensidadLuz == null)
+                Reset();
+
+            SceneManager.sceneLoaded += AlCargarEscena;
+            VincularReferenciasDeEscena();
         }
 
         private void Reset()
@@ -102,54 +106,81 @@ namespace MarteSim.CicloDiaNoche
 
         private void Start()
         {
-            // Inicializa el estado visual en el frame 0 (06:00 AM del Día 1)
+            DiaActual = 1;
             HoraNormalizada = horaInicialNormalizada;
             ActualizarAmbienteVisual();
             EvaluarDiaONoche(forzarEvento: true);
+            ActualizarMonitorInspector();
         }
 
         private void Update()
         {
-            if (TiempoTranscurridoSeg >= duracionTotalPartidaSeg) return;
-
-            // Si TormentaSolarManager está activo en la escena, sincroniza con su reloj maestro
-            if (TormentaSolarManager.Instance != null && TormentaSolarManager.Instance.TiempoTranscurridoPartida > 0f)
+            // El gestor de misión es el reloj maestro para tormentas, HUD y ciclo solar.
+            if (DONKIFLRManager.Instance != null)
             {
-                TiempoTranscurridoSeg = Mathf.Min(
-                    duracionTotalPartidaSeg,
-                    TormentaSolarManager.Instance.TiempoTranscurridoPartida
-                );
+                TiempoTranscurridoSeg = DONKIFLRManager.Instance.TiempoTranscurridoPartida;
+            }
+            else if (TormentaSolarManager.Instance != null && TormentaSolarManager.Instance.TiempoTranscurridoPartida > 0f)
+            {
+                TiempoTranscurridoSeg = TormentaSolarManager.Instance.TiempoTranscurridoPartida;
             }
             else
             {
-                TiempoTranscurridoSeg = Mathf.Min(
-                    duracionTotalPartidaSeg,
-                    TiempoTranscurridoSeg + Time.deltaTime * multiplicadorVelocidad
-                );
+                TiempoTranscurridoSeg += Time.deltaTime * multiplicadorVelocidad;
             }
 
-            float segundosPorDia = duracionTotalPartidaSeg / totalDiasJuego; // 84s por día
-            int diaCalculado = Mathf.Min(totalDiasJuego, Mathf.FloorToInt(TiempoTranscurridoSeg / segundosPorDia) + 1);
+            float segundosPorDia = duracionTotalPartidaSeg / Mathf.Max(1, totalDiasJuego);
+            int diaCalculado = Mathf.FloorToInt(TiempoTranscurridoSeg / segundosPorDia) + 1;
 
-            if (diaCalculado > DiaActual)
+            if (diaCalculado != DiaActual)
             {
                 DiaActual = diaCalculado;
                 OnNuevoDia?.Invoke(DiaActual);
                 Debug.Log($"[Ciclo Solar] Inicio del Día {DiaActual} de {totalDiasJuego}");
             }
 
-            float progresoEnElDia = (TiempoTranscurridoSeg % segundosPorDia) / segundosPorDia;
+            float progresoEnElDia = Mathf.Repeat(TiempoTranscurridoSeg / segundosPorDia, 1f);
             HoraNormalizada = (horaInicialNormalizada + progresoEnElDia) % 1f;
 
-            ActualizarAmbienteVisual();
+            if (EsEscenaExteriorMarte())
+                ActualizarAmbienteVisual();
             EvaluarDiaONoche(forzarEvento: false);
             ActualizarMonitorInspector();
 
             OnHoraActualizada?.Invoke(HoraNormalizada);
         }
 
+        private void OnDestroy()
+        {
+            SceneManager.sceneLoaded -= AlCargarEscena;
+            if (Instance == this)
+                Instance = null;
+        }
+
+        private void AlCargarEscena(Scene escena, LoadSceneMode modo)
+        {
+            VincularReferenciasDeEscena();
+            if (EsEscenaExteriorMarte())
+                ActualizarAmbienteVisual();
+        }
+
+        private void VincularReferenciasDeEscena()
+        {
+            bool superficie = EsEscenaExteriorMarte();
+            camaraPrincipal = superficie ? Camera.main : null;
+            luzGlobal2D = superficie ? FindFirstObjectByType<Light2D>() : null;
+        }
+
+        private static bool EsEscenaExteriorMarte()
+        {
+            return SceneManager.GetActiveScene().name == "Mars_Natural_Landscape_01";
+        }
+
         private void ActualizarAmbienteVisual()
         {
+            if (gradienteLuzSolar == null || curvaIntensidadLuz == null || gradienteSkyboxHorizonte == null)
+                return;
+
             Color colorLuz = gradienteLuzSolar.Evaluate(HoraNormalizada);
             float intensidad = curvaIntensidadLuz.Evaluate(HoraNormalizada);
 

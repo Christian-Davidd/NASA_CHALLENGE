@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using MarteSim.CicloDiaNoche;
 
 /// <summary>
 /// Gestor central de Clima Espacial FLR (/DONKI/FLR) y Supervivencia Realista en Marte:
@@ -29,27 +30,27 @@ public sealed class DONKIFLRManager : MonoBehaviour
     [SerializeField] private float cacheVigenciaHoras = 6f;
 
     [Header("Temporización de Llamaradas / Tormentas de Calor (FLR)")]
-    [SerializeField] private float preavisoSegundos = 3f;
-    [SerializeField] private float primerEventoFLRSegundos = 34f;
-    [SerializeField] private float duracionPartidaSeg = 210f;
+    [SerializeField] private float preavisoSegundos = 8f;
+    [SerializeField] private float primerEventoFLRSegundos = 84f;
+    [SerializeField] private float duracionPartidaSeg = 420f;
     [SerializeField] private int totalDiasJuego = 5;
 
     [Header("Consumos Continuos Realistas (%/seg)")]
-    [SerializeField] private float consumoBaseEnergiaPorSeg = 0.42f;
-    [SerializeField] private float consumoExtraInvernaderoPorSeg = 0.45f;
-    [SerializeField] private float consumoExtraAntenaCMEPorSeg = 1.65f;
-    [SerializeField] private float consumoBaseAguaExteriorPorSeg = 0.22f;
-    [SerializeField] private float consumoBaseAguaInteriorPorSeg = 0.10f;
-    [SerializeField] private float consumoOxigenoExteriorPorSeg = 0.65f;
+    [SerializeField] private float consumoBaseEnergiaPorSeg = 0.09f;
+    [SerializeField] private float consumoExtraInvernaderoPorSeg = 0.04f;
+    [SerializeField] private float consumoExtraAntenaCMEPorSeg = 0.18f;
+    [SerializeField] private float consumoBaseAguaExteriorPorSeg = 0.08f;
+    [SerializeField] private float consumoBaseAguaInteriorPorSeg = 0.035f;
+    [SerializeField] private float consumoOxigenoExteriorPorSeg = 0.16f;
 
     [Header("Recargas Progresivas al Mantener [E] (%/seg)")]
-    [SerializeField] private float recargaSolarEnergiaPorSeg = 22f;
-    [SerializeField] private float recargaMoxieOxigenoPorSeg = 28f;
-    [SerializeField] private float costoEnergiaMoxiePorSeg = 6.5f;
-    [SerializeField] private float recargaFiltroOrinaAguaPorSeg = 24f;
-    [SerializeField] private float costoEnergiaFiltroOrinaPorSeg = 7.5f;
-    [SerializeField] private float extraccionHieloISRUPorSeg = 22f;
-    [SerializeField] private float costoEnergiaISRUPorSeg = 11f;
+    [SerializeField] private float recargaSolarEnergiaPorSeg = 8f;
+    [SerializeField] private float recargaMoxieOxigenoPorSeg = 16f;
+    [SerializeField] private float costoEnergiaMoxiePorSeg = 2f;
+    [SerializeField] private float recargaFiltroOrinaAguaPorSeg = 12f;
+    [SerializeField] private float costoEnergiaFiltroOrinaPorSeg = 2.2f;
+    [SerializeField] private float extraccionHieloISRUPorSeg = 9f;
+    [SerializeField] private float costoEnergiaISRUPorSeg = 2.5f;
 
     private const string PREF_FLR_CACHE_JSON = "DONKI_FLR_CACHE_JSON_V1";
     private const string PREF_FLR_CACHE_TIME = "DONKI_FLR_CACHE_TIME_V1";
@@ -76,7 +77,7 @@ public sealed class DONKIFLRManager : MonoBehaviour
     public float DuracionTotalActual { get; private set; } = 16.8f;
     public float TiempoRestantePreaviso { get; private set; }
     public float TiempoRestanteEvento { get; private set; }
-    public float TiempoParaSiguienteFLR { get; private set; } = 34f;
+    public float TiempoParaSiguienteFLR { get; private set; } = 84f;
     public float DrenajeBateriaPorSegActual { get; private set; }
     public float ConsumoAguaTermicoPorSegActual { get; private set; }
     public float DesgasteTermicoPorSegActual { get; private set; }
@@ -188,25 +189,33 @@ public sealed class DONKIFLRManager : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void EnsureManagerExists()
     {
-        if (Instance != null) return;
-
         string activeScene = SceneManager.GetActiveScene().name;
         if (activeScene != "Mars_Natural_Landscape_01" &&
             activeScene != "Cultivation_Module_Interior" &&
             activeScene != "Spaceship_Interior")
             return;
 
+        if (Instance != null)
+        {
+            if (Instance.GetComponent<CicloDiaNocheManager>() == null)
+                Instance.gameObject.AddComponent<CicloDiaNocheManager>();
+            return;
+        }
+
         var existingHud = FindFirstObjectByType<MarsMissionHUD>();
         if (existingHud != null)
         {
             if (existingHud.GetComponent<DONKIFLRManager>() == null)
                 existingHud.gameObject.AddComponent<DONKIFLRManager>();
+            if (existingHud.GetComponent<CicloDiaNocheManager>() == null)
+                existingHud.gameObject.AddComponent<CicloDiaNocheManager>();
             return;
         }
 
         var go = new GameObject("SpaceWeather_And_HUD_Manager_Runtime");
         go.AddComponent<DONKICMEManager>();
         go.AddComponent<DONKIFLRManager>();
+        go.AddComponent<CicloDiaNocheManager>();
         go.AddComponent<MarsMissionHUD>();
     }
 
@@ -289,7 +298,8 @@ public sealed class DONKIFLRManager : MonoBehaviour
         TiempoParaSiguienteFLR -= Time.deltaTime;
         if (TiempoParaSiguienteFLR <= 0f)
         {
-            float prob = Mathf.Clamp(ProbabilidadEventoPorDia, 0.25f, 0.98f);
+            // Se conserva la estadística DONKI y se escala su frecuencia para la partida.
+            float prob = Mathf.Clamp(ProbabilidadEventoPorDia * 0.70f, 0.10f, 0.65f);
             if (UnityEngine.Random.value <= prob)
             {
                 string clase = SortearSeveridad(StatsActuales?.distribucion_severidad);
@@ -297,7 +307,7 @@ public sealed class DONKIFLRManager : MonoBehaviour
             }
             else
             {
-                TiempoParaSiguienteFLR = CalcularIntervaloEntreVentanas() * 0.55f;
+                TiempoParaSiguienteFLR = CalcularIntervaloEntreVentanas();
             }
         }
     }
@@ -326,7 +336,7 @@ public sealed class DONKIFLRManager : MonoBehaviour
         GastarAguaConRetornoOrina(aguaBase * dt);
         ReservaOrinaHumedad = Mathf.Clamp(ReservaOrinaHumedad + 0.22f * dt, 0f, 100f);
 
-        // 4. TORMENTA DE CALOR / LLAMARADA SOLAR (FLR) EN EL EXTERIOR (tras los 3 s de preaviso):
+        // 4. TORMENTA DE CALOR / LLAMARADA SOLAR (FLR) EN EL EXTERIOR (tras el preaviso):
         //    El traje activa el Control Térmico (LCVG + sublimador de agua) + escudo activo,
         //    lo cual consume AGUA y ENERGÍA y desgasta el Control Térmico (requiere mantenimiento en la Nave).
         if (EnPicoRadiacion && !EstaEnRefugioDomo)
@@ -445,21 +455,21 @@ public sealed class DONKIFLRManager : MonoBehaviour
         {
             case "X":
                 nivelTexto = "TORMENTA DE CALOR / FLR CRÍTICA (Clase X)";
-                bateriaTotalPct = 42f;
-                aguaTermicaTotalPct = 36f;
-                desgasteTermicoTotalPct = 45f;
-                break;
-            case "M":
-                nivelTexto = "TORMENTA DE CALOR / FLR MODERADA (Clase M)";
                 bateriaTotalPct = 28f;
                 aguaTermicaTotalPct = 24f;
                 desgasteTermicoTotalPct = 30f;
                 break;
+            case "M":
+                nivelTexto = "TORMENTA DE CALOR / FLR MODERADA (Clase M)";
+                bateriaTotalPct = 15f;
+                aguaTermicaTotalPct = 12f;
+                desgasteTermicoTotalPct = 16f;
+                break;
             default:
                 nivelTexto = "TORMENTA DE CALOR / FLR MENOR (Clase C)";
-                bateriaTotalPct = 16f;
-                aguaTermicaTotalPct = 14f;
-                desgasteTermicoTotalPct = 18f;
+                bateriaTotalPct = 7f;
+                aguaTermicaTotalPct = 6f;
+                desgasteTermicoTotalPct = 8f;
                 break;
         }
 
@@ -472,7 +482,7 @@ public sealed class DONKIFLRManager : MonoBehaviour
 
         HayTormentaFLRActiva = true;
         EnPreaviso = true;
-        TiempoRestantePreaviso = Mathf.Max(1f, preavisoSegundos); // Exactamente 3 segundos de preaviso
+        TiempoRestantePreaviso = Mathf.Max(1f, preavisoSegundos);
         TiempoRestanteEvento = duracion;
 
         OnFLRIniciada?.Invoke(ClaseActual, DuracionTotalActual);
@@ -751,7 +761,10 @@ public sealed class DONKIFLRManager : MonoBehaviour
     private float CalcularIntervaloEntreVentanas()
     {
         float segPorDia = Mathf.Max(22f, duracionPartidaSeg / Mathf.Max(1, totalDiasJuego));
-        return Mathf.Clamp(segPorDia * 0.85f, 24f, 52f);
+        float solesEntreVentanas = TotalLlamaradasSemana >= 10 ? 1.55f
+            : TotalLlamaradasSemana >= 4 ? 1.85f
+            : 2.15f;
+        return Mathf.Clamp(segPorDia * solesEntreVentanas, 120f, 190f);
     }
 
     private IEnumerator FlujoCargaEstadisticasFLR()

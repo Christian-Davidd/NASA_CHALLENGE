@@ -12201,7 +12201,7 @@ MonoBehaviour:
   apiKey: DEMO_KEY
   githubRawJsonUrl: https://raw.githubusercontent.com/Christian-Davidd/NASA_CHALLENGE/main/nasa-data/cme_semana.json
   cacheVigenciaHoras: 6
-  primerEventoSegundos: 22
+  primerEventoSegundos: 150
   duracionEventoSegundos: 45
 --- !u!114 &910000413
 MonoBehaviour:
@@ -12253,23 +12253,23 @@ MonoBehaviour:
   apiKey: DEMO_KEY
   githubRawJsonUrl: https://raw.githubusercontent.com/Christian-Davidd/NASA_CHALLENGE/main/nasa-data/estadisticas_tormenta_marte.json
   cacheVigenciaHoras: 6
-  preavisoSegundos: 3
-  primerEventoFLRSegundos: 34
-  duracionPartidaSeg: 210
+  preavisoSegundos: 8
+  primerEventoFLRSegundos: 84
+  duracionPartidaSeg: 420
   totalDiasJuego: 5
-  consumoBaseEnergiaPorSeg: 0.42
-  consumoExtraInvernaderoPorSeg: 0.45
-  consumoExtraAntenaCMEPorSeg: 1.65
-  consumoBaseAguaExteriorPorSeg: 0.22
-  consumoBaseAguaInteriorPorSeg: 0.1
-  consumoOxigenoExteriorPorSeg: 0.65
-  recargaSolarEnergiaPorSeg: 22
-  recargaMoxieOxigenoPorSeg: 28
-  costoEnergiaMoxiePorSeg: 6.5
-  recargaFiltroOrinaAguaPorSeg: 24
-  costoEnergiaFiltroOrinaPorSeg: 7.5
-  extraccionHieloISRUPorSeg: 22
-  costoEnergiaISRUPorSeg: 11
+  consumoBaseEnergiaPorSeg: 0.09
+  consumoExtraInvernaderoPorSeg: 0.04
+  consumoExtraAntenaCMEPorSeg: 0.18
+  consumoBaseAguaExteriorPorSeg: 0.08
+  consumoBaseAguaInteriorPorSeg: 0.035
+  consumoOxigenoExteriorPorSeg: 0.16
+  recargaSolarEnergiaPorSeg: 8
+  recargaMoxieOxigenoPorSeg: 16
+  costoEnergiaMoxiePorSeg: 2
+  recargaFiltroOrinaAguaPorSeg: 12
+  costoEnergiaFiltroOrinaPorSeg: 2.2
+  extraccionHieloISRUPorSeg: 9
+  costoEnergiaISRUPorSeg: 2.5
 --- !u!1 &910000420
 GameObject:
   m_ObjectHideFlags: 0

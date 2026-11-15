@@ -106,15 +106,15 @@ public sealed class CommsTowerCMEEvent : MonoBehaviour
         float velKmS = cme.VelocidadActualKmS > 0f ? cme.VelocidadActualKmS : 680f;
         float speedNorm = Mathf.Clamp01(Mathf.InverseLerp(350f, 1300f, velKmS));
         StaticTiempoLimiteSobrecarga = velKmS >= 800f
-            ? Mathf.Lerp(21f, 14f, Mathf.Clamp01(Mathf.InverseLerp(800f, 1400f, velKmS)))
-            : Mathf.Lerp(34f, 26f, speedNorm);
+            ? Mathf.Lerp(40f, 32f, Mathf.Clamp01(Mathf.InverseLerp(800f, 1400f, velKmS)))
+            : Mathf.Lerp(58f, 44f, speedNorm);
 
         StaticSobrecargaProgreso += deltaTime / Mathf.Max(8f, StaticTiempoLimiteSobrecarga);
 
         if (StaticSobrecargaProgreso >= 1f)
         {
             StaticSobrecargaProgreso = 0f;
-            DONKIFLRManager.Instance?.AplicarCortocircuitoAntenaCME(22f, velKmS);
+            DONKIFLRManager.Instance?.AplicarCortocircuitoAntenaCME(10f, velKmS);
 
             if (Instance != null)
             {
@@ -122,7 +122,7 @@ public sealed class CommsTowerCMEEvent : MonoBehaviour
                     Instance.ReiniciarAPasoUnoApagado();
 
                 Instance.FijarMensajeConsola(
-                    $"¡CORTOCIRCUITO DE PLASMA ({velKmS:F0} km/s)! -22% Energía en la red. Apaga la antena desde el Paso 1.",
+                    $"¡CORTOCIRCUITO DE PLASMA ({velKmS:F0} km/s)! -10% Energía en la red. Apaga la antena desde el Paso 1.",
                     new Color(1f, 0.35f, 0.35f, 1f),
                     4.5f
                 );

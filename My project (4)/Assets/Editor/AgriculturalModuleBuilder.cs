@@ -561,19 +561,34 @@ public static class AgriculturalModuleBuilder
         var main = effect.main;
         main.duration = 3.6f;
         main.loop = false;
-        main.startLifetime = 2.2f;
-        main.startSpeed = 0.12f;
-        main.startSize = new ParticleSystem.MinMaxCurve(0.12f, 0.24f);
-        main.startColor = new Color(0.78f, 0.9f, 0.9f, 0.22f);
-        main.maxParticles = 420;
-        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.playOnAwake = false;
+        main.startLifetime = 1.25f;
+        main.startSpeed = 0.035f;
+        main.startSize = new ParticleSystem.MinMaxCurve(0.10f, 0.18f);
+        main.startColor = new Color(1f, 1f, 1f, 0.82f);
+        main.maxParticles = 220;
+        main.simulationSpace = ParticleSystemSimulationSpace.Local;
         var emission = effect.emission;
-        emission.rateOverTime = 95f;
+        emission.rateOverTime = 78f;
         var shape = effect.shape;
         shape.shapeType = ParticleSystemShapeType.Box;
-        shape.scale = new Vector3(3.35f, 5.0f, 0.08f);
+        shape.scale = new Vector3(2.8f, 4.8f, 0.04f);
         var renderer = effect.GetComponent<ParticleSystemRenderer>();
         renderer.sortingOrder = 9;
+        renderer.sharedMaterial = AssetDatabase.LoadAssetAtPath<Material>(PipeMaterialPath);
+        var colorOverLifetime = effect.colorOverLifetime;
+        colorOverLifetime.enabled = true;
+        var mistGradient = new Gradient();
+        mistGradient.SetKeys(
+            new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+            new[]
+            {
+                new GradientAlphaKey(0f, 0f),
+                new GradientAlphaKey(0.68f, 0.18f),
+                new GradientAlphaKey(0.58f, 0.72f),
+                new GradientAlphaKey(0f, 1f)
+            });
+        colorOverLifetime.color = mistGradient;
         return effect;
     }
 

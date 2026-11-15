@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using MarteSim.CicloDiaNoche;
 
 /// <summary>
 /// [PERSONA 1, 2 y 3] HUD Integrado de la Misión en Marte:
@@ -385,7 +386,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
         float width = Mathf.Min(330f, availableWidth);
         float x = gapLeft + Mathf.Max(0f, (availableWidth - width) * 0.5f);
         bool expanded = ShowExtendedContext;
-        float height = expanded ? 102f : 60f;
+        float height = expanded ? 116f : 78f;
         Rect rect = new Rect(x, 16f, width, height);
 
         Color accent = hayInterferencia ? new Color(1f, 0.34f, 0.45f, 1f)
@@ -404,6 +405,11 @@ public sealed class MarsMissionHUD : MonoBehaviour
             : "Antena: en línea";
         GUI.Label(new Rect(rect.x + 14f, rect.y + 5f, rect.width - 28f, 20f), "CLIMA ESPACIAL", panelTitleStyle);
         GUI.Label(new Rect(rect.x + 14f, rect.y + 27f, rect.width - 28f, 22f), clima + "  ·  " + antena, bodyTextStyle);
+        CicloDiaNocheManager ciclo = CicloDiaNocheManager.Instance;
+        string faseSolar = ciclo != null && ciclo.EsDeNoche ? "NOCHE" : "DÍA";
+        string relojSolar = ciclo != null ? ciclo.ObtenerRelojFormateado() : "Día 1 - 06:00";
+        GUI.Label(new Rect(rect.x + 14f, rect.y + 49f, rect.width - 28f, 18f),
+            $"{relojSolar}  ·  {faseSolar}", smallHintStyle);
         if (expanded)
         {
             string cmeInfo = cme != null && cme.HayTormentaCMEActiva
@@ -412,8 +418,8 @@ public sealed class MarsMissionHUD : MonoBehaviour
             string flrInfo = flr == null ? "FLR: cargando" : flr.HayTormentaFLRActiva
                 ? $"FLR {flr.ClaseActual}: {(flr.EnPreaviso ? flr.TiempoRestantePreaviso : flr.TiempoRestanteEvento):F0}s"
                 : $"FLR: {flr.TotalLlamaradasSemana}/sem · próxima en {flr.TiempoParaSiguienteFLR:F0}s";
-            GUI.Label(new Rect(rect.x + 14f, rect.y + 50f, rect.width - 28f, 20f), cmeInfo, smallHintStyle);
-            GUI.Label(new Rect(rect.x + 14f, rect.y + 72f, rect.width - 28f, 20f), flrInfo, smallHintStyle);
+            GUI.Label(new Rect(rect.x + 14f, rect.y + 70f, rect.width - 28f, 20f), cmeInfo, smallHintStyle);
+            GUI.Label(new Rect(rect.x + 14f, rect.y + 92f, rect.width - 28f, 20f), flrInfo, smallHintStyle);
         }
         else
         {

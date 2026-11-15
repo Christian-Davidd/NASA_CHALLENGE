@@ -48,7 +48,7 @@ public sealed class DONKICMEManager : MonoBehaviour
     [SerializeField] private float cacheVigenciaHoras = 6f;
 
     [Header("Frecuencia y Duración de Nubes de Plasma (CME)")]
-    [SerializeField] private float primerEventoSegundos = 22f;
+    [SerializeField] private float primerEventoSegundos = 150f;
     [SerializeField] private float duracionEventoSegundos = 45f;
 
     public List<CMEEventData> EventosCargados { get; private set; } = new List<CMEEventData>();
@@ -241,18 +241,18 @@ public sealed class DONKICMEManager : MonoBehaviour
         int totalSemana = EventosCargados.Count;
         if (totalSemana >= 10)
         {
-            IntervaloCalculadoSegundos = 35f;
-            ReglaFrecuenciaTexto = $"Sol muy activo ({totalSemana} CMEs/semana) → cada 35s";
+            IntervaloCalculadoSegundos = 150f;
+            ReglaFrecuenciaTexto = $"Sol muy activo ({totalSemana} CMEs/semana) → cada 150s";
         }
         else if (totalSemana >= 4)
         {
-            IntervaloCalculadoSegundos = 55f;
-            ReglaFrecuenciaTexto = $"Actividad solar media ({totalSemana} CMEs/semana) → cada 55s";
+            IntervaloCalculadoSegundos = 180f;
+            ReglaFrecuenciaTexto = $"Actividad solar media ({totalSemana} CMEs/semana) → cada 180s";
         }
         else
         {
-            IntervaloCalculadoSegundos = 75f;
-            ReglaFrecuenciaTexto = $"Sol tranquilo ({totalSemana} CMEs/semana) → cada 75s";
+            IntervaloCalculadoSegundos = 210f;
+            ReglaFrecuenciaTexto = $"Sol tranquilo ({totalSemana} CMEs/semana) → cada 210s";
         }
 
         TiempoParaSiguienteCME = Mathf.Min(TiempoParaSiguienteCME, primerEventoSegundos);
