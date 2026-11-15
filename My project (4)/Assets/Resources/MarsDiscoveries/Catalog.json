@@ -1,0 +1,112 @@
+{
+  "entries": [
+    {
+      "id": "granular",
+      "title": "Roca granulada",
+      "instrument": "MAHLI",
+      "description": "Los granos redondeados cementados en una roca se llaman clastos. En el afloramiento Link, su tamaño y redondez dieron pistas de que una corriente de agua los transportó.\n\nQué observar: compara los fragmentos redondeados que sobresalen de la roca con el material fino que los une. Los fragmentos pierden sus bordes al chocar durante el transporte. En la imagen, Link está a la izquierda y el ejemplo terrestre está a la derecha.",
+      "source": "https://science.nasa.gov/photojournal/rock-outcrops-on-mars-and-earth/",
+      "credit": "NASA/JPL-Caltech/MSSS",
+      "isEquipment": false
+    },
+    {
+      "id": "sedimentaria",
+      "title": "Roca sedimentaria estratificada",
+      "instrument": "MAHLI",
+      "description": "Cada capa conserva sedimento depositado en un momento distinto. En Shaler, las capas inclinadas ayudaron a reconocer sedimentos desplazados por una corriente.\n\nQué observar: fíjate en las líneas que se inclinan respecto de las capas que las rodean. El sedimento puede acumularse en la pendiente de una ondulación cuando la corriente arrastra granos. Comparar esas inclinaciones ayuda a interpretar cómo se depositó el material.",
+      "source": "https://science.nasa.gov/resource/shaler-units-evidence-of-stream-flow-unannotated/",
+      "credit": "NASA/JPL-Caltech/MSSS",
+      "isEquipment": false
+    },
+    {
+      "id": "azufre",
+      "title": "Cristales de azufre",
+      "instrument": "MAHLI",
+      "description": "Curiosity abrió accidentalmente una roca al pasar sobre ella. La cámara MAHLI fotografió los cristales amarillos y el espectrómetro APXS confirmó que eran azufre elemental.\n\nQué observar: en la foto de MAHLI, mira el interior recién expuesto de la roca. La cámara permite examinar la forma de los cristales. Para identificar su composición, el equipo comparó esa imagen con las mediciones del instrumento del brazo.",
+      "source": "https://science.nasa.gov/photojournal/curiosity-captures-close-up-of-sulfur-crystals/",
+      "credit": "NASA/JPL-Caltech/MSSS",
+      "isEquipment": false
+    },
+    {
+      "id": "cumberland",
+      "title": "Roca tipo Cumberland",
+      "instrument": "SAM",
+      "description": "Cumberland fue el segundo objetivo de perforación de Curiosity en Yellowknife Bay. Su superficie rugosa tiene concreciones, pequeños depósitos minerales relacionados con agua que circuló por el sedimento.\n\nQué observar: la imagen ubica Cumberland y John Klein en la parte inferior de la formación Yellowknife Bay, en el cráter Gale. Al perforar dos puntos cercanos, el equipo pudo comparar muestras de una misma unidad de roca sedimentaria.",
+      "source": "https://science.nasa.gov/photojournal/view-of-yellowknife-bay-formation-with-drilling-sites/",
+      "credit": "NASA/JPL-Caltech/MSSS",
+      "isEquipment": false
+    },
+    {
+      "id": "suelo",
+      "title": "Suelo marciano",
+      "instrument": "SAM",
+      "description": "El regolito es el material suelto que cubre el terreno. En Rocknest, Curiosity tomó arena y polvo con una pala y entregó parte de la muestra al laboratorio SAM.\n\nQué observar: busca los cinco huecos que dejó la pala en el depósito de arena y polvo. Cada hueco mide aproximadamente cinco centímetros de ancho. Parte del material también se estudió con CheMin para identificar sus minerales.",
+      "source": "https://science.nasa.gov/resource/five-bites-into-mars/",
+      "credit": "NASA/JPL-Caltech",
+      "isEquipment": false
+    },
+    {
+      "id": "volatiles",
+      "title": "Roca para analizar gases",
+      "instrument": "SAM",
+      "description": "El taladro de Curiosity convierte parte de la roca en polvo. SAM puede calentar ese material y medir los gases liberados para estudiar su composición.\n\nQué observar: en la pala se distingue el polvo gris verdoso de la roca John Klein y el residuo rojizo de Rocknest. El equipo tamizó el polvo y envió porciones a SAM y CheMin para estudiar gases y minerales.",
+      "source": "https://science.nasa.gov/resource/first-curiosity-drilling-sample-in-the-scoop/",
+      "credit": "NASA/JPL-Caltech/MSSS",
+      "isEquipment": false
+    },
+    {
+      "id": "hematita",
+      "title": "Roca con hematita",
+      "instrument": "CheMin",
+      "description": "La hematita es un óxido de hierro. Se detectó en Vera Rubin Ridge; comparar sus minerales con los de otras capas ayuda a reconstruir la historia geológica del cráter Gale.\n\nQué observar: las capas casi horizontales de la parte baja de la cresta se distinguen por su espesor y su relieve. La presencia de hematita se detectó desde órbita. Las imágenes tomadas desde el suelo permiten situar esa observación en el terreno.",
+      "source": "https://science.nasa.gov/resource/martian-ridge-looming-above-curiosity-prior-to-ascent-figure-1/",
+      "credit": "NASA/JPL-Caltech/MSSS",
+      "isEquipment": false
+    },
+    {
+      "id": "minerales",
+      "title": "Mezcla mineral con olivino",
+      "instrument": "CheMin",
+      "description": "CheMin identificó olivino, piroxeno y feldespato en material de Rocknest. El patrón de difracción de rayos X permite distinguir minerales que se parecen a simple vista. La referencia muestra cristales terrestres de olivino.\n\nQué observar: los cristales terrestres de la imagen ilustran el aspecto del olivino. En una muestra triturada, CheMin distingue la estructura del mineral por el patrón que deja al dispersar rayos X, incluso si el grano es demasiado pequeño para verse con claridad.",
+      "source": "https://science.nasa.gov/resource/olivine-on-earth/",
+      "credit": "NASA",
+      "isEquipment": false
+    },
+    {
+      "id": "arcillas",
+      "title": "Roca arcillosa",
+      "instrument": "CheMin",
+      "description": "Curiosity perforó Aberlady en una región rica en arcillas. Estos minerales pueden formarse cuando el agua altera la roca y ayudan a investigar el ambiente antiguo de Marte.\n\nQué observar: las vistas de Aberlady muestran la roca antes y después de perforarla. El orificio marca el punto de extracción del polvo. Analizar minerales de una zona rica en arcillas permite comparar su composición con la de otras capas de la montaña.",
+      "source": "https://science.nasa.gov/resource/curiositys-latest-drill-hole/",
+      "credit": "NASA/JPL-Caltech/MSSS",
+      "isEquipment": false
+    },
+    {
+      "id": "mahli",
+      "title": "Cámara MAHLI",
+      "instrument": "Instrumento",
+      "description": "Mars Hand Lens Imager es una cámara en el brazo de Curiosity. Sus primeros planos permiten observar granos, capas y cristales. En el juego recuperas una representación del instrumento.\n\nEn la imagen, Mastcam fotografió MAHLI desde el mástil. El brazo puede acercar la cámara a la superficie para mostrar detalles que se pierden en las panorámicas, como el tamaño de los granos y los bordes de los cristales.",
+      "source": "https://science.nasa.gov/resource/camera-on-curiositys-arm-as-seen-by-camera-on-mast/",
+      "credit": "NASA/JPL-Caltech/MSSS",
+      "isEquipment": true
+    },
+    {
+      "id": "sam",
+      "title": "Analizador SAM",
+      "instrument": "Instrumento",
+      "description": "Sample Analysis at Mars estudia gases de la atmósfera y de muestras calentadas. Combina un cromatógrafo de gases, un espectrómetro de masas y un espectrómetro láser. En Curiosity está dentro del rover.\n\nLa imagen muestra el equipo durante su montaje. Al calentar una muestra, el material puede liberar gases. El cromatógrafo ayuda a separarlos y los espectrómetros aportan mediciones para identificar sus componentes.",
+      "source": "https://science.nasa.gov/photojournal/sample-analysis-at-mars-instrument-side-panels-off/",
+      "credit": "NASA",
+      "isEquipment": true
+    },
+    {
+      "id": "chemin",
+      "title": "Analizador CheMin",
+      "instrument": "Instrumento",
+      "description": "Chemistry and Mineralogy identifica minerales en roca y suelo mediante difracción de rayos X. En Curiosity está dentro del rover y recibe muestras en polvo.\n\nLa imagen muestra la entrada por la que se introducen muestras en polvo. Dentro del equipo, los rayos X se dispersan según la estructura de los minerales. El patrón funciona como una huella que el equipo científico compara con minerales conocidos.",
+      "source": "https://science.nasa.gov/resource/say-ahh-on-mars/",
+      "credit": "NASA/JPL-Caltech/MSSS",
+      "isEquipment": true
+    }
+  ]
+}

@@ -71,7 +71,7 @@ public sealed class AstronautController2D : MonoBehaviour
             return;
         }
 
-        if (CommsTowerCMEEvent.IsMinigameActive)
+        if (CommsTowerCMEEvent.IsMinigameActive || MarsMissionHUD.IsScienceLabOpen)
         {
             moveInput = Vector2.zero;
             UpdateSprite();

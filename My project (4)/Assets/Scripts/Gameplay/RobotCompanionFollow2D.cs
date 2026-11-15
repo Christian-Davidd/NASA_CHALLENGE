@@ -10,8 +10,8 @@ public sealed class RobotCompanionFollow2D : MonoBehaviour
     [Header("Configuración de Seguimiento Suave")]
     [SerializeField] private Transform targetAstronaut;
     [SerializeField, Min(0.5f)] private float followDistance = 1.65f;
-    [SerializeField, Min(0.05f)] private float smoothTime = 0.24f;
-    [SerializeField] private float maxFollowSpeed = 6.5f;
+    [SerializeField, Min(0.05f)] private float smoothTime = 0.48f;
+    [SerializeField] private float maxFollowSpeed = 4.2f;
 
     [Header("Visual del rover")]
     [SerializeField] private SpriteRenderer roverRenderer;
@@ -21,7 +21,8 @@ public sealed class RobotCompanionFollow2D : MonoBehaviour
     [SerializeField] private Sprite rightSprite;
 
     [Header("Búsqueda de muestras")]
-    [SerializeField, Min(0.1f)] private float sampleSearchSeconds = 35f;
+    [SerializeField, Min(0.1f)] private float sampleSearchSeconds = 25f;
+    [SerializeField, Min(0.1f)] private float sampleTripSpeed = 4.5f;
 
     private double sampleSearchElapsed;
     private enum SampleTrip { Following, Searching, Returning }
@@ -167,7 +168,7 @@ public sealed class RobotCompanionFollow2D : MonoBehaviour
         }
         else
         {
-            transform.position = Vector3.MoveTowards(transform.position, desiredPos, maxFollowSpeed * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, desiredPos, sampleTripSpeed * Time.deltaTime);
         }
 
         if (roverRenderer != null)

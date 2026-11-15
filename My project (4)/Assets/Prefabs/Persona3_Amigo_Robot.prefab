@@ -47,8 +47,8 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   targetAstronaut: {fileID: 0}
   followDistance: 1.65
-  smoothTime: 0.24
-  maxFollowSpeed: 6.5
+  smoothTime: 0.48
+  maxFollowSpeed: 4.2
   roverRenderer: {fileID: 910000442}
   frontSprite: {fileID: 21300000, guid: eac1ed9db1bd4475812e42c1b83aea29, type: 3}
   backSprite: {fileID: 21300000, guid: dbcc53b5278d4df09502ece4e32c5299, type: 3}

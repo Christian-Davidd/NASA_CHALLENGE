@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -14,9 +15,42 @@ public sealed class MarsMissionHUD : MonoBehaviour
     private GUIStyle alertBannerStyle;
     private GUIStyle alertSubStyle;
     private GUIStyle sampleCounterStyle;
+    private GUIStyle discoveryTitleStyle;
+    private GUIStyle discoveryTextStyle;
+    private int lastDiscoveryVersion = -1;
+    private const float DiscoveryDisplaySeconds = 15f;
+    private double discoveryVisibleUntil;
+    private Texture2D discoveryReference;
+    private Vector2 discoveryScroll;
+    private readonly Queue<MarsSampleNode2D> pendingAnalyses = new();
+    private readonly MarsScienceLab scienceLab = new();
+    private MarsSampleNode2D displayedDiscovery;
+    private MarsSampleNode2D activeAnalysis;
+    public static bool IsScienceLabOpen { get; private set; }
+
+    private void Update()
+    {
+        ObserveDiscovery();
+        if (activeAnalysis != null || CommsTowerCMEEvent.IsMinigameActive) return;
+
+        while (pendingAnalyses.Count > 0)
+        {
+            var node = pendingAnalyses.Dequeue();
+            if (node == null) continue;
+            OpenAnalysis(node);
+            break;
+        }
+    }
 
     private void OnGUI()
     {
+        if (activeAnalysis != null)
+        {
+            if (scienceLab.Draw())
+                CloseAnalysis();
+            return;
+        }
+
         EnsureResources();
 
         var cme = DONKICMEManager.Instance;
@@ -36,6 +70,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
 
         // 3. [PERSONA 2] Panel de Contador de Muestras y Cultivos (Arriba Derecha)
         DibujarPanelMuestrasYCultivos();
+        DibujarHallazgo();
     }
 
     private void DibujarBannerTormentaOProteccion(
@@ -172,6 +207,110 @@ public sealed class MarsMissionHUD : MonoBehaviour
 
         GUI.Label(new Rect(rect.x + 12f, rect.y + 80f, rect.width - 24f, 20f), cropInfo, bodyTextStyle);
         GUI.Label(new Rect(rect.x + 12f, rect.y + 98f, rect.width - 24f, 20f), "Controles: WASD mover | [E] Interactuar | [T] CME", bodyTextStyle);
+    }
+
+    private void ObserveDiscovery()
+    {
+        var node = MarsSampleNode2D.LatestDiscovery;
+        if (node == null || node.gameObject.scene != gameObject.scene ||
+            lastDiscoveryVersion == MarsSampleNode2D.DiscoveryVersion) return;
+
+        lastDiscoveryVersion = MarsSampleNode2D.DiscoveryVersion;
+        if (node.Discovery.isEquipment)
+            ShowDiscovery(node);
+        else
+            pendingAnalyses.Enqueue(node);
+    }
+
+    private void ShowDiscovery(MarsSampleNode2D node)
+    {
+        displayedDiscovery = node;
+        discoveryVisibleUntil = Time.unscaledTimeAsDouble + DiscoveryDisplaySeconds;
+        discoveryScroll = Vector2.zero;
+        discoveryReference = node.Discovery.LoadReference();
+    }
+
+    private void OpenAnalysis(MarsSampleNode2D node)
+    {
+        activeAnalysis = node;
+        scienceLab.Open(node.Discovery);
+        IsScienceLabOpen = true;
+    }
+
+    private void CloseAnalysis()
+    {
+        var node = activeAnalysis;
+        activeAnalysis = null;
+        IsScienceLabOpen = false;
+        ShowDiscovery(node);
+    }
+
+    private void OnDisable()
+    {
+        if (activeAnalysis != null)
+        {
+            activeAnalysis = null;
+            IsScienceLabOpen = false;
+        }
+    }
+
+    private void DibujarHallazgo()
+    {
+        if (displayedDiscovery == null || Time.unscaledTimeAsDouble >= discoveryVisibleUntil ||
+            CommsTowerCMEEvent.IsMinigameActive) return;
+
+        var node = displayedDiscovery;
+        var discovery = node.Discovery;
+        float width = Mathf.Min(560f, Screen.width - 32f);
+        float height = Mathf.Min(585f, Screen.height - 32f);
+        if (width < 180f || height < 80f) return;
+        float left = (Screen.width - width) * 0.5f;
+        float top = Screen.height - height - 16f;
+        Rect panel = new Rect(left, top, width, height);
+        Color previous = GUI.color;
+        GUI.color = new Color(0.05f, 0.08f, 0.13f, 0.97f);
+        GUI.DrawTexture(panel, solidTex);
+        GUI.color = new Color(0.39f, 0.9f, 0.66f);
+        GUI.DrawTexture(new Rect(left, top, width, 3f), solidTex);
+        GUI.color = previous;
+
+        GUI.Label(new Rect(left + 12f, top + 7f, width - 58f, 22f), "HALLAZGO CIENTÍFICO", panelTitleStyle);
+        if (GUI.Button(new Rect(panel.xMax - 36f, top + 6f, 26f, 25f), "×"))
+        {
+            discoveryVisibleUntil = 0;
+            return;
+        }
+
+        discoveryTitleStyle ??= new GUIStyle(sampleCounterStyle) { fontSize = 16, wordWrap = true };
+        discoveryTextStyle ??= new GUIStyle(bodyTextStyle) { fontSize = 13, wordWrap = true, alignment = TextAnchor.UpperCenter };
+        float contentWidth = width - 42f;
+        float titleHeight = discoveryTitleStyle.CalcHeight(new GUIContent(discovery.title), contentWidth);
+        string detail = discovery.isEquipment ? "Instrumento científico" : $"Análisis con {discovery.instrument}";
+        detail += node.DeliveredByRover ? " · Entregado por el rover" : " · Recogido por el astronauta";
+        float detailHeight = discoveryTextStyle.CalcHeight(new GUIContent(detail), contentWidth);
+        string description = discovery.description;
+        float descriptionHeight = discoveryTextStyle.CalcHeight(new GUIContent(description), contentWidth);
+        float imagesY = titleHeight + detailHeight + 12f;
+        float imageHeight = Mathf.Min(225f, contentWidth * 0.65f);
+        float bodyY = imagesY + (discoveryReference != null ? imageHeight + 14f : 0f);
+        float scrollHeight = bodyY + descriptionHeight + 62f;
+        Rect scrollArea = new Rect(left + 12f, top + 36f, width - 24f, height - 46f);
+        discoveryScroll = GUI.BeginScrollView(scrollArea, discoveryScroll, new Rect(0, 0, contentWidth, scrollHeight));
+
+        GUI.Label(new Rect(0, 0, contentWidth, titleHeight), discovery.title, discoveryTitleStyle);
+        GUI.Label(new Rect(0, titleHeight + 2f, contentWidth, detailHeight), detail, discoveryTextStyle);
+
+        if (discoveryReference != null)
+            GUI.DrawTexture(new Rect(0, imagesY, contentWidth, imageHeight), discoveryReference, ScaleMode.ScaleToFit);
+
+        GUI.Label(new Rect(0, bodyY, contentWidth, descriptionHeight), description, discoveryTextStyle);
+        float footerY = bodyY + descriptionHeight + 5f;
+        GUI.Label(new Rect(0, footerY, contentWidth, 20f), discovery.credit, discoveryTextStyle);
+        const float sourceWidth = 128f;
+        if (GUI.Button(new Rect((contentWidth - sourceWidth) * 0.5f, footerY + 24f, sourceWidth, 24f), "Ver fuente NASA"))
+            Application.OpenURL(discovery.source);
+
+        GUI.EndScrollView();
     }
 
     private void EnsureResources()

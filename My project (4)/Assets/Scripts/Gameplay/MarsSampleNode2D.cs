@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// [PERSONA 2] Nodo cuadrado de Muestra Geológica esparcida por el mapa.
+/// [PERSONA 2] Hallazgo científico que puede recoger el astronauta o el rover.
 /// Muestra su etiqueta flotante en el mundo y actualiza el contador global de muestras en el HUD.
 /// </summary>
 [RequireComponent(typeof(MarsWorldPlaceholder2D))]
@@ -10,13 +10,20 @@ public sealed class MarsSampleNode2D : MonoBehaviour
 {
     private static readonly HashSet<MarsSampleNode2D> AllNodes = new HashSet<MarsSampleNode2D>();
     private static int bonusSamples;
-    public static int TotalSamples => AllNodes.Count + bonusSamples;
+    private static int mapSampleCount;
+    public static int TotalSamples => mapSampleCount + bonusSamples;
+    internal static MarsSampleNode2D LatestDiscovery { get; private set; }
+    internal static int DiscoveryVersion { get; private set; }
     public static int CollectedSamples { get; private set; }
 
     [Header("Datos de la Muestra")]
     [SerializeField] private string sampleLabel = "[MUESTRA GEOLÓGICA #1]";
     [SerializeField] private string sampleDescription = "Muestra de regolito y minerales marcianos.";
 
+    [SerializeField] private string discoveryId;
+
+    internal MarsDiscovery Discovery { get; private set; }
+    internal bool DeliveredByRover { get; private set; }
     public bool IsCollected { get; private set; }
     public bool IsAvailable => isActiveAndEnabled && !IsCollected && reservedBy == null;
     private RobotCompanionFollow2D reservedBy;
@@ -29,7 +36,7 @@ public sealed class MarsSampleNode2D : MonoBehaviour
     }
 
     public static bool AllMapSamplesCollected =>
-        AllNodes.Count > 0 && CollectedSamples - bonusSamples == AllNodes.Count;
+        mapSampleCount > 0 && CollectedSamples - bonusSamples == mapSampleCount;
 
     public static void GetAvailableSamples(UnityEngine.SceneManagement.Scene scene, List<MarsSampleNode2D> results)
     {
@@ -62,7 +69,7 @@ public sealed class MarsSampleNode2D : MonoBehaviour
         if (!isActiveAndEnabled || IsCollected || rover == null || reservedBy != rover) return false;
 
         reservedBy = null;
-        message = CollectSample();
+        message = CollectSample(true);
         return true;
     }
 
@@ -72,6 +79,7 @@ public sealed class MarsSampleNode2D : MonoBehaviour
     private void Awake()
     {
         placeholder = GetComponent<MarsWorldPlaceholder2D>();
+        Discovery = MarsDiscovery.Find(discoveryId);
     }
 
     private void OnEnable()
@@ -85,6 +93,8 @@ public sealed class MarsSampleNode2D : MonoBehaviour
     {
         reservedBy = null;
         AllNodes.Remove(this);
+        if (LatestDiscovery == this)
+            LatestDiscovery = null;
         if (AllNodes.Count == 0)
             bonusSamples = 0;
         RecalculateCollectedCount();
@@ -93,15 +103,20 @@ public sealed class MarsSampleNode2D : MonoBehaviour
     private static void RecalculateCollectedCount()
     {
         int count = bonusSamples;
+        mapSampleCount = 0;
         foreach (var node in AllNodes)
         {
-            if (node != null && node.IsCollected)
+            if (node == null || node.Discovery?.isEquipment == true) continue;
+            mapSampleCount++;
+            if (node.IsCollected)
                 count++;
         }
         CollectedSamples = count;
     }
 
-    public string CollectSample()
+    public string CollectSample() => CollectSample(false);
+
+    private string CollectSample(bool deliveredByRover)
     {
         if (IsCollected)
             return $"{sampleLabel}: ya fue recolectada.";
@@ -109,8 +124,18 @@ public sealed class MarsSampleNode2D : MonoBehaviour
             return "El rover lleva esta muestra.";
 
         IsCollected = true;
+        DeliveredByRover = deliveredByRover;
+        if (Discovery != null)
+        {
+            LatestDiscovery = this;
+            DiscoveryVersion++;
+        }
+
         RecalculateCollectedCount();
         UpdateVisuals();
+        if (Discovery != null)
+            return $"Hallazgo registrado: {Discovery.title}.";
+
         return $"{sampleLabel} recolectada ({CollectedSamples}/{TotalSamples}) — {sampleDescription}";
     }
 
@@ -119,6 +144,16 @@ public sealed class MarsSampleNode2D : MonoBehaviour
         if (placeholder == null)
             placeholder = GetComponent<MarsWorldPlaceholder2D>();
         if (placeholder == null) return;
+
+        if (Discovery != null)
+        {
+            bool visible = IsAvailable;
+            GetComponent<SpriteRenderer>().enabled = visible;
+            placeholder.enabled = visible;
+            if (visible)
+                placeholder.SetVisualState(Color.white, Discovery.title, "Pulsa [E] para recoger");
+            return;
+        }
 
         if (IsCollected)
         {
@@ -141,4 +176,40 @@ public sealed class MarsSampleNode2D : MonoBehaviour
             );
         }
     }
+}
+
+[System.Serializable]
+internal sealed class MarsDiscovery
+{
+    public string id;
+    public string title;
+    public string instrument;
+    public string description;
+    public string source;
+    public string credit;
+    public bool isEquipment;
+
+    [System.Serializable]
+    private sealed class Catalog
+    {
+        public MarsDiscovery[] entries;
+    }
+
+    private const string ResourceFolder = "MarsDiscoveries/";
+    private static Catalog catalog;
+
+    public static MarsDiscovery Find(string id)
+    {
+        if (string.IsNullOrEmpty(id)) return null;
+        if (catalog == null)
+        {
+            var data = Resources.Load<TextAsset>(ResourceFolder + "Catalog");
+            if (data == null) return null;
+            catalog = JsonUtility.FromJson<Catalog>(data.text);
+        }
+
+        return System.Array.Find(catalog.entries, entry => entry.id == id);
+    }
+
+    public Texture2D LoadReference() => Resources.Load<Texture2D>(ResourceFolder + "photo_" + id);
 }
