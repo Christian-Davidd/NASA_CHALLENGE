@@ -179,10 +179,11 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
         float guiX = screenPos.x;
         float guiY = Screen.height - screenPos.y;
 
-        bool hasSubtitle = !string.IsNullOrEmpty(labelSubtitle);
+        string visibleSubtitle = MarsMissionHUD.GetContextText(labelSubtitle, 70);
+        bool hasSubtitle = !string.IsNullOrEmpty(visibleSubtitle);
         Vector2 titleSize = titleStyle.CalcSize(new GUIContent(labelTitle));
         Vector2 subtitleSize = hasSubtitle
-            ? subtitleStyle.CalcSize(new GUIContent(labelSubtitle))
+            ? subtitleStyle.CalcSize(new GUIContent(visibleSubtitle))
             : Vector2.zero;
 
         const float paddingX = 12f;
@@ -197,7 +198,7 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
         Rect boxRect = new Rect(guiX - boxWidth * 0.5f, guiY - boxHeight * 0.5f, boxWidth, boxHeight);
 
         Color prevColor = GUI.color;
-        GUI.color = new Color(0.06f, 0.08f, 0.12f, 0.86f);
+        GUI.color = new Color(0.075f, 0.045f, 0.055f, 0.94f);
         GUI.DrawTexture(boxRect, labelBgTex);
 
         GUI.color = new Color(squareColor.r, squareColor.g, squareColor.b, 0.95f);
@@ -218,7 +219,7 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
                     boxRect.y + paddingY + titleLineHeight + 3f,
                     boxRect.width - paddingX * 2f,
                     subtitleLineHeight),
-                labelSubtitle,
+                visibleSubtitle,
                 subtitleStyle);
         }
     }
@@ -237,7 +238,7 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
             titleStyle = new GUIStyle(GUI.skin.label)
             {
                 alignment = TextAnchor.MiddleCenter,
-                fontSize = 22,
+                fontSize = 20,
                 fontStyle = FontStyle.Bold,
                 wordWrap = false,
                 clipping = TextClipping.Overflow,
@@ -250,11 +251,11 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
             subtitleStyle = new GUIStyle(GUI.skin.label)
             {
                 alignment = TextAnchor.MiddleCenter,
-                fontSize = 18,
+                fontSize = 15,
                 fontStyle = FontStyle.Normal,
                 wordWrap = false,
                 clipping = TextClipping.Overflow,
-                normal = { textColor = new Color(0.85f, 0.92f, 1f, 0.95f) }
+                normal = { textColor = new Color(1f, 0.87f, 0.74f, 0.98f) }
             };
         }
     }

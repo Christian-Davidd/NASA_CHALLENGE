@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// [PERSONA 1, 2 y 3] HUD Integrado de la Misión en Marte:
@@ -33,6 +35,8 @@ public sealed class MarsMissionHUD : MonoBehaviour
     private readonly Queue<MarsSampleNode2D> pendingAnalyses = new();
     private readonly MarsScienceLab scienceLab = new();
     private static MarsMissionHUD activeInstance;
+    private static bool showExtendedContext;
+    private static int lastContextToggleFrame = -1;
     private MarsSampleNode2D displayedDiscovery;
     private MarsDiscovery displayedDiscoveryData;
     private bool displayedByRover;
@@ -40,10 +44,45 @@ public sealed class MarsMissionHUD : MonoBehaviour
     private MarsDiscovery activeAnalysisData;
     private bool activeAnalysisByRover;
     public static bool IsScienceLabOpen { get; private set; }
+    public static bool ShowExtendedContext => showExtendedContext;
+
+    public static string GetContextText(string fullText, int maxChars = 108)
+    {
+        if (string.IsNullOrWhiteSpace(fullText)) return string.Empty;
+
+        string concise = fullText.Trim();
+        if (!showExtendedContext)
+        {
+            for (int i = 0; i < concise.Length; i++)
+            {
+                if (concise[i] != '.' && concise[i] != '!' && concise[i] != '?') continue;
+                if (i >= 20)
+                {
+                    concise = concise.Substring(0, i + 1);
+                    break;
+                }
+            }
+        }
+
+        int limit = showExtendedContext ? maxChars * 2 : maxChars;
+        if (concise.Length <= limit) return concise;
+        return concise.Substring(0, Mathf.Max(1, limit - 1)).TrimEnd() + "…";
+    }
 
     private Camera cachedCam;
     private Vector3 lastShakeOffset;
     private bool hasShakeOffset;
+
+    private static bool IsGameplaySceneActive
+    {
+        get
+        {
+            string sceneName = SceneManager.GetActiveScene().name;
+            return sceneName == "Mars_Natural_Landscape_01" ||
+                   sceneName == "Cultivation_Module_Interior" ||
+                   sceneName == "Spaceship_Interior";
+        }
+    }
 
     private void Awake()
     {
@@ -57,6 +96,14 @@ public sealed class MarsMissionHUD : MonoBehaviour
 
     private void Update()
     {
+        var keyboard = Keyboard.current;
+        if (IsGameplaySceneActive && keyboard != null && keyboard.gKey.wasPressedThisFrame &&
+            lastContextToggleFrame != Time.frameCount)
+        {
+            showExtendedContext = !showExtendedContext;
+            lastContextToggleFrame = Time.frameCount;
+        }
+
         ObserveDiscovery();
         if (activeAnalysisData != null ||
             CommsTowerCMEEvent.IsMinigameActive ||
@@ -76,6 +123,8 @@ public sealed class MarsMissionHUD : MonoBehaviour
     private void LateUpdate()
     {
         RevertCameraShake();
+        if (!IsGameplaySceneActive)
+            return;
 
         var flr = DONKIFLRManager.Instance;
         if (flr == null || flr.MisionFallida || !flr.EnPicoRadiacion || !flr.EstaEnExteriorMarte)
@@ -120,12 +169,8 @@ public sealed class MarsMissionHUD : MonoBehaviour
 
     private void OnGUI()
     {
-        if (activeAnalysisData != null)
-        {
-            if (scienceLab.Draw())
-                CloseAnalysis();
+        if (!IsGameplaySceneActive)
             return;
-        }
 
         EnsureResources();
 
@@ -137,47 +182,44 @@ public sealed class MarsMissionHUD : MonoBehaviour
         bool hayInterferencia = CommsTowerCMEEvent.HaySobrecargaActivaPorCME;
         bool enModoSeguro = !CommsTowerCMEEvent.StaticTransmisorEncendido;
         bool hayFLR = flr != null && flr.HayTormentaFLRActiva;
+        bool ventanaAbierta = activeAnalysisData != null || MarsMonitorScreen2D.IsOpen ||
+                              MarsSpaceshipStation2D.IsMinigameActive || CommsTowerCMEEvent.IsMinigameActive;
 
-        // 0. Overlay atmosférico dorado/naranja en el cielo cuando hay Llamarada / Tormenta de Calor en exterior
-        if (hayFLR && flr.EstaEnExteriorMarte)
+        if (activeAnalysisData != null)
         {
+            bool cerrar = scienceLab.Draw();
+            DibujarBarrasVitales(flr);
+            if (cerrar) CloseAnalysis();
+            return;
+        }
+
+        if (!ventanaAbierta && hayFLR && flr.EstaEnExteriorMarte)
             DibujarOverlayCieloFLR(flr);
-        }
 
-        // 1. Banner superior de CME / Modo Seguro
-        float nextBannerY = 14f;
-        if (hayCME || enModoSeguro)
+        // Las cuatro barras permanecen visibles; el resto del HUD se repliega detrás de las ventanas.
+        DibujarBarrasVitales(flr);
+
+        if (!ventanaAbierta)
         {
-            DibujarBannerTormentaOProteccion(cme, hayCME, hayInterferencia, enModoSeguro, nextBannerY);
-            nextBannerY += 70f;
+            DibujarPanelClimaYSupervivencia(cme, flr, tower, hayCME, hayInterferencia, hayFLR);
+            DibujarPanelMuestrasYCultivos();
+            DibujarAlertaCompacta(cme, flr, hayCME, hayInterferencia, enModoSeguro);
+            DibujarHallazgo();
+
+            if (flr != null && !flr.MisionFallida && Time.time < flr.MensajeEmergenciaHasta &&
+                !string.IsNullOrEmpty(flr.UltimoMensajeEmergencia))
+                DibujarAvisoEmergencia(flr.UltimoMensajeEmergencia);
         }
 
-        // 2. Banner dorado/naranja de Llamarada Solar / Tormenta de Calor (FLR)
-        if (hayFLR)
-        {
-            DibujarBannerTormentaFLR(flr, nextBannerY);
-        }
-
-        // 3. Panel Izquierdo: Clima + 4 Barras de Supervivencia
-        DibujarPanelClimaYSupervivencia(cme, flr, tower, hayCME, hayInterferencia, hayFLR);
-
-        // 4. Panel Derecho: Muestras (1/1 en mano) y Cultivos
-        DibujarPanelMuestrasYCultivos();
-
-        // 5. Tarjeta flotante de Hallazgo Científico NASA (del equipo)
-        DibujarHallazgo();
-
-        // 6. Aviso flotante de Energía / Emergencia / Térmico
-        if (flr != null && !flr.MisionFallida && Time.time < flr.MensajeEmergenciaHasta && !string.IsNullOrEmpty(flr.UltimoMensajeEmergencia))
-        {
-            DibujarAvisoEmergencia(flr.UltimoMensajeEmergencia);
-        }
-
-        // 7. Pantalla de Derrota (Game Over)
         if (flr != null && flr.MisionFallida)
-        {
             DibujarPantallaDerrota(flr);
-        }
+    }
+
+    public static void DrawPersistentVitalsOnTopOfModal()
+    {
+        if (activeInstance == null || !IsGameplaySceneActive) return;
+        activeInstance.EnsureResources();
+        activeInstance.DibujarBarrasVitales(DONKIFLRManager.Instance);
     }
 
     private void DibujarOverlayCieloFLR(DONKIFLRManager flr)
@@ -351,127 +393,167 @@ public sealed class MarsMissionHUD : MonoBehaviour
         bool hayInterferencia,
         bool hayFLR)
     {
-        Rect rect = new Rect(16f, 16f, 348f, 316f);
+        float vitalWidth = Mathf.Min(258f, Mathf.Max(180f, Screen.width * 0.23f));
+        float progressWidth = Mathf.Min(278f, Mathf.Max(196f, Screen.width * 0.23f));
+        float x = 16f + vitalWidth + 12f;
+        float rightX = Screen.width - progressWidth - 16f;
+        float width = Mathf.Max(120f, rightX - x - 12f);
+        bool expanded = ShowExtendedContext;
+        float height = expanded ? 108f : 64f;
+        Rect rect = new Rect(x, 16f, width, height);
         Color prev = GUI.color;
 
-        GUI.color = new Color(0.05f, 0.08f, 0.13f, 0.92f);
+        Color accent = hayInterferencia ? new Color(1f, 0.34f, 0.45f, 1f)
+            : hayFLR || hayCME ? new Color(1f, 0.66f, 0.23f, 1f)
+            : new Color(0.39f, 0.83f, 0.91f, 1f);
+        GUI.color = new Color(0.035f, 0.047f, 0.075f, 0.94f);
         GUI.DrawTexture(rect, solidTex);
-
-        Color accent;
-        if (hayInterferencia)
-            accent = new Color(1f, 0.28f, 0.58f, 1f);
-        else if (hayFLR)
-            accent = new Color(1.0f, 0.68f, 0.18f, 1f);
-        else if (hayCME)
-            accent = new Color(1f, 0.78f, 0.25f, 1f);
-        else
-            accent = new Color(0.22f, 0.85f, 0.98f, 1f);
-
         GUI.color = accent;
         GUI.DrawTexture(new Rect(rect.x, rect.y, rect.width, 3f), solidTex);
         GUI.color = prev;
 
-        string estadoClima;
-        if (hayCME && hayFLR)
-            estadoClima = $"DOBLE TORMENTA (CME + FLR {flr.ClaseActual})";
-        else if (hayFLR)
-            estadoClima = flr.EnPreaviso
-                ? $"PREAVISO CALOR/FLR (Clase {flr.ClaseActual})"
-                : $"LLAMARADA / CALOR FLR (Clase {flr.ClaseActual})";
-        else if (hayCME)
-            estadoClima = "TORMENTA CME (Nube de Plasma)";
-        else
-            estadoClima = "DESPEJADO (Viento Solar Estable)";
-
-        string estadoTorre;
-        if (hayInterferencia)
-            estadoTorre = $"¡SOBRECARGA {Mathf.RoundToInt(CommsTowerCMEEvent.StaticSobrecargaProgreso * 100f)}%! (Apagar [E])";
-        else if (!CommsTowerCMEEvent.StaticTransmisorEncendido)
-            estadoTorre = CommsTowerCMEEvent.NecesitaReencendidoGlobal ? "MODO SEGURO (Reencender [E])" : "MODO SEGURO (Protegida)";
-        else
-            estadoTorre = "EN LÍNEA (Señal Estable)";
-
-        string proxCMETexto = (cme != null && cme.HayTormentaCMEActiva)
-            ? $"CME activa: {cme.TiempoRestanteEvento:F0}s | Vel: {cme.VelocidadActualKmS:F0} km/s"
-            : $"Próxima CME: {(cme != null ? cme.TiempoParaSiguienteCME : 0f):F0}s ([T] probar)";
-
-        string flrTexto;
-        if (flr == null)
+        string clima = hayCME && hayFLR ? "Tormenta solar doble"
+            : hayInterferencia ? "Interferencia CME"
+            : hayFLR ? (flr != null && flr.EnPreaviso ? "Alerta solar próxima" : "Llamarada solar")
+            : hayCME ? "Tormenta CME"
+            : "Cielo despejado";
+        string antena = hayInterferencia ? "Antena: apagar [E]"
+            : !CommsTowerCMEEvent.StaticTransmisorEncendido ? "Antena: protegida"
+            : "Antena: en línea";
+        GUI.Label(new Rect(rect.x + 11f, rect.y + 5f, rect.width - 22f, 20f), "CLIMA ESPACIAL", panelTitleStyle);
+        GUI.Label(new Rect(rect.x + 11f, rect.y + 27f, rect.width - 22f, 22f), clima + "  ·  " + antena, bodyTextStyle);
+        if (expanded)
         {
-            flrTexto = "FLR: Inicializando datos NASA...";
-        }
-        else if (flr.HayTormentaFLRActiva)
-        {
-            flrTexto = flr.EnPreaviso
-                ? $"FLR {flr.ClaseActual}: Impacto en {flr.TiempoRestantePreaviso:F1}s"
-                : $"FLR {flr.ClaseActual}: {flr.TiempoRestanteEvento:F0}s | {(flr.EstaEnRefugioDomo ? "EN REFUGIO" : "EXTERIOR")}";
+            string cmeInfo = cme != null && cme.HayTormentaCMEActiva
+                ? $"CME: {cme.VelocidadActualKmS:F0} km/s · {cme.TiempoRestanteEvento:F0}s"
+                : $"CME: próxima en {(cme != null ? cme.TiempoParaSiguienteCME : 0f):F0}s";
+            string flrInfo = flr == null ? "FLR: cargando" : flr.HayTormentaFLRActiva
+                ? $"FLR {flr.ClaseActual}: {(flr.EnPreaviso ? flr.TiempoRestantePreaviso : flr.TiempoRestanteEvento):F0}s"
+                : $"FLR: {flr.TotalLlamaradasSemana}/sem · próxima en {flr.TiempoParaSiguienteFLR:F0}s";
+            GUI.Label(new Rect(rect.x + 11f, rect.y + 50f, rect.width - 22f, 20f), cmeInfo, smallHintStyle);
+            GUI.Label(new Rect(rect.x + 11f, rect.y + 72f, rect.width - 22f, 20f), flrInfo, smallHintStyle);
         }
         else
         {
-            flrTexto = $"FLR ({flr.TotalLlamaradasSemana}/sem | Prob {(flr.ProbabilidadEventoPorDia * 100f):F0}%): {flr.TiempoParaSiguienteFLR:F0}s ([F])";
+            GUI.Label(new Rect(rect.xMax - 94f, rect.y + 5f, 84f, 18f), "[G] DETALLE", smallHintStyle);
         }
 
-        GUI.Label(new Rect(rect.x + 12f, rect.y + 8f, rect.width - 24f, 20f), "CLIMA ESPACIAL Y SUPERVIVENCIA", panelTitleStyle);
-        GUI.Label(new Rect(rect.x + 12f, rect.y + 30f, rect.width - 24f, 20f), $"Clima: {estadoClima}", bodyTextStyle);
-        GUI.Label(new Rect(rect.x + 12f, rect.y + 50f, rect.width - 24f, 20f), $"Antena HGA: {estadoTorre}", bodyTextStyle);
-        GUI.Label(new Rect(rect.x + 12f, rect.y + 70f, rect.width - 24f, 20f), proxCMETexto, bodyTextStyle);
-        GUI.Label(new Rect(rect.x + 12f, rect.y + 90f, rect.width - 24f, 20f), flrTexto, bodyTextStyle);
-
-        GUI.color = new Color(0.22f, 0.32f, 0.44f, 0.75f);
-        GUI.DrawTexture(new Rect(rect.x + 12f, rect.y + 114f, rect.width - 24f, 1f), solidTex);
         GUI.color = prev;
+    }
 
-        float energia = flr != null ? flr.EnergiaActual : 100f;
-        float agua = flr != null ? flr.AguaActual : 100f;
-        float oxigeno = flr != null ? flr.OxigenoActual : 100f;
-        float termico = flr != null ? flr.EstadoControlTermico : 100f;
-        int nivelTerm = flr != null ? flr.NivelControlTermico : 1;
+    private void DibujarBarrasVitales(DONKIFLRManager flr)
+    {
+        float scale = Mathf.Clamp(Screen.height / 900f, 0.72f, 1f);
+        float width = Mathf.Min(258f, Mathf.Max(180f, Screen.width * 0.23f));
+        float rowHeight = 31f * scale;
+        float height = 12f + rowHeight * 4f + 18f;
+        var panel = new Rect(16f, 16f, width, height);
+        Color previous = GUI.color;
+        GUI.color = new Color(0.035f, 0.047f, 0.075f, 0.96f);
+        GUI.DrawTexture(panel, solidTex);
+        GUI.color = new Color(1f, 0.58f, 0.28f, 1f);
+        GUI.DrawTexture(new Rect(panel.x, panel.y, panel.width, 3f), solidTex);
+        GUI.color = previous;
 
-        // 1. ENERGÍA (baja siempre; mantén [E] en Paneles Solares)
-        string hintE = hayInterferencia
-            ? "¡CME drenando! (Paneles [E])"
-            : (energia < 30f ? "¡CRÍTICA! Mantén [E] en Paneles" : "Baja siempre | Paneles [E]");
-        DrawSurvivalBar(
-            new Rect(rect.x + 12f, rect.y + 120f, rect.width - 24f, 34f),
-            $"⚡ Energía: {energia:F0}% — {hintE}",
-            energia / 100f,
-            energia > 45f ? new Color(0.20f, 0.86f, 1.0f, 1f) : (energia > 22f ? new Color(1.0f, 0.76f, 0.18f, 1f) : new Color(1.0f, 0.24f, 0.20f, 1f))
-        );
+        float[] values =
+        {
+            flr != null ? flr.EnergiaActual : 100f,
+            flr != null ? flr.AguaActual : 100f,
+            flr != null ? flr.OxigenoActual : 100f,
+            flr != null ? flr.EstadoControlTermico : 100f
+        };
+        string[] labels = { "ENERGÍA", "AGUA", "OXÍGENO", "TÉRMICO" };
+        Color[] colors =
+        {
+            new Color(1f, 0.72f, 0.27f, 1f),
+            new Color(0.32f, 0.72f, 1f, 1f),
+            new Color(0.29f, 0.88f, 0.69f, 1f),
+            new Color(1f, 0.43f, 0.36f, 1f)
+        };
+        for (int i = 0; i < values.Length; i++)
+        {
+            float y = panel.y + 8f + i * rowHeight;
+            Rect row = new Rect(panel.x + 7f, y, panel.width - 14f, rowHeight - 2f);
+            GUI.color = new Color(0.07f, 0.09f, 0.13f, 0.92f);
+            GUI.DrawTexture(row, solidTex);
+            GUI.color = colors[i];
+            GUI.DrawTexture(new Rect(row.x, row.y, 3f, row.height), solidTex);
+            GUI.color = previous;
 
-        // 2. AGUA (baja en uso/calor/cultivos; Filtro UPA Nave o Hielo ISRU)
-        string hintW = agua < 30f ? "¡BAJA! Filtro Orina Nave / Hielo ISRU" : "Filtro Nave [E] / Hielo ISRU [E]";
-        DrawSurvivalBar(
-            new Rect(rect.x + 12f, rect.y + 158f, rect.width - 24f, 34f),
-            $"💧 Agua: {agua:F0}% — {hintW}",
-            agua / 100f,
-            agua > 45f ? new Color(0.26f, 0.68f, 1.0f, 1f) : (agua > 22f ? new Color(1.0f, 0.72f, 0.20f, 1f) : new Color(1.0f, 0.24f, 0.20f, 1f))
-        );
+            string label = i == 3 && flr != null ? $"{labels[i]} · NV.{flr.NivelControlTermico}" : labels[i];
+            barLabelStyle.normal.textColor = new Color(0.96f, 0.91f, 0.82f, 1f);
+            GUI.Label(new Rect(row.x + 9f, row.y + 1f, row.width - 58f, 15f * scale), label, barLabelStyle);
+            Color previousCounterColor = sampleCounterStyle.normal.textColor;
+            sampleCounterStyle.normal.textColor = colors[i];
+            sampleCounterStyle.fontSize = Mathf.RoundToInt(12f * scale);
+            GUI.Label(new Rect(row.xMax - 48f, row.y + 1f, 44f, 15f * scale), $"{values[i]:F0}%", sampleCounterStyle);
+            sampleCounterStyle.fontSize = 14;
+            sampleCounterStyle.normal.textColor = previousCounterColor;
 
-        // 3. OXÍGENO (baja en exterior; MOXIE en Nave)
-        string hintO = (flr != null && !flr.EstaEnExteriorMarte)
-            ? "Pausado en interior presurizado"
-            : (oxigeno < 30f ? "¡BAJO! Recarga MOXIE en Nave [E]" : "MOXIE en Nave [E]");
-        DrawSurvivalBar(
-            new Rect(rect.x + 12f, rect.y + 196f, rect.width - 24f, 34f),
-            $"🫧 Oxígeno: {oxigeno:F0}% — {hintO}",
-            oxigeno / 100f,
-            oxigeno > 45f ? new Color(0.36f, 0.96f, 0.76f, 1f) : (oxigeno > 22f ? new Color(1.0f, 0.72f, 0.20f, 1f) : new Color(1.0f, 0.24f, 0.20f, 1f))
-        );
+            Rect track = new Rect(row.x + 9f, row.y + row.height - 8f, row.width - 18f, 4f);
+            GUI.color = new Color(0.16f, 0.19f, 0.24f, 1f);
+            GUI.DrawTexture(track, solidTex);
+            GUI.color = colors[i];
+            GUI.DrawTexture(new Rect(track.x, track.y, track.width * Mathf.Clamp01(values[i] / 100f), track.height), solidTex);
+            GUI.color = previous;
+        }
 
-        // 4. CONTROL TÉRMICO DEL TRAJE (mantenimiento y mejora en la Nave)
-        string hintT = termico < 65f
-            ? "¡Requiere mantenimiento en Nave!"
-            : (nivelTerm < DONKIFLRManager.MaxNivelControlTermico ? "Mejorable en Nave [E]" : "Nivel Máximo");
-        DrawSurvivalBar(
-            new Rect(rect.x + 12f, rect.y + 234f, rect.width - 24f, 34f),
-            $"🌡️ Térmico (Nv.{nivelTerm}): {termico:F0}% — {hintT}",
-            termico / 100f,
-            termico > 55f ? new Color(1.0f, 0.68f, 0.22f, 1f) : new Color(1.0f, 0.30f, 0.18f, 1f)
-        );
+        GUI.Label(new Rect(panel.x + 8f, panel.yMax - 18f, panel.width - 16f, 16f), "TRAJE EVA  ·  [G] MÁS CONTEXTO", smallHintStyle);
+    }
 
-        string fuente = flr != null ? flr.FuenteDatosActual : "Inicializando...";
-        GUI.Label(new Rect(rect.x + 12f, rect.y + 276f, rect.width - 24f, 18f), $"NASA: {fuente}", smallHintStyle);
-        GUI.Label(new Rect(rect.x + 12f, rect.y + 293f, rect.width - 24f, 18f), "0% en Energía, Agua o Oxígeno = Misión fallida", smallHintStyle);
+    private void DibujarAlertaCompacta(
+        DONKICMEManager cme,
+        DONKIFLRManager flr,
+        bool hayCME,
+        bool hayInterferencia,
+        bool enModoSeguro)
+    {
+        bool hayFLR = flr != null && flr.HayTormentaFLRActiva;
+        if (!hayCME && !hayFLR) return;
+
+        string mensaje;
+        Color accent;
+        if (hayInterferencia)
+        {
+            mensaje = "CME: apaga la antena HGA [E]";
+            accent = new Color(1f, 0.36f, 0.50f, 1f);
+        }
+        else if (hayFLR && flr.EscudoSobrecargadoSinControlTermico)
+        {
+            mensaje = "¡Peligro térmico! Refúgiate dentro";
+            accent = new Color(1f, 0.39f, 0.30f, 1f);
+        }
+        else if (hayFLR)
+        {
+            mensaje = flr.EstaEnRefugioDomo ? "Llamarada activa · estás a salvo" : "Llamarada activa · busca refugio";
+            accent = new Color(1f, 0.68f, 0.25f, 1f);
+        }
+        else if (hayCME && enModoSeguro)
+        {
+            mensaje = $"CME activa · antena protegida ({(cme != null ? cme.TiempoRestanteEvento : 0f):F0}s)";
+            accent = new Color(1f, 0.74f, 0.29f, 1f);
+        }
+        else
+        {
+            return;
+        }
+
+        float width = Mathf.Min(560f, Screen.width - 32f);
+        float vitalScale = Mathf.Clamp(Screen.height / 900f, 0.72f, 1f);
+        float vitalHeight = 12f + 31f * vitalScale * 4f + 18f;
+        float topY = 16f + Mathf.Max(vitalHeight, 126f) + 10f;
+        Rect rect = new Rect((Screen.width - width) * 0.5f, topY, width, 40f);
+        Color previous = GUI.color;
+        GUI.color = new Color(0.075f, 0.045f, 0.075f, 0.96f);
+        GUI.DrawTexture(rect, solidTex);
+        GUI.color = accent;
+        GUI.DrawTexture(new Rect(rect.x, rect.y, 4f, rect.height), solidTex);
+        GUI.DrawTexture(new Rect(rect.x, rect.y, rect.width, 2f), solidTex);
+        GUI.color = previous;
+        alertBannerStyle.alignment = TextAnchor.MiddleLeft;
+        alertBannerStyle.fontSize = 13;
+        alertBannerStyle.normal.textColor = accent;
+        GUI.Label(new Rect(rect.x + 13f, rect.y + 4f, rect.width - 26f, rect.height - 8f), "⚠  " + mensaje, alertBannerStyle);
     }
 
     private void DrawSurvivalBar(Rect area, string label, float ratio, Color fillColor)
@@ -490,22 +572,22 @@ public sealed class MarsMissionHUD : MonoBehaviour
 
     private void DibujarPanelMuestrasYCultivos()
     {
-        const float panelW = 336f;
-        const float panelH = 152f;
+        float panelW = Mathf.Min(278f, Mathf.Max(196f, Screen.width * 0.23f));
+        const float panelH = 126f;
         Rect rect = new Rect(Screen.width - panelW - 16f, 16f, panelW, panelH);
 
         Color prev = GUI.color;
         GUI.color = new Color(0.05f, 0.08f, 0.13f, 0.92f);
         GUI.DrawTexture(rect, solidTex);
 
-        GUI.color = new Color(1.0f, 0.78f, 0.22f, 1f);
+        GUI.color = new Color(1.0f, 0.66f, 0.29f, 1f);
         GUI.DrawTexture(new Rect(rect.x, rect.y, rect.width, 3f), solidTex);
 
         int collected = MarsSampleNode2D.CollectedSamples;
         int total = Mathf.Max(1, MarsSampleNode2D.TotalSamples);
 
         GUI.color = prev;
-        GUI.Label(new Rect(rect.x + 12f, rect.y + 8f, rect.width - 24f, 22f), "PROGRESO DE MISIÓN EN MARTE", panelTitleStyle);
+        GUI.Label(new Rect(rect.x + 12f, rect.y + 8f, rect.width - 24f, 22f), "MISIÓN", panelTitleStyle);
         GUI.Label(
             new Rect(rect.x + 12f, rect.y + 32f, rect.width - 24f, 24f),
             $"Muestras en Nave: {collected} / {total}",
@@ -517,23 +599,19 @@ public sealed class MarsMissionHUD : MonoBehaviour
         GUI.DrawTexture(barBg, solidTex);
 
         float ratio = Mathf.Clamp01((float)collected / total);
-        GUI.color = new Color(1.0f, 0.78f, 0.22f, 1f);
+        GUI.color = new Color(1.0f, 0.66f, 0.29f, 1f);
         GUI.DrawTexture(new Rect(barBg.x, barBg.y, barBg.width * ratio, barBg.height), solidTex);
         GUI.color = prev;
 
-        string manoTexto = MarsSampleNode2D.HasHeldSample
-            ? $"📦 En mano (1/1): {MarsSampleNode2D.HeldSampleLabel} → ¡Ve a la Nave!"
-            : "📦 Contenedor EVA libre (0/1) — Recoge 1 muestra afuera";
-
-        GUI.Label(new Rect(rect.x + 12f, rect.y + 76f, rect.width - 24f, 22f), manoTexto, heldSampleStyle);
-
-        string cropInfo = $"🌱 Cultivos regados/cosechados: {MarsCropPlot2D.TotalHarvestedCrops}";
-        GUI.Label(new Rect(rect.x + 12f, rect.y + 100f, rect.width - 24f, 20f), cropInfo, bodyTextStyle);
-        GUI.Label(
-            new Rect(rect.x + 12f, rect.y + 122f, rect.width - 24f, 20f),
-            "WASD mover | [E] Usar/Mantener | [T] CME | [F] FLR",
-            smallHintStyle
-        );
+        string manoTexto = MarsSampleNode2D.HasHeldSample ? "Muestra: llena · vuelve a la nave" : "Muestra: contenedor libre";
+        GUI.Label(new Rect(rect.x + 12f, rect.y + 76f, rect.width - 24f, 20f), manoTexto, heldSampleStyle);
+        GUI.Label(new Rect(rect.x + 12f, rect.y + 98f, rect.width - 24f, 18f),
+            $"Cosechas: {MarsCropPlot2D.TotalHarvestedCrops}   ·   [G] más", smallHintStyle);
+        if (ShowExtendedContext)
+        {
+            GUI.Label(new Rect(rect.x + 12f, rect.y + 111f, rect.width - 24f, 14f),
+                MarsSampleNode2D.HasHeldSample ? MarsSampleNode2D.HeldSampleLabel + " · WASD mover · E interactuar" : "WASD mover · E interactuar · T/F eventos", smallHintStyle);
+        }
     }
 
     internal static bool OpenExternalAnalysis(MarsDiscovery discovery, bool byRover = false)
@@ -626,7 +704,8 @@ public sealed class MarsMissionHUD : MonoBehaviour
 
         bool byRover = displayedDiscoveryData != null ? displayedByRover : displayedDiscovery.DeliveredByRover;
         float width = Mathf.Min(560f, Screen.width - 32f);
-        float height = Mathf.Min(585f, Screen.height - 32f);
+        float targetHeight = ShowExtendedContext ? 585f : 390f;
+        float height = Mathf.Min(targetHeight, Screen.height - 32f);
         if (width < 180f || height < 80f) return;
         float left = (Screen.width - width) * 0.5f;
         float top = Screen.height - height - 16f;
@@ -634,7 +713,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
         Color previous = GUI.color;
         GUI.color = new Color(0.05f, 0.08f, 0.13f, 0.97f);
         GUI.DrawTexture(panel, solidTex);
-        GUI.color = new Color(0.39f, 0.9f, 0.66f);
+        GUI.color = new Color(1f, 0.62f, 0.32f);
         GUI.DrawTexture(new Rect(left, top, width, 3f), solidTex);
         GUI.color = previous;
 
@@ -649,13 +728,13 @@ public sealed class MarsMissionHUD : MonoBehaviour
         discoveryTextStyle ??= new GUIStyle(bodyTextStyle) { fontSize = 13, wordWrap = true, alignment = TextAnchor.UpperCenter };
         float contentWidth = width - 42f;
         float titleHeight = discoveryTitleStyle.CalcHeight(new GUIContent(discovery.title), contentWidth);
-        string detail = discovery.isEquipment ? "Instrumento científico" : $"Análisis con {discovery.instrument}";
-        detail += byRover ? " · Entregado por el rover" : " · Recogido por el astronauta";
+        string detail = discovery.isEquipment ? "Instrumento científico" : $"Instrumento: {discovery.instrument}";
+        detail += byRover ? " · Rover" : " · Astronauta";
         float detailHeight = discoveryTextStyle.CalcHeight(new GUIContent(detail), contentWidth);
-        string description = discovery.description;
+        string description = GetContextText(discovery.description, 160);
         float descriptionHeight = discoveryTextStyle.CalcHeight(new GUIContent(description), contentWidth);
         float imagesY = titleHeight + detailHeight + 12f;
-        float imageHeight = Mathf.Min(225f, contentWidth * 0.65f);
+        float imageHeight = Mathf.Min(ShowExtendedContext ? 225f : 155f, contentWidth * 0.56f);
         float bodyY = imagesY + (discoveryReference != null ? imageHeight + 14f : 0f);
         float scrollHeight = bodyY + descriptionHeight + 62f;
         Rect scrollArea = new Rect(left + 12f, top + 36f, width - 24f, height - 46f);
@@ -669,9 +748,10 @@ public sealed class MarsMissionHUD : MonoBehaviour
 
         GUI.Label(new Rect(0, bodyY, contentWidth, descriptionHeight), description, discoveryTextStyle);
         float footerY = bodyY + descriptionHeight + 5f;
-        GUI.Label(new Rect(0, footerY, contentWidth, 20f), discovery.credit, discoveryTextStyle);
+        GUI.Label(new Rect(0, footerY, contentWidth, 20f), GetContextText(discovery.credit, 90), discoveryTextStyle);
         const float sourceWidth = 128f;
-        if (GUI.Button(new Rect((contentWidth - sourceWidth) * 0.5f, footerY + 24f, sourceWidth, 24f), "Ver fuente NASA"))
+        GUI.Label(new Rect(0f, footerY + 20f, contentWidth, 20f), "[G] Más contexto", smallHintStyle);
+        if (GUI.Button(new Rect((contentWidth - sourceWidth) * 0.5f, footerY + 42f, sourceWidth, 24f), "Fuente NASA"))
             Application.OpenURL(discovery.source);
 
         GUI.EndScrollView();
@@ -689,7 +769,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
         GUI.DrawTexture(new Rect(rect.x, rect.y, rect.width, 3f), solidTex);
         GUI.color = prev;
 
-        GUI.Label(new Rect(rect.x + 12f, rect.y + 8f, rect.width - 24f, 28f), texto, alertSubStyle);
+        GUI.Label(new Rect(rect.x + 12f, rect.y + 8f, rect.width - 24f, 28f), GetContextText(texto, 112), alertSubStyle);
     }
 
     private void DibujarPantallaDerrota(DONKIFLRManager flr)
@@ -710,7 +790,8 @@ public sealed class MarsMissionHUD : MonoBehaviour
 
         GUI.Label(new Rect(box.x + 24f, box.y + 22f, box.width - 48f, 36f), "MISIÓN FALLIDA", gameOverTitleStyle);
         GUI.Label(new Rect(box.x + 24f, box.y + 66f, box.width - 48f, 28f), flr.MotivoDerrota, alertBannerStyle);
-        GUI.Label(new Rect(box.x + 28f, box.y + 102f, box.width - 56f, 82f), flr.DetalleDerrota, gameOverBodyStyle);
+        GUI.Label(new Rect(box.x + 28f, box.y + 102f, box.width - 56f, 82f), GetContextText(flr.DetalleDerrota, 125), gameOverBodyStyle);
+        GUI.Label(new Rect(box.x + 28f, box.y + 184f, box.width - 56f, 20f), "[G] Más contexto", smallHintStyle);
 
         Rect btnRect = new Rect(box.x + (box.width - 230f) * 0.5f, box.y + boxH - 64f, 230f, 44f);
         if (GUI.Button(btnRect, "Reintentar Misión", retryBtnStyle))
@@ -734,7 +815,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
             {
                 fontSize = 13,
                 fontStyle = FontStyle.Bold,
-                normal = { textColor = new Color(0.45f, 0.92f, 1f, 1f) }
+                normal = { textColor = new Color(1f, 0.70f, 0.38f, 1f) }
             };
         }
 
@@ -743,7 +824,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
             bodyTextStyle = new GUIStyle(GUI.skin.label)
             {
                 fontSize = 12,
-                normal = { textColor = new Color(0.92f, 0.95f, 1f, 0.96f) }
+                normal = { textColor = new Color(0.96f, 0.92f, 0.85f, 0.96f) }
             };
         }
 
@@ -752,7 +833,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
             smallHintStyle = new GUIStyle(GUI.skin.label)
             {
                 fontSize = 11,
-                normal = { textColor = new Color(0.78f, 0.86f, 0.96f, 0.92f) }
+                normal = { textColor = new Color(0.76f, 0.80f, 0.84f, 0.94f) }
             };
         }
 
@@ -762,7 +843,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
             {
                 fontSize = 11,
                 fontStyle = FontStyle.Bold,
-                normal = { textColor = new Color(0.98f, 0.96f, 0.86f, 1f) }
+                normal = { textColor = new Color(1f, 0.91f, 0.75f, 1f) }
             };
         }
 
@@ -772,7 +853,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
             {
                 fontSize = 12,
                 fontStyle = FontStyle.Bold,
-                normal = { textColor = new Color(0.55f, 0.96f, 1f, 1f) }
+                normal = { textColor = new Color(0.63f, 0.85f, 1f, 1f) }
             };
         }
 
@@ -782,7 +863,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
             {
                 fontSize = 14,
                 fontStyle = FontStyle.Bold,
-                normal = { textColor = new Color(1f, 0.86f, 0.35f, 1f) }
+                normal = { textColor = new Color(1f, 0.75f, 0.32f, 1f) }
             };
         }
 

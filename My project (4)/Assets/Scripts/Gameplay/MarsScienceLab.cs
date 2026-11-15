@@ -33,6 +33,14 @@ internal sealed class MarsScienceLab
         _ => ""
     };
 
+    private string ContextDescription() => specimen.instrument switch
+    {
+        "MAHLI" => "MAHLI captura imágenes de cerca para estudiar textura y forma de las rocas.",
+        "SAM" => "SAM analiza gases y moléculas liberadas por una muestra; esta actividad resume sus señales.",
+        "CheMin" => "CheMin identifica minerales mediante difracción de rayos X.",
+        _ => "Práctica interactiva de análisis científico."
+    };
+
     public void Open(MarsDiscovery sample)
     {
         specimen = sample;
@@ -64,7 +72,11 @@ internal sealed class MarsScienceLab
         EnsureStyles();
         const float width = 720f;
         const float height = 535f;
-        float scale = Mathf.Min(1f, (Screen.width - 24f) / width, (Screen.height - 24f) / height);
+        float vitalGutter = Mathf.Min(280f, Mathf.Max(196f, Screen.width * 0.23f));
+        float availableWidth = Mathf.Max(240f, Screen.width - vitalGutter - 24f);
+        float scale = Mathf.Min(1f, availableWidth / width, (Screen.height - 24f) / height);
+        float left = vitalGutter + (availableWidth - width * scale) * 0.5f;
+        float top = (Screen.height - height * scale) * 0.5f;
         Matrix4x4 previousMatrix = GUI.matrix;
         Color previousColor = GUI.color;
         int previousDepth = GUI.depth;
@@ -73,7 +85,7 @@ internal sealed class MarsScienceLab
         GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), Texture2D.whiteTexture);
         GUI.color = Color.white;
         GUI.matrix = previousMatrix * Matrix4x4.TRS(
-            new Vector3((Screen.width - width * scale) * 0.5f, (Screen.height - height * scale) * 0.5f),
+            new Vector3(left, top),
             Quaternion.identity, new Vector3(scale, scale, 1f));
 
         try
@@ -86,7 +98,16 @@ internal sealed class MarsScienceLab
             if (Button(new Rect(651, 25, 35, 30), "×", 12))
                 return true;
 
-            GUI.Label(new Rect(29, 79, 660, 32), Hint(specimen), textStyle);
+            string guidance = Hint(specimen);
+            if (MarsMissionHUD.ShowExtendedContext)
+                guidance += " " + ContextDescription();
+            string visibleGuidance = MarsMissionHUD.GetContextText(guidance, 72);
+            if (!MarsMissionHUD.ShowExtendedContext)
+                visibleGuidance += " [G] +info";
+            int previousFontSize = textStyle.fontSize;
+            textStyle.fontSize = 13;
+            GUI.Label(new Rect(29, 79, 660, 32), visibleGuidance, textStyle);
+            textStyle.fontSize = previousFontSize;
             bool controlsEnabled = GUI.enabled;
             GUI.enabled = controlsEnabled && !success;
             switch (specimen.instrument)

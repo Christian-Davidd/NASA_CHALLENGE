@@ -92,16 +92,20 @@ public sealed class MarsMonitorScreen2D : MonoBehaviour
         if (!isOpen) return;
         EnsureStyles();
 
-        float width = Mathf.Min(Screen.width * 0.86f, 1120f);
+        float vitalGutter = Mathf.Min(280f, Mathf.Max(196f, Screen.width * 0.23f));
+        float availableWidth = Mathf.Max(240f, Screen.width - vitalGutter - 26f);
+        float width = Mathf.Min(1120f, availableWidth * 0.94f);
         float height = Mathf.Min(Screen.height * 0.84f, 780f);
-        var panel = new Rect((Screen.width - width) * 0.5f, (Screen.height - height) * 0.5f, width, height);
+        var panel = new Rect(vitalGutter + (availableWidth - width) * 0.5f,
+            (Screen.height - height) * 0.5f, width, height);
 
-        GUI.color = new Color(0.015f, 0.025f, 0.03f, 0.84f);
+        GUI.color = new Color(0.025f, 0.026f, 0.045f, 0.76f);
         GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), WhitePixel);
         GUI.color = Color.white;
 
-        GUI.Box(panel, GUIContent.none);
-        DrawRect(new Rect(panel.x + 10, panel.y + 10, panel.width - 20, 58), new Color(0.10f, 0.18f, 0.20f, 1f));
+        DrawRect(panel, new Color(0.045f, 0.055f, 0.080f, 0.99f));
+        DrawRect(new Rect(panel.x, panel.y, panel.width, 3f), new Color(1f, 0.59f, 0.30f, 1f));
+        DrawRect(new Rect(panel.x + 10, panel.y + 10, panel.width - 20, 58), new Color(0.12f, 0.095f, 0.095f, 1f));
         GUI.Label(new Rect(panel.x + 30, panel.y + 17, panel.width - 170, 44), title, headerStyle);
 
         var close = new Rect(panel.xMax - 112, panel.y + 22, 80, 36);
@@ -112,13 +116,14 @@ public sealed class MarsMonitorScreen2D : MonoBehaviour
         else
             DrawTelemetryPanel(panel);
 
-        DrawRect(new Rect(panel.x + 10, panel.yMax - 52, panel.width - 20, 42), new Color(0.10f, 0.18f, 0.20f, 1f));
+        DrawRect(new Rect(panel.x + 10, panel.yMax - 52, panel.width - 20, 42), new Color(0.12f, 0.095f, 0.095f, 1f));
         string footer = crop == null
-            ? "[E] Cerrar monitor     [ESC] Cerrar"
+            ? "[E/ESC] Cerrar     [G] Más contexto"
             : crop.CanHarvest
-                ? "[E] COSECHAR Y REINICIAR CICLO     [ESC] Cerrar inspección"
-                : "Crecimiento automático · " + crop.StageTimeLabel + "     [ESC] Cerrar inspección";
+                ? "[E] Cosechar     [G] Contexto     [ESC] Cerrar"
+                : crop.StageTimeLabel + "     [G] Contexto     [ESC] Cerrar";
         GUI.Label(new Rect(panel.x + 28, panel.yMax - 48, panel.width - 56, 34), footer, smallStyle);
+        MarsMissionHUD.DrawPersistentVitalsOnTopOfModal();
     }
 
     private void DrawCropPanel(Rect panel)
@@ -126,20 +131,21 @@ public sealed class MarsMonitorScreen2D : MonoBehaviour
         float margin = 28f;
         float imageSize = Mathf.Min(panel.height - 190f, panel.width * 0.31f);
         var imageRect = new Rect(panel.x + margin + 20, panel.y + 105, imageSize, imageSize);
-        DrawRect(imageRect, new Color(0.80f, 0.81f, 0.77f, 1f));
+        DrawRect(imageRect, new Color(0.13f, 0.10f, 0.09f, 1f));
+        DrawRect(new Rect(imageRect.x, imageRect.y, imageRect.width, 3f), new Color(1f, 0.65f, 0.32f, 1f));
         if (crop.CurrentSprite != null)
-            GUI.DrawTexture(new Rect(imageRect.x + 8, imageRect.y + 8, imageRect.width - 16, imageRect.height - 16), crop.CurrentSprite.texture, ScaleMode.ScaleToFit, true);
+            GUI.DrawTexture(new Rect(imageRect.x + 12, imageRect.y + 12, imageRect.width - 24, imageRect.height - 24), crop.CurrentSprite.texture, ScaleMode.ScaleToFit, true);
 
         float rightX = imageRect.xMax + 36f;
         float rightWidth = panel.xMax - rightX - margin - 20f;
         GUI.Label(new Rect(rightX, panel.y + 112, rightWidth, 52), crop.StageLabel, valueStyle);
-        GUI.Label(new Rect(rightX, panel.y + 172, rightWidth, 130), detail, bodyStyle);
+        GUI.Label(new Rect(rightX, panel.y + 172, rightWidth, 100), MarsMissionHUD.GetContextText(detail, 180), bodyStyle);
 
         GUI.Label(new Rect(rightX, panel.y + 284, rightWidth, 32), crop.StageTimeLabel, smallStyle);
         DrawCropStageBar(new Rect(rightX, panel.y + 324, rightWidth, 82));
         GUI.Label(new Rect(rightX, panel.y + 424, rightWidth, 80),
-            $"COSECHAS REGISTRADAS   {crop.HarvestedCount:00}\nCiclo de juego acelerado: semilla → crecimiento → madurez → cosecha.", smallStyle);
-        GUI.Label(new Rect(imageRect.x, imageRect.yMax + 18, imageRect.width, 52), "Vista del cultivo seleccionado", smallStyle);
+            $"Cosechas: {crop.HarvestedCount:00}\nSemilla → crecimiento → cosecha", smallStyle);
+        GUI.Label(new Rect(imageRect.x, imageRect.yMax + 18, imageRect.width, 52), "CULTIVO ACTUAL", smallStyle);
     }
 
     private void DrawCropStageBar(Rect rect)
@@ -150,9 +156,9 @@ public sealed class MarsMonitorScreen2D : MonoBehaviour
         for (int i = 0; i < 3; i++)
         {
             var box = new Rect(rect.x + i * segment + 5, rect.y, segment - 10, rect.height);
-            DrawRect(box, i == current ? new Color(0.15f, 0.42f, 0.42f, 1f) : new Color(0.16f, 0.20f, 0.20f, 1f));
+            DrawRect(box, i == current ? new Color(0.42f, 0.20f, 0.12f, 1f) : new Color(0.15f, 0.12f, 0.13f, 1f));
             if (i == current && i < 2)
-                DrawRect(new Rect(box.x + 8, box.yMax - 12, (box.width - 16) * crop.StageProgress, 4), new Color(0.48f, 0.84f, 0.75f, 1f));
+                DrawRect(new Rect(box.x + 8, box.yMax - 12, (box.width - 16) * crop.StageProgress, 4), new Color(1f, 0.68f, 0.32f, 1f));
             GUI.Label(new Rect(box.x + 4, box.y + 20, box.width - 8, 40), stages[i], smallStyle);
         }
     }
@@ -167,13 +173,13 @@ public sealed class MarsMonitorScreen2D : MonoBehaviour
         float summaryTop = chartRect.yMax + 15f;
         var summaryRect = new Rect(panel.x + margin, summaryTop, panel.width - margin * 2f,
             panel.yMax - 62f - summaryTop);
-        DrawRect(summaryRect, new Color(0.12f, 0.18f, 0.19f, 1f));
+        DrawRect(summaryRect, new Color(0.12f, 0.09f, 0.09f, 1f));
         GUI.Label(new Rect(summaryRect.x + 16f, summaryRect.y + 7f, summaryRect.width - 32f, 30f),
             "RESUMEN DEL SUBSISTEMA", valueStyle);
 
         float textWidth = summaryRect.width * 0.43f;
         GUI.Label(new Rect(summaryRect.x + 18f, summaryRect.y + 42f, textWidth - 28f, summaryRect.height - 50f),
-            detail, bodyStyle);
+            MarsMissionHUD.GetContextText(detail, 100), bodyStyle);
 
         var readings = GetReadings(title);
         float cardsX = summaryRect.x + textWidth;
@@ -188,11 +194,11 @@ public sealed class MarsMonitorScreen2D : MonoBehaviour
             int row = i / 2;
             var card = new Rect(cardsX + column * (cardWidth + gap),
                 summaryRect.y + 42f + row * (cardHeight + gap), cardWidth, cardHeight);
-            DrawRect(card, new Color(0.07f, 0.13f, 0.15f, 1f));
+            DrawRect(card, new Color(0.075f, 0.065f, 0.075f, 1f));
             GUI.Label(new Rect(card.x + 10f, card.y + 4f, card.width - 20f, 22f), reading.Item1, smallStyle);
             GUI.Label(new Rect(card.x + 10f, card.y + 23f, card.width - 20f, 29f), reading.Item2, valueStyle);
-            DrawRect(new Rect(card.x + 10f, card.yMax - 8f, card.width - 20f, 3f), new Color(0.25f, 0.37f, 0.37f, 1f));
-            DrawRect(new Rect(card.x + 10f, card.yMax - 8f, (card.width - 20f) * reading.Item3, 3f), new Color(0.31f, 0.73f, 0.66f, 1f));
+            DrawRect(new Rect(card.x + 10f, card.yMax - 8f, card.width - 20f, 3f), new Color(0.31f, 0.22f, 0.20f, 1f));
+            DrawRect(new Rect(card.x + 10f, card.yMax - 8f, (card.width - 20f) * reading.Item3, 3f), new Color(1f, 0.62f, 0.34f, 1f));
         }
     }
 
@@ -212,14 +218,14 @@ public sealed class MarsMonitorScreen2D : MonoBehaviour
 
     private void DrawTelemetryChart(Rect rect, string panelTitle)
     {
-        DrawRect(rect, new Color(0.055f, 0.105f, 0.12f, 1f));
+        DrawRect(rect, new Color(0.075f, 0.065f, 0.075f, 1f));
         bool waterMode = IsWaterMonitor(panelTitle);
         bool cropMode = !waterMode && IsCropMonitor(panelTitle);
         string chartTitle = waterMode ? "CIRCUITO DE AGUA Y NUTRIENTES"
             : cropMode ? "SENSORES DE LA ZONA RADICULAR" : "CONDICIONES AMBIENTALES DEL MÓDULO";
         GUI.Label(new Rect(rect.x + 18f, rect.y + 8f, rect.width - 150f, 32f), chartTitle, valueStyle);
-        DrawRect(new Rect(rect.xMax - 112f, rect.y + 14f, 94f, 22f), new Color(0.18f, 0.34f, 0.32f, 1f));
-        GUI.Label(new Rect(rect.xMax - 108f, rect.y + 12f, 90f, 24f), "DEMO", smallStyle);
+        DrawRect(new Rect(rect.xMax - 128f, rect.y + 14f, 110f, 22f), new Color(0.35f, 0.19f, 0.12f, 1f));
+        GUI.Label(new Rect(rect.xMax - 124f, rect.y + 12f, 104f, 24f), "SIMULADO", smallStyle);
 
         TrendSeries[] series = GetTrendSeries(waterMode, cropMode);
         float legendX = rect.x + 20f;
@@ -254,7 +260,7 @@ public sealed class MarsMonitorScreen2D : MonoBehaviour
             GUI.Label(new Rect(x - 36f, plot.yMax + 3f, 72f, 22f), timeLabels[i], smallStyle);
         }
         GUI.Label(new Rect(rect.xMax - 300f, rect.yMax - 24f, 280f, 20f),
-            "Escala normalizada · tendencia ilustrativa", smallStyle);
+            "Tendencia ilustrativa", smallStyle);
     }
 
     private static TrendSeries[] GetTrendSeries(bool waterMode, bool cropMode)
@@ -263,9 +269,9 @@ public sealed class MarsMonitorScreen2D : MonoBehaviour
         {
             return new[]
             {
-                new TrendSeries("ALIMENTACIÓN", new Color(0.35f, 0.81f, 0.87f), new[] { 43f, 48f, 46f, 53f, 55f, 51f, 58f, 56f, 62f, 59f, 64f, 61f }),
-                new TrendSeries("RETORNO", new Color(0.91f, 0.57f, 0.34f), new[] { 34f, 38f, 36f, 41f, 39f, 46f, 43f, 47f, 45f, 51f, 48f, 52f }),
-                new TrendSeries("RESERVORIO", new Color(0.66f, 0.82f, 0.48f), new[] { 79f, 78f, 77f, 77f, 76f, 75f, 76f, 75f, 74f, 74f, 73f, 74f })
+                new TrendSeries("ALIMENTACIÓN", new Color(0.34f, 0.78f, 0.96f), new[] { 43f, 48f, 46f, 53f, 55f, 51f, 58f, 56f, 62f, 59f, 64f, 61f }),
+                new TrendSeries("RETORNO", new Color(1.00f, 0.59f, 0.32f), new[] { 34f, 38f, 36f, 41f, 39f, 46f, 43f, 47f, 45f, 51f, 48f, 52f }),
+                new TrendSeries("RESERVORIO", new Color(0.55f, 0.88f, 0.48f), new[] { 79f, 78f, 77f, 77f, 76f, 75f, 76f, 75f, 74f, 74f, 73f, 74f })
             };
         }
 
@@ -273,17 +279,17 @@ public sealed class MarsMonitorScreen2D : MonoBehaviour
         {
             return new[]
             {
-                new TrendSeries("HUMEDAD RAÍZ", new Color(0.35f, 0.81f, 0.87f), new[] { 58f, 61f, 63f, 62f, 65f, 66f, 64f, 68f, 67f, 69f, 67f, 68f }),
-                new TrendSeries("O₂ RADICULAR", new Color(0.66f, 0.82f, 0.48f), new[] { 77f, 78f, 80f, 79f, 81f, 83f, 82f, 80f, 84f, 82f, 83f, 82f }),
-                new TrendSeries("TEMP. FOLIAR", new Color(0.91f, 0.57f, 0.34f), new[] { 44f, 46f, 45f, 49f, 48f, 51f, 50f, 48f, 52f, 50f, 53f, 51f })
+                new TrendSeries("HUMEDAD RAÍZ", new Color(0.34f, 0.78f, 0.96f), new[] { 58f, 61f, 63f, 62f, 65f, 66f, 64f, 68f, 67f, 69f, 67f, 68f }),
+                new TrendSeries("O₂ RADICULAR", new Color(0.55f, 0.88f, 0.48f), new[] { 77f, 78f, 80f, 79f, 81f, 83f, 82f, 80f, 84f, 82f, 83f, 82f }),
+                new TrendSeries("TEMP. FOLIAR", new Color(1.00f, 0.59f, 0.32f), new[] { 44f, 46f, 45f, 49f, 48f, 51f, 50f, 48f, 52f, 50f, 53f, 51f })
             };
         }
 
         return new[]
         {
-            new TrendSeries("TEMPERATURA", new Color(0.91f, 0.57f, 0.34f), new[] { 54f, 56f, 55f, 58f, 57f, 61f, 60f, 59f, 63f, 61f, 64f, 62f }),
-            new TrendSeries("HUMEDAD", new Color(0.35f, 0.81f, 0.87f), new[] { 70f, 68f, 66f, 67f, 65f, 64f, 66f, 63f, 62f, 64f, 61f, 63f }),
-            new TrendSeries("CO₂", new Color(0.66f, 0.82f, 0.48f), new[] { 35f, 38f, 37f, 41f, 40f, 43f, 41f, 45f, 44f, 42f, 40f, 41f })
+            new TrendSeries("TEMPERATURA", new Color(1.00f, 0.59f, 0.32f), new[] { 54f, 56f, 55f, 58f, 57f, 61f, 60f, 59f, 63f, 61f, 64f, 62f }),
+            new TrendSeries("HUMEDAD", new Color(0.34f, 0.78f, 0.96f), new[] { 70f, 68f, 66f, 67f, 65f, 64f, 66f, 63f, 62f, 64f, 61f, 63f }),
+            new TrendSeries("CO₂", new Color(0.55f, 0.88f, 0.48f), new[] { 35f, 38f, 37f, 41f, 40f, 43f, 41f, 45f, 44f, 42f, 40f, 41f })
         };
     }
 
@@ -344,13 +350,13 @@ public sealed class MarsMonitorScreen2D : MonoBehaviour
     {
         if (headerStyle != null) return;
         headerStyle = new GUIStyle(GUI.skin.label) { fontSize = Mathf.Clamp(Screen.height / 36, 22, 34), fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleLeft, wordWrap = true };
-        headerStyle.normal.textColor = new Color(0.93f, 0.94f, 0.90f);
+        headerStyle.normal.textColor = new Color(1f, 0.94f, 0.82f);
         bodyStyle = new GUIStyle(GUI.skin.label) { fontSize = Mathf.Clamp(Screen.height / 62, 15, 22), alignment = TextAnchor.UpperLeft, wordWrap = true, padding = new RectOffset(4, 8, 4, 4) };
-        bodyStyle.normal.textColor = new Color(0.84f, 0.87f, 0.84f);
+        bodyStyle.normal.textColor = new Color(0.91f, 0.88f, 0.83f);
         smallStyle = new GUIStyle(GUI.skin.label) { fontSize = Mathf.Clamp(Screen.height / 76, 13, 18), alignment = TextAnchor.MiddleLeft, wordWrap = true };
-        smallStyle.normal.textColor = new Color(0.72f, 0.81f, 0.79f);
+        smallStyle.normal.textColor = new Color(0.79f, 0.81f, 0.81f);
         valueStyle = new GUIStyle(GUI.skin.label) { fontSize = Mathf.Clamp(Screen.height / 56, 16, 23), fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleLeft, wordWrap = true };
-        valueStyle.normal.textColor = new Color(0.46f, 0.84f, 0.76f);
+        valueStyle.normal.textColor = new Color(1f, 0.67f, 0.35f);
         buttonStyle = new GUIStyle(GUI.skin.button) { fontSize = Mathf.Clamp(Screen.height / 75, 13, 18), fontStyle = FontStyle.Bold };
     }
 

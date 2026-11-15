@@ -69,16 +69,17 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
     private string statusBanner = "";
     private Color statusBannerColor = new Color(0.35f, 0.92f, 1f, 1f);
     private float currentGuiScale = 1f;
+    private float currentPanelXOffset;
 
     // Lienzo lógico de la consola. El GUI se escala uniformemente sobre este tamaño.
     private const float BasePanelW = 1000f;
     private const float BasePanelH = 630f;
 
-    private static readonly Color TextMain = new Color(0.93f, 0.96f, 1f, 1f);
-    private static readonly Color TextDim = new Color(0.62f, 0.72f, 0.83f, 1f);
-    private static readonly Color Success = new Color(0.34f, 0.94f, 0.60f, 1f);
-    private static readonly Color Warning = new Color(1f, 0.79f, 0.28f, 1f);
-    private static readonly Color Danger = new Color(1f, 0.43f, 0.40f, 1f);
+    private static readonly Color TextMain = new Color(0.98f, 0.95f, 0.88f, 1f);
+    private static readonly Color TextDim = new Color(0.72f, 0.77f, 0.82f, 1f);
+    private static readonly Color Success = new Color(0.36f, 0.91f, 0.62f, 1f);
+    private static readonly Color Warning = new Color(1f, 0.70f, 0.28f, 1f);
+    private static readonly Color Danger = new Color(1f, 0.39f, 0.35f, 1f);
 
     private static Texture2D solidTex;
     private static Texture2D panelGradientTex;
@@ -710,13 +711,13 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
 
     private Color StationAccent => stationType switch
     {
-        StationType.OxygenMoxie => new Color(0.26f, 0.86f, 1f, 1f),
-        StationType.WaterUrineFilterUPA => new Color(0.36f, 0.70f, 1f, 1f),
-        StationType.SampleAnalyzerLab => new Color(0.38f, 0.95f, 0.62f, 1f),
-        StationType.ThermalControlBench => new Color(1f, 0.64f, 0.24f, 1f),
-        StationType.EvaAirlockHatch => new Color(1f, 0.58f, 0.28f, 1f),
-        StationType.FlightCommandConsole => new Color(0.40f, 0.98f, 0.60f, 1f),
-        _ => new Color(0.93f, 0.71f, 0.24f, 1f)
+        StationType.OxygenMoxie => new Color(1f, 0.54f, 0.29f, 1f),
+        StationType.WaterUrineFilterUPA => new Color(0.30f, 0.71f, 0.98f, 1f),
+        StationType.SampleAnalyzerLab => new Color(0.37f, 0.87f, 0.66f, 1f),
+        StationType.ThermalControlBench => new Color(1f, 0.67f, 0.27f, 1f),
+        StationType.EvaAirlockHatch => new Color(1f, 0.48f, 0.34f, 1f),
+        StationType.FlightCommandConsole => new Color(0.37f, 0.80f, 0.94f, 1f),
+        _ => new Color(1f, 0.73f, 0.30f, 1f)
     };
 
     private string StationTag => stationType switch
@@ -743,13 +744,13 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
 
     private string StationSubtitle => stationType switch
     {
-        StationType.OxygenMoxie => "Atmósfera de Marte → O₂ respirable  ·  Experimento NASA Perseverance",
-        StationType.WaterUrineFilterUPA => "Ósmosis inversa y destilación centrífuga  ·  ISS / Artemis",
-        StationType.SampleAnalyzerLab => "Protección planetaria y espectrometría  ·  Protocolo Apollo",
-        StationType.ThermalControlBench => "LCVG + sublimador + Kapton MLI  ·  Traje EVA Apollo",
-        StationType.EvaAirlockHatch => "Despresurización y salida al exterior marciano",
-        StationType.FlightCommandConsole => "Computador de guía Apollo  ·  MIT Instrumentation Lab",
-        _ => "Simulación didáctica basada en ingeniería real de la NASA"
+        StationType.OxygenMoxie => MarsMissionHUD.GetContextText("MOXIE procesa CO₂ marciano para producir oxígeno.", 90),
+        StationType.WaterUrineFilterUPA => MarsMissionHUD.GetContextText("UPA recupera agua de residuos líquidos.", 90),
+        StationType.SampleAnalyzerLab => MarsMissionHUD.GetContextText("Laboratorio sellado para analizar muestras.", 90),
+        StationType.ThermalControlBench => MarsMissionHUD.GetContextText("El PLSS regula el calor del traje EVA.", 90),
+        StationType.EvaAirlockHatch => MarsMissionHUD.GetContextText("Prepara el traje antes de salir a Marte.", 90),
+        StationType.FlightCommandConsole => MarsMissionHUD.GetContextText("Consola inspirada en el computador Apollo.", 90),
+        _ => MarsMissionHUD.GetContextText("Controles de soporte vital de la misión.", 90)
     };
 
     private void OnGUI()
@@ -761,11 +762,13 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
         EnsureTextures();
         EnsureStyles();
 
-        float maxEscalaAncho = (Screen.width - 20f) / BasePanelW;
+        float vitalGutterPx = Mathf.Min(280f, Mathf.Max(196f, Screen.width * 0.23f));
+        float availablePixels = Mathf.Max(220f, Screen.width - vitalGutterPx - 26f);
+        float maxEscalaAncho = availablePixels / BasePanelW;
         float maxEscalaAlto = (Screen.height - 20f) / BasePanelH;
         float escalaFinal = Mathf.Clamp(
             Mathf.Min(escalaPantallaConsola, Mathf.Min(maxEscalaAncho, maxEscalaAlto)),
-            0.55f,
+            0.36f,
             1.9f);
         currentGuiScale = escalaFinal;
 
@@ -774,6 +777,9 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
 
         float virtualW = Screen.width / escalaFinal;
         float virtualH = Screen.height / escalaFinal;
+        currentPanelXOffset = Mathf.Min(
+            (vitalGutterPx + 12f) / escalaFinal,
+            Mathf.Max(0f, virtualW - 220f));
 
         Color prevColor = GUI.color;
         GUI.color = new Color(0.012f, 0.020f, 0.036f, 0.84f);
@@ -790,13 +796,15 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
         }
 
         GUI.matrix = prevMatrix;
+        MarsMissionHUD.DrawPersistentVitalsOnTopOfModal();
     }
 
     private void DibujarConsolaHardware(float virtualW, float virtualH)
     {
-        float w = Mathf.Min(BasePanelW, virtualW - 24f);
+        float availableW = Mathf.Max(180f, virtualW - currentPanelXOffset);
+        float w = Mathf.Min(BasePanelW, availableW - 24f);
         float h = Mathf.Min(BasePanelH, virtualH - 24f);
-        Rect panel = new Rect((virtualW - w) * 0.5f, (virtualH - h) * 0.5f, w, h);
+        Rect panel = new Rect(currentPanelXOffset + (availableW - w) * 0.5f, (virtualH - h) * 0.5f, w, h);
         Color accent = StationAccent;
 
         // Chasis principal con bisel y fondo degradado.
@@ -902,12 +910,13 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
 
         Color prevBody = bodyTightStyle.normal.textColor;
         bodyTightStyle.normal.textColor = new Color(0.96f, 0.98f, 1f, 1f);
-        GUI.Label(new Rect(footer.x + 14f, footer.y + 18f, footer.width - 150f, 25f), statusBanner, bodyTightStyle);
+        GUI.Label(new Rect(footer.x + 14f, footer.y + 18f, footer.width - 230f, 25f),
+            MarsMissionHUD.GetContextText(statusBanner, 96), bodyTightStyle);
         bodyTightStyle.normal.textColor = prevBody;
 
         DrawPill(
-            new Rect(footer.xMax - 116f, footer.y + 9f, 104f, 28f),
-            "ESC · CERRAR",
+            new Rect(footer.xMax - 210f, footer.y + 9f, 198f, 28f),
+            "G · MÁS INFO     ESC · CERRAR",
             new Color(0.60f, 0.70f, 0.80f, 1f),
             false);
     }
@@ -974,7 +983,7 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
 
         GUI.Label(
             new Rect(card.x + 12f, card.y + 41f, card.width - 24f, 76f),
-            objective,
+            MarsMissionHUD.GetContextText(objective, 112),
             stepBodyStyle);
     }
 
@@ -1163,7 +1172,7 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
 
         GUI.Label(
             new Rect(rect.x + 10f, rect.y + 22f, rect.width - 20f, rect.height - 28f),
-            body,
+            MarsMissionHUD.GetContextText(body, 120),
             noteBodyStyle);
     }
 
@@ -1177,7 +1186,8 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
             1f);
 
         GUI.Label(new Rect(strip.x + 10f, strip.y + 2f, strip.width - 20f, 20f), title, stepTitleStyle);
-        GUI.Label(new Rect(strip.x + 10f, strip.y + 22f, strip.width - 20f, 15f), subtitle, subHeaderStyle);
+        GUI.Label(new Rect(strip.x + 10f, strip.y + 22f, strip.width - 20f, 15f),
+            MarsMissionHUD.GetContextText(subtitle, 94), subHeaderStyle);
     }
 
     private void DrawInfoCard(Rect rect, string number, string title, string body, Color accent)
@@ -1199,7 +1209,8 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
         chipStyle.fontSize = 17;
 
         GUI.Label(new Rect(rect.x + 44f, rect.y + 6f, rect.width - 54f, 26f), title, stepTitleStyle);
-        GUI.Label(new Rect(rect.x + 11f, rect.y + 36f, rect.width - 22f, rect.height - 42f), body, bodyStyle);
+        GUI.Label(new Rect(rect.x + 11f, rect.y + 36f, rect.width - 22f, rect.height - 42f),
+            MarsMissionHUD.GetContextText(body, 120), bodyStyle);
     }
 
     private void PrepararTarjeta(string titulo, string subtitulo, string estado, params string[] puntos)
@@ -2093,9 +2104,10 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
 
     private void DibujarTarjetaEducativaModal(float virtualW, float virtualH)
     {
-        float w = Mathf.Min(790f, virtualW - 32f);
+        float availableW = Mathf.Max(180f, virtualW - currentPanelXOffset);
+        float w = Mathf.Min(790f, availableW - 32f);
         float h = Mathf.Min(510f, virtualH - 32f);
-        Rect card = new Rect((virtualW - w) * 0.5f, (virtualH - h) * 0.5f, w, h);
+        Rect card = new Rect(currentPanelXOffset + (availableW - w) * 0.5f, (virtualH - h) * 0.5f, w, h);
         Color accent = StationAccent;
 
         DrawBoxWithBorder(card, new Color(0.060f, 0.095f, 0.135f, 0.99f), Success, 2.5f);
@@ -2115,7 +2127,8 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
             alignment = TextAnchor.UpperLeft
         };
         GUI.Label(new Rect(card.x + 24f, card.y + 50f, card.width - 48f, 50f), tarjetaTitulo, titleStyle);
-        GUI.Label(new Rect(card.x + 24f, card.y + 101f, card.width - 48f, 20f), tarjetaSubtitulo, subHeaderStyle);
+        GUI.Label(new Rect(card.x + 24f, card.y + 101f, card.width - 48f, 20f),
+            MarsMissionHUD.GetContextText(tarjetaSubtitulo, 100), subHeaderStyle);
 
         float y = card.y + 128f;
         for (int i = 0; i < tarjetaPuntosCount; i++)
@@ -2131,7 +2144,8 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
             GUI.Label(new Rect(chip.x, chip.y + 4f, chip.width, 20f), (i + 1).ToString(), chipStyle);
             chipStyle.normal.textColor = prevChip;
 
-            GUI.Label(new Rect(row.x + 46f, row.y + 7f, row.width - 58f, 52f), tarjetaPuntos[i], bulletStyle);
+            GUI.Label(new Rect(row.x + 46f, row.y + 7f, row.width - 58f, 52f),
+                MarsMissionHUD.GetContextText(tarjetaPuntos[i], 110), bulletStyle);
             y += 74f;
         }
 
