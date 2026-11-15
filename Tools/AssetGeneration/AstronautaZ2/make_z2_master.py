@@ -101,23 +101,6 @@ def helmet_side_real(which):
     s.append('<path d="M 299 51 Q 313 52 320 61 L 319 66 Q 311 60 300 60 Z" fill="none" stroke="#77756F" stroke-width="1.4" stroke-linejoin="round"/>')
     return "".join(s)
 
-def nasa_insignia_real():
-    # Classic NASA meatball, drawn as clean vector shapes to match the sprite.
-    return (
-        '<g transform="translate(256 236)">'
-        '<ellipse rx="38" ry="27" fill="#0B3D91" stroke="#E6E4DE" stroke-width="1.5"/>'
-        '<g fill="#FFFFFF">'
-        '<circle cx="-25" cy="-10" r="1.4"/><circle cx="-17" cy="12" r="1.1"/>'
-        '<circle cx="-7" cy="-18" r="1.2"/><circle cx="5" cy="16" r="1.1"/>'
-        '<circle cx="19" cy="-14" r="1.3"/><circle cx="27" cy="8" r="1.1"/>'
-        '<circle cx="12" cy="-4" r=".9"/><circle cx="-29" cy="4" r=".9"/>'
-        '</g>'
-        '<path d="M -31 13 Q -5 -3 13 -6 Q 29 -9 34 -18 Q 32 -4 16 5 Q -5 16 -31 13 Z" fill="#FC3D21"/>'
-        '<text x="0" y="7" text-anchor="middle" fill="#FFFFFF" font-family="Arial,sans-serif" '
-        'font-size="17" font-weight="700" font-style="italic" letter-spacing="-.8">NASA</text>'
-        '</g>'
-    )
-
 def helmet_back_real():
     s = [m.ell(m.CX, 125, 90, 82, m.IVORY, m.IVSH, band=9, sw=1.5)]
     s.append(m.seam("M 174 126 Q 256 151 338 126", 1.3, .42))
@@ -151,7 +134,6 @@ def rear_entry_shell():
         "Q 161 357 156 302 Q 146 224 153 151 C 155 111 173 78 207 63 Z",
         m.IVORY, m.IVSH, band=9, sw=1.5)]
     # Keep the rear-facing shell clean; its rounded outline defines the pack.
-    s.append(nasa_insignia_real())
     return "".join(s)
 
 def torso_side_real(which):

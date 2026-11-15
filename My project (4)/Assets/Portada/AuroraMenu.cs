@@ -27,7 +27,7 @@ public sealed class AuroraMenu : MonoBehaviour
     RawImage pilotImage;
     CanvasGroup entrance;
     Font font;
-    Texture field, halo, crew, crewBack, coverCrew, nasa;
+    Texture field, halo, crew, crewBack, coverCrew;
     AudioSource audioSource;
     AudioClip click, signal;
     Text status, volumeLabel;
@@ -60,7 +60,6 @@ public sealed class AuroraMenu : MonoBehaviour
         crew = Resources.Load<Texture>("Aurora/Crew");
         crewBack = Resources.Load<Texture>("Aurora/CrewBack");
         coverCrew = Resources.Load<Texture>("Aurora/CoverCrew");
-        nasa = Resources.Load<Texture>("Aurora/NASA");
         click = Resources.Load<AudioClip>("Aurora/Click");
         signal = Resources.Load<AudioClip>("Aurora/Signal");
         audioSource = gameObject.AddComponent<AudioSource>();
@@ -130,8 +129,6 @@ public sealed class AuroraMenu : MonoBehaviour
         Bar(screen, Cyan, 111, 86, 23, 4);
         Label(screen, "CENTRO DE OPERACIONES", 147, 72, 480, 32, 19, Cyan, true);
         Bar(screen, Line, 111, 122, 1378, 1);
-        if (nasa)
-            Art(screen, "Insignia NASA", nasa, Color.white, 1374, 31, 94, 80);
         Bar(screen, Line, 111, 797, 1378, 1);
         Label(screen, "Tu gran salto empieza aquí.", 111, 180, 680, 39, 22, Fog, true);
         Label(screen, "First on", 102, 222, 765, 115, 110, White, true);
