@@ -56,6 +56,86 @@ public sealed class CommsTowerCMEEvent : MonoBehaviour
     [Header("Animación Enlace Orbital")]
     [SerializeField] private float rangoEtiquetaProximidad = 5.2f;
 
+    public static bool StaticTransmisorEncendido { get; private set; } = true;
+    public static float StaticSobrecargaProgreso { get; private set; }
+    public static float StaticTiempoLimiteSobrecarga { get; private set; } = 24f;
+    public static int StaticReparacionesCompletadas { get; private set; }
+
+    public static bool HaySobrecargaActivaPorCME =>
+        DONKICMEManager.Instance != null &&
+        DONKICMEManager.Instance.HayTormentaCMEActiva &&
+        StaticTransmisorEncendido;
+
+    public static bool NecesitaReencendidoGlobal =>
+        !StaticTransmisorEncendido &&
+        (DONKICMEManager.Instance == null || !DONKICMEManager.Instance.HayTormentaCMEActiva);
+
+    public static void ResetStaticState()
+    {
+        StaticTransmisorEncendido = true;
+        StaticSobrecargaProgreso = 0f;
+        StaticTiempoLimiteSobrecarga = 24f;
+        StaticReparacionesCompletadas = 0;
+        if (Instance != null)
+        {
+            Instance.TransmisorEncendido = true;
+            Instance.TieneInterferenciaCME = false;
+            Instance.ReparacionesCompletadas = 0;
+            Instance.ReiniciarAPasoUnoApagado();
+        }
+    }
+
+    public static void TickStaticOverloadDuringCME(float deltaTime)
+    {
+        var cme = DONKICMEManager.Instance;
+        bool nubeActiva = cme != null && cme.HayTormentaCMEActiva;
+        if (!nubeActiva || !StaticTransmisorEncendido)
+        {
+            StaticSobrecargaProgreso = 0f;
+            if (Instance != null)
+            {
+                Instance.sobrecargaProgreso = 0f;
+                Instance.TieneInterferenciaCME = false;
+            }
+            return;
+        }
+
+        if (Instance != null)
+            Instance.TieneInterferenciaCME = true;
+
+        float velKmS = cme.VelocidadActualKmS > 0f ? cme.VelocidadActualKmS : 680f;
+        float speedNorm = Mathf.Clamp01(Mathf.InverseLerp(350f, 1300f, velKmS));
+        StaticTiempoLimiteSobrecarga = velKmS >= 800f
+            ? Mathf.Lerp(21f, 14f, Mathf.Clamp01(Mathf.InverseLerp(800f, 1400f, velKmS)))
+            : Mathf.Lerp(34f, 26f, speedNorm);
+
+        StaticSobrecargaProgreso += deltaTime / Mathf.Max(8f, StaticTiempoLimiteSobrecarga);
+
+        if (StaticSobrecargaProgreso >= 1f)
+        {
+            StaticSobrecargaProgreso = 0f;
+            DONKIFLRManager.Instance?.AplicarCortocircuitoAntenaCME(22f, velKmS);
+
+            if (Instance != null)
+            {
+                if (Instance.consolaAbierta && Instance.modoConsola == ModoConsola.Apagar)
+                    Instance.ReiniciarAPasoUnoApagado();
+
+                Instance.FijarMensajeConsola(
+                    $"¡CORTOCIRCUITO DE PLASMA ({velKmS:F0} km/s)! -22% Energía en la red. Apaga la antena desde el Paso 1.",
+                    new Color(1f, 0.35f, 0.35f, 1f),
+                    4.5f
+                );
+            }
+        }
+
+        if (Instance != null)
+        {
+            Instance.sobrecargaProgreso = StaticSobrecargaProgreso;
+            Instance.tiempoLimiteSobrecarga = StaticTiempoLimiteSobrecarga;
+        }
+    }
+
     public bool TransmisorEncendido { get; private set; } = true;
     public bool TieneInterferenciaCME { get; private set; }
     public bool TorreCalibrada => TransmisorEncendido && !TieneInterferenciaCME;
@@ -138,7 +218,28 @@ public sealed class CommsTowerCMEEvent : MonoBehaviour
             baseRenderer = GetComponent<SpriteRenderer>();
         if (orbiterTransform != null)
             orbiterHomeLocalPos = orbiterTransform.localPosition;
-        plugOffsetPx = PlugRestCenter;
+
+        // Restaurar estado persistente al regresar desde Nave o Invernadero
+        TransmisorEncendido = StaticTransmisorEncendido;
+        ReparacionesCompletadas = StaticReparacionesCompletadas;
+        sobrecargaProgreso = StaticSobrecargaProgreso;
+        tiempoLimiteSobrecarga = StaticTiempoLimiteSobrecarga;
+        if (!TransmisorEncendido)
+        {
+            rfPowerPercent = 0f;
+            pararrayosTierraActivo = true;
+            plugOffsetPx = SocketCenter;
+            dishAngleDeg = 90f;
+            platoEstacionado = true;
+        }
+        else
+        {
+            plugOffsetPx = PlugRestCenter;
+        }
+
+        if (DONKICMEManager.Instance != null && DONKICMEManager.Instance.HayTormentaCMEActiva && TransmisorEncendido)
+            TieneInterferenciaCME = true;
+
         EnsureTextures();
         EnsureAuraRenderers();
     }
@@ -268,6 +369,7 @@ public sealed class CommsTowerCMEEvent : MonoBehaviour
                 else if (modoConsola == ModoConsola.Encender)
                 {
                     TransmisorEncendido = true;
+                    StaticTransmisorEncendido = true;
                     tapaSeguridadAbierta = false;
                     FijarMensajeConsola("¡Energía principal ON! Ahora sube el plato con la flecha ▲ (Paso 2).", WaveRelockColor, 3.0f);
                 }
@@ -333,33 +435,8 @@ public sealed class CommsTowerCMEEvent : MonoBehaviour
 
     private void ActualizarSobrecargaDuranteApagado()
     {
-        if (modoConsola != ModoConsola.Apagar) return;
-
-        var cme = DONKICMEManager.Instance;
-        bool nubeActiva = cme != null && cme.HayTormentaCMEActiva;
-        if (!nubeActiva || !TransmisorEncendido)
-        {
-            sobrecargaProgreso = 0f;
-            return;
-        }
-
-        float velKmS = cme.VelocidadActualKmS > 0f ? cme.VelocidadActualKmS : 680f;
-        float speedNorm = Mathf.Clamp01(Mathf.InverseLerp(350f, 1300f, velKmS));
-        tiempoLimiteSobrecarga = velKmS >= 800f
-            ? Mathf.Lerp(21f, 14f, Mathf.Clamp01(Mathf.InverseLerp(800f, 1400f, velKmS)))
-            : Mathf.Lerp(34f, 26f, speedNorm);
-
-        sobrecargaProgreso += Time.deltaTime / Mathf.Max(8f, tiempoLimiteSobrecarga);
-        if (sobrecargaProgreso >= 1f)
-        {
-            sobrecargaProgreso = 0f;
-            ReiniciarAPasoUnoApagado();
-            FijarMensajeConsola(
-                $"¡SOBRECARGA DE PLASMA ({velKmS:F0} km/s)! El circuito se protegió: reiniciando desde el Paso 1.",
-                new Color(1f, 0.38f, 0.38f, 1f),
-                4.2f
-            );
-        }
+        sobrecargaProgreso = StaticSobrecargaProgreso;
+        tiempoLimiteSobrecarga = StaticTiempoLimiteSobrecarga;
     }
 
     private void ReiniciarAPasoUnoApagado()
@@ -696,7 +773,7 @@ public sealed class CommsTowerCMEEvent : MonoBehaviour
     {
         consolaAbierta = true;
         mostrarTarjetaEducativa = false;
-        sobrecargaProgreso = 0f;
+        sobrecargaProgreso = StaticSobrecargaProgreso;
         activeDrag = ActiveDragControl.None;
 
         var cme = DONKICMEManager.Instance;
@@ -746,7 +823,6 @@ public sealed class CommsTowerCMEEvent : MonoBehaviour
     private void CerrarConsola()
     {
         consolaAbierta = false;
-        sobrecargaProgreso = 0f;
         activeDrag = ActiveDragControl.None;
         draggingPlug = false;
 
@@ -759,6 +835,7 @@ public sealed class CommsTowerCMEEvent : MonoBehaviour
     private void CompletarApagadoSeguro()
     {
         TransmisorEncendido = false;
+        StaticTransmisorEncendido = false;
         TieneInterferenciaCME = false;
         platoEstacionado = true;
         dishAngleDeg = 90f;
@@ -767,6 +844,7 @@ public sealed class CommsTowerCMEEvent : MonoBehaviour
         rfPowerPercent = 0f;
         tapaSeguridadAbierta = false;
         sobrecargaProgreso = 0f;
+        StaticSobrecargaProgreso = 0f;
         consolaAbierta = false;
 
         if (DONKICMEManager.Instance != null && DONKICMEManager.Instance.HayTormentaCMEActiva)
@@ -781,6 +859,7 @@ public sealed class CommsTowerCMEEvent : MonoBehaviour
     private void CompletarReencendidoSeguro()
     {
         TransmisorEncendido = true;
+        StaticTransmisorEncendido = true;
         TieneInterferenciaCME = DONKICMEManager.Instance != null && DONKICMEManager.Instance.HayTormentaCMEActiva;
         platoEstacionado = false;
         dishAngleDeg = 0f;
@@ -790,6 +869,7 @@ public sealed class CommsTowerCMEEvent : MonoBehaviour
         tapaSeguridadAbierta = false;
         consolaAbierta = false;
         ReparacionesCompletadas++;
+        StaticReparacionesCompletadas = ReparacionesCompletadas;
         reLockFlashUntil = Time.time + 2.2f;
 
         PrepararTarjetaEducativa(false);

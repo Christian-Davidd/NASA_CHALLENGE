@@ -2,18 +2,34 @@ using UnityEngine;
 
 /// <summary>
 /// [PERSONA 2] Cuadrado placeholder para la Zona de Cultivos / Invernadero Marciano.
-/// Permite interactuar con [E] para avanzar las etapas base del cultivo y deja listo
-/// el objeto con su etiqueta para colocar después el asset definitivo.
+/// Permite interactuar con [E] para avanzar las etapas base del cultivo consumiendo
+/// Energía (luces/bombas) y Agua al regar.
 /// </summary>
 [RequireComponent(typeof(MarsWorldPlaceholder2D))]
 public sealed class MarsCropPlot2D : MonoBehaviour
 {
     public static MarsCropPlot2D Instance { get; private set; }
+    public static int TotalHarvestedCrops { get; private set; }
+
+    public static void RegisterInteriorHarvestCycle()
+    {
+        TotalHarvestedCrops++;
+    }
+
+    public static void ResetAllCrops()
+    {
+        TotalHarvestedCrops = 0;
+        if (Instance != null)
+        {
+            Instance.currentStep = 0;
+            Instance.UpdateVisuals();
+        }
+    }
 
     [SerializeField] private string zoneLabel = "[ZONA DE CULTIVOS]";
     private MarsWorldPlaceholder2D placeholder;
     private int currentStep;
-    public int HarvestedCropsCount { get; private set; }
+    public int HarvestedCropsCount => TotalHarvestedCrops;
 
     public string CurrentStatusText
     {
@@ -23,7 +39,7 @@ public sealed class MarsCropPlot2D : MonoBehaviour
             {
                 case 0: return "Suelo listo — [E] Preparar sustrato";
                 case 1: return "Sustrato preparado — [E] Sembrar semillas";
-                case 2: return "Semillas plantadas — [E] Regar cultivo";
+                case 2: return "Semillas plantadas — [E] Regar (usa Agua y ⚡)";
                 default: return "¡Brote maduro! — [E] Cosechar cultivo";
             }
         }
@@ -38,25 +54,59 @@ public sealed class MarsCropPlot2D : MonoBehaviour
 
     public string InteractFromPlayer()
     {
+        float costoEnergia;
+        float costoAgua = 0f;
+        string accion;
+        switch (currentStep)
+        {
+            case 0:
+                costoEnergia = 5f;
+                accion = "oxigenar sustrato";
+                break;
+            case 1:
+                costoEnergia = 5f;
+                accion = "sembrar semillas";
+                break;
+            case 2:
+                costoEnergia = 8f;
+                costoAgua = 12f;
+                accion = "bombear y regar agua al cultivo";
+                break;
+            default:
+                costoEnergia = 6f;
+                accion = "cosechar y procesar cultivo";
+                break;
+        }
+
+        string notaCosto = "";
+        if (DONKIFLRManager.Instance != null)
+        {
+            if (!DONKIFLRManager.Instance.IntentarConsumirRecursosCultivo(costoEnergia, costoAgua, accion, out string msgCosto))
+            {
+                return msgCosto;
+            }
+            notaCosto = " " + msgCosto;
+        }
+
         string msg;
         switch (currentStep)
         {
             case 0:
                 currentStep = 1;
-                msg = "Zona de Cultivos: Sustrato marciano oxigenado. Presiona [E] para sembrar.";
+                msg = $"Zona de Cultivos: Sustrato marciano oxigenado.{notaCosto} Presiona [E] para sembrar.";
                 break;
             case 1:
                 currentStep = 2;
-                msg = "Zona de Cultivos: Semillas plantadas. Presiona [E] para regar.";
+                msg = $"Zona de Cultivos: Semillas plantadas.{notaCosto} Presiona [E] para regar agua.";
                 break;
             case 2:
                 currentStep = 3;
-                msg = "Zona de Cultivos: Cultivo regado y listo para cosechar con [E].";
+                msg = $"Zona de Cultivos: Agua y nutrientes bombeados al cultivo.{notaCosto} Listo para cosechar con [E].";
                 break;
             default:
                 currentStep = 0;
-                HarvestedCropsCount++;
-                msg = $"¡Cultivo cosechado con éxito! Total cosechas: {HarvestedCropsCount}.";
+                TotalHarvestedCrops++;
+                msg = $"¡Cultivo cosechado con éxito! Total cosechas: {TotalHarvestedCrops}.{notaCosto}";
                 break;
         }
 
@@ -77,8 +127,8 @@ public sealed class MarsCropPlot2D : MonoBehaviour
             default: c = new Color(0.45f, 1.00f, 0.30f, 0.96f); break;
         }
 
-        string subtitle = HarvestedCropsCount > 0
-            ? $"{CurrentStatusText} (Cosechados: {HarvestedCropsCount})"
+        string subtitle = TotalHarvestedCrops > 0
+            ? $"{CurrentStatusText} (Cosechados: {TotalHarvestedCrops})"
             : CurrentStatusText;
 
         placeholder.SetVisualState(c, zoneLabel, subtitle);

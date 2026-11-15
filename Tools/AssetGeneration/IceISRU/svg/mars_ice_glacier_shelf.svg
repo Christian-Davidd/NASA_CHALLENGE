@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="820" viewBox="0 0 960 820">
+  <defs>
+  <radialGradient id="soilFade" cx="50%" cy="56%" r="48%">
+    <stop offset="0%" stop-color="#4e2312" stop-opacity="0.72"/>
+    <stop offset="68%" stop-color="#7c3a1d" stop-opacity="0.48"/>
+    <stop offset="100%" stop-color="#9e4d28" stop-opacity="0"/>
+  </radialGradient>
+  <linearGradient id="regolithSlope" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#b45a31"/>
+    <stop offset="55%" stop-color="#873e1e"/>
+    <stop offset="100%" stop-color="#512211"/>
+  </linearGradient>
+  <linearGradient id="pitShadow" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#2e150b"/>
+    <stop offset="100%" stop-color="#4f2514"/>
+  </linearGradient>
+  <linearGradient id="iceTop" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#f4fcff"/>
+    <stop offset="52%" stop-color="#bae6fd"/>
+    <stop offset="100%" stop-color="#60c8fa"/>
+  </linearGradient>
+  <linearGradient id="iceDeep" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#7dd3fc"/>
+    <stop offset="60%" stop-color="#0284c7"/>
+    <stop offset="100%" stop-color="#0c4a6e"/>
+  </linearGradient>
+  <linearGradient id="hullCream" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#faf6ec"/>
+    <stop offset="58%" stop-color="#e4dbc8"/>
+    <stop offset="100%" stop-color="#bfb39c"/>
+  </linearGradient>
+  <linearGradient id="legMetal" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#c6cdd4"/>
+    <stop offset="50%" stop-color="#879099"/>
+    <stop offset="100%" stop-color="#596169"/>
+  </linearGradient>
+  <linearGradient id="goldMli" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#fde047"/>
+    <stop offset="50%" stop-color="#eab308"/>
+    <stop offset="100%" stop-color="#b45309"/>
+  </linearGradient>
+  <linearGradient id="waterTank" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#e0f2fe"/>
+    <stop offset="35%" stop-color="#38bdf8"/>
+    <stop offset="100%" stop-color="#0369a1"/>
+  </linearGradient>
+
+  <linearGradient id="basaltRock" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#8a523b"/>
+    <stop offset="55%" stop-color="#5d3323"/>
+    <stop offset="100%" stop-color="#3c1f14"/>
+  </linearGradient>
+</defs>
+  
+  <!-- Soft terrain gradient onto Martian regolith -->
+  <ellipse cx="480" cy="532" rx="430" ry="204" fill="url(#soilFade)"/>
+
+  <!-- Permafrost ground fractures -->
+  <g fill="none" stroke="#421d0f" stroke-width="5" stroke-linecap="round" opacity="0.55">
+    <path d="M138 488 L76 474 L48 498"/>
+    <path d="M174 584 L112 624 L74 614"/>
+    <path d="M784 484 L848 468 L888 492"/>
+    <path d="M776 588 L838 626 L882 618"/>
+  </g>
+
+  <!-- Eroded Basalt/Regolith Overburden Ridge Behind the Exposed Ice Scarp -->
+  <path d="M134 484 L178 408 L268 358 L410 334 L574 338 L718 370 L802 436 L822 522 L768 594 L646 644 L476 658 L296 640 L182 586 Z"
+        fill="url(#regolithSlope)" stroke="#2a221e" stroke-width="6" stroke-linejoin="round"/>
+
+  <!-- Dark Stratified Basalt Cap Rock Overhanging the Ice Ledge -->
+  <path d="M168 456 L246 378 L382 350 L548 358 L708 386 L786 458 L722 496 L528 476 L322 486 Z"
+        fill="url(#basaltRock)" stroke="#2a221e" stroke-width="6.5" stroke-linejoin="round"/>
+
+  <!-- Exposed Layered Martian Water-Ice Glacier Face (HiRISE terraced strata) -->
+  <path d="M176 508 L234 448 L366 424 L558 428 L732 450 L788 518 L734 588 L590 626 L386 626 L224 588 Z"
+        fill="url(#iceDeep)" stroke="#2a221e" stroke-width="6.5" stroke-linejoin="round"/>
+
+  <!-- Upper Bright Terraced Ice Shelf Facets -->
+  <polygon points="186,512 246,454 372,434 416,494 316,548 228,556" fill="url(#iceTop)" stroke="#075985" stroke-width="3.5" stroke-linejoin="round"/>
+  <polygon points="372,434 548,438 594,498 486,556 416,494" fill="url(#iceTop)" stroke="#075985" stroke-width="3.5" stroke-linejoin="round"/>
+  <polygon points="548,438 718,460 774,518 704,564 594,498" fill="url(#iceTop)" stroke="#075985" stroke-width="3.5" stroke-linejoin="round"/>
+
+  <!-- Stepped Subsurface Ice Shelf Ledges (horizontal stratified layers) -->
+  <polygon points="244,548 342,516 462,534 584,510 694,548 632,598 478,612 318,596" fill="#93e5ff" stroke="#075985" stroke-width="3.5" stroke-linejoin="round"/>
+  <polygon points="292,584 420,564 552,566 648,588 574,616 392,616" fill="#38bdf8" stroke="#075985" stroke-width="3" stroke-linejoin="round" opacity="0.88"/>
+
+  <!-- Crisp ice shelf fracture veins & specular highlights -->
+  <g fill="none" stroke="#f0f9ff" stroke-width="3.5" stroke-linecap="round" opacity="0.9">
+    <path d="M236 494 L322 468 L384 484"/>
+    <path d="M408 468 L486 488 L558 466"/>
+    <path d="M608 478 L678 488 L734 514"/>
+    <path d="M332 544 L452 554 L568 536"/>
+  </g>
+  <!-- Wind-blown red Martian dust bands settled along glacial terraces -->
+  <g fill="#9e4d28" opacity="0.34">
+    <ellipse cx="386" cy="526" rx="46" ry="7"/>
+    <ellipse cx="598" cy="534" rx="44" ry="7"/>
+  </g>
+
+  <!-- Fractured Basalt Clasts & Regolith Stones on Lower Rim -->
+  <g stroke="#2a221e" stroke-width="5.5" stroke-linejoin="round">
+    <polygon points="154,548 212,534 236,576 174,590" fill="url(#basaltRock)"/>
+    <polygon points="734,544 796,530 818,574 756,592" fill="url(#basaltRock)"/>
+    <polygon points="264,606 308,596 324,622 276,630" fill="#8f4523"/>
+    <polygon points="642,608 688,598 702,626 654,634" fill="#8f4523"/>
+  </g>
+
+  <!-- Right Side Heated Vapor Harvester & Pressurized Water Tap -->
+  <g fill="none" stroke-linecap="round">
+    <path d="M558 378 C646 392, 742 436, 788 514 C812 554, 820 598, 774 616" stroke="#2a221e" stroke-width="20"/>
+    <path d="M558 378 C646 392, 742 436, 788 514 C812 554, 820 598, 774 616" stroke="#0284c7" stroke-width="11"/>
+  </g>
+  <rect x="734" y="598" width="54" height="32" rx="8" fill="#d8dee3" stroke="#2a221e" stroke-width="6"/>
+  <rect x="722" y="604" width="16" height="20" rx="4" fill="#38bdf8" stroke="#2a221e" stroke-width="4.5"/>
+  <circle cx="766" cy="614" r="5" fill="#4ade80"/>
+
+  <!-- Compact Solar-Thermal Condenser Rig Mounted on Upper Basalt Shelf -->
+  <g stroke="#2a221e" stroke-width="7.5" stroke-linejoin="round">
+    <polygon points="414,328 346,386 376,396 438,340" fill="url(#legMetal)"/>
+    <polygon points="542,328 610,386 580,396 518,340" fill="url(#legMetal)"/>
+    <rect x="466" y="330" width="24" height="122" rx="6" fill="url(#legMetal)"/>
+    <rect x="458" y="358" width="40" height="20" rx="5" fill="#f97316"/>
+    <rect x="404" y="216" width="148" height="118" rx="22" fill="url(#hullCream)"/>
+    <rect x="404" y="238" width="148" height="22" fill="#b6432e"/>
+    <rect x="422" y="268" width="58" height="54" rx="8" fill="url(#waterTank)" stroke-width="5"/>
+    <line x1="430" y1="292" x2="452" y2="292" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+    <rect x="490" y="268" width="44" height="54" rx="6" fill="url(#goldMli)" stroke-width="5"/>
+    <path d="M428 216 C432 162, 524 162, 528 216 Z" fill="url(#legMetal)"/>
+    <circle cx="478" cy="176" r="14" fill="#38bdf8"/>
+  </g>
+
+</svg>

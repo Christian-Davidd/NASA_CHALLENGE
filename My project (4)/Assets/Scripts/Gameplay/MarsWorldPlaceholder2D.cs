@@ -14,6 +14,7 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
     [SerializeField] private Color squareColor = new Color(0.2f, 0.8f, 0.95f, 0.92f);
     [SerializeField] private Color labelTextColor = Color.white;
     [SerializeField] private float labelHeightOffset = 1.35f;
+    [SerializeField] private bool tintSpriteWithSquareColor = true;
 
     private SpriteRenderer spriteRenderer;
     private static Sprite fallbackSquareSprite;
@@ -43,15 +44,16 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
         EnsureVisuals();
     }
 
-    public void SetVisualState(Color color, string title, string subtitle)
+    public void SetVisualState(Color color, string title, string subtitle, bool tintSprite = true)
     {
         squareColor = color;
         labelTitle = title;
         labelSubtitle = subtitle;
+        tintSpriteWithSquareColor = tintSprite;
         if (spriteRenderer == null)
             spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer != null)
-            spriteRenderer.color = squareColor;
+            spriteRenderer.color = tintSpriteWithSquareColor ? squareColor : Color.white;
     }
 
     private void EnsureVisuals()
@@ -64,7 +66,7 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
             if (spriteRenderer.sprite == null)
                 spriteRenderer.sprite = GetOrCreateFallbackSquareSprite();
 
-            spriteRenderer.color = squareColor;
+            spriteRenderer.color = tintSpriteWithSquareColor ? squareColor : Color.white;
             spriteRenderer.sortingOrder = 12 + Mathf.RoundToInt(-transform.position.y * 3f);
         }
     }
@@ -114,6 +116,7 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
     private void OnGUI()
     {
         if (!Application.isPlaying) return;
+        if (CommsTowerCMEEvent.IsMinigameActive || MarsSpaceshipStation2D.IsMinigameActive || string.IsNullOrEmpty(labelTitle)) return;
 
         var cam = Camera.main;
         if (cam == null) return;

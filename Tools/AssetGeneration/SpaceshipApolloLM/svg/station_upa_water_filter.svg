@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640">
+  <defs>
+  <linearGradient id="kaptonGold" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#fde047"/>
+    <stop offset="45%" stop-color="#f59e0b"/>
+    <stop offset="100%" stop-color="#b45309"/>
+  </linearGradient>
+  <linearGradient id="kaptonDark" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#f59e0b"/>
+    <stop offset="55%" stop-color="#b45309"/>
+    <stop offset="100%" stop-color="#78350f"/>
+  </linearGradient>
+  <linearGradient id="ascentHull" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#faf6ec"/>
+    <stop offset="55%" stop-color="#e3dac7"/>
+    <stop offset="100%" stop-color="#b8ad96"/>
+  </linearGradient>
+  <linearGradient id="inconelDark" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#47515c"/>
+    <stop offset="55%" stop-color="#2e353d"/>
+    <stop offset="100%" stop-color="#1b2026"/>
+  </linearGradient>
+  <linearGradient id="legMetal" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#d4dbe2"/>
+    <stop offset="50%" stop-color="#8b949e"/>
+    <stop offset="100%" stop-color="#555d66"/>
+  </linearGradient>
+  <linearGradient id="windowGlass" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#38bdf8"/>
+    <stop offset="40%" stop-color="#0c4a6e"/>
+    <stop offset="100%" stop-color="#081c2e"/>
+  </linearGradient>
+  <linearGradient id="screenDark" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#071929"/>
+    <stop offset="100%" stop-color="#0f314d"/>
+  </linearGradient>
+</defs>
+  
+  <ellipse cx="320" cy="560" rx="236" ry="52" fill="#1e293b" opacity="0.28"/>
+  <g stroke="#2a221e" stroke-width="8" stroke-linejoin="round">
+    <rect x="92" y="88" width="456" height="468" rx="28" fill="url(#legMetal)"/>
+    <rect x="114" y="112" width="412" height="420" rx="20" fill="url(#ascentHull)"/>
+    <!-- Top Blue H2O Recovery Header -->
+    <rect x="114" y="112" width="412" height="46" rx="14" fill="#2563eb"/>
+  </g>
+  <text x="320" y="142" font-family="Arial,sans-serif" font-weight="900" font-size="21" fill="#ffffff" text-anchor="middle" letter-spacing="1.2">UPA WATER RECOVERY</text>
+
+  <!-- Left Tank: Raw Urine & Cabin Condensate Input (Amber-Gold Sight Glass) -->
+  <g stroke="#2a221e" stroke-width="6.5">
+    <rect x="138" y="184" width="96" height="172" rx="14" fill="#1e293b"/>
+    <rect x="150" y="218" width="72" height="124" rx="8" fill="url(#kaptonGold)"/>
+    <line x1="160" y1="248" x2="188" y2="248" stroke="#fef08a" stroke-width="4" stroke-linecap="round"/>
+    <line x1="160" y1="280" x2="196" y2="280" stroke="#fef08a" stroke-width="4" stroke-linecap="round"/>
+    <line x1="160" y1="312" x2="188" y2="312" stroke="#fef08a" stroke-width="4" stroke-linecap="round"/>
+  </g>
+
+  <!-- Center Rotary Vapor Compression Distillation Centrifuge & Multi-Filtration Beds -->
+  <g stroke="#2a221e" stroke-width="6.5" stroke-linejoin="round">
+    <circle cx="320" cy="270" r="66" fill="#64748b"/>
+    <circle cx="320" cy="270" r="44" fill="#cbd5e1"/>
+    <path d="M290 270 H350 M320 240 V300" stroke="#1e293b" stroke-width="6"/>
+    <circle cx="320" cy="270" r="14" fill="#38bdf8"/>
+    <!-- Dual Ion-Exchange Filter Cartridges below centrifuge -->
+    <rect x="268" y="354" width="44" height="92" rx="8" fill="#94a3b8"/>
+    <rect x="328" y="354" width="44" height="92" rx="8" fill="#94a3b8"/>
+  </g>
+
+  <!-- Right Tank: Distilled Potable H2O Output (Crystal Cyan Sight Glass) -->
+  <g stroke="#2a221e" stroke-width="6.5">
+    <rect x="406" y="184" width="96" height="172" rx="14" fill="#1e293b"/>
+    <rect x="418" y="200" width="72" height="142" rx="8" fill="#38bdf8"/>
+    <line x1="428" y1="234" x2="456" y2="234" stroke="#f0f9ff" stroke-width="4" stroke-linecap="round"/>
+    <line x1="428" y1="268" x2="464" y2="268" stroke="#f0f9ff" stroke-width="4" stroke-linecap="round"/>
+    <line x1="428" y1="302" x2="456" y2="302" stroke="#f0f9ff" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="468" cy="248" r="5" fill="#ffffff"/>
+    <circle cx="458" cy="288" r="4" fill="#ffffff"/>
+  </g>
+
+  <!-- Bottom Potable Water Dispenser Manifold -->
+  <g stroke="#2a221e" stroke-width="6.5">
+    <rect x="148" y="464" width="344" height="48" rx="10" fill="#1e293b"/>
+    <path d="M186 488 H454" stroke="#38bdf8" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="204" cy="488" r="11" fill="#eab308"/>
+    <circle cx="436" cy="488" r="11" fill="#22c55e"/>
+  </g>
+
+</svg>

@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="896" viewBox="0 0 1120 896">
+  <defs>
+  <linearGradient id="hullCream" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#faf6ec"/>
+    <stop offset="58%" stop-color="#e4dbc8"/>
+    <stop offset="100%" stop-color="#bfb39c"/>
+  </linearGradient>
+  <linearGradient id="legMetal" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#b9c0c7"/>
+    <stop offset="50%" stop-color="#838b94"/>
+    <stop offset="100%" stop-color="#585f68"/>
+  </linearGradient>
+  <linearGradient id="wingFrame" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#e6ebef"/>
+    <stop offset="55%" stop-color="#b6bfc8"/>
+    <stop offset="100%" stop-color="#7c848e"/>
+  </linearGradient>
+  <linearGradient id="goldMli" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#fcd34d"/>
+    <stop offset="48%" stop-color="#eab308"/>
+    <stop offset="100%" stop-color="#b45309"/>
+  </linearGradient>
+  <linearGradient id="pvCellMid" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#2c60a3"/>
+    <stop offset="55%" stop-color="#1b3c6c"/>
+    <stop offset="100%" stop-color="#102344"/>
+  </linearGradient>
+  <linearGradient id="pvCellBright" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#3773be"/>
+    <stop offset="55%" stop-color="#214880"/>
+    <stop offset="100%" stop-color="#132b50"/>
+  </linearGradient>
+  <linearGradient id="screenGlow" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#071b2e"/>
+    <stop offset="100%" stop-color="#103657"/>
+  </linearGradient>
+</defs>
+  
+  <!-- Contact shadow on Martian regolith -->
+  <ellipse cx="560" cy="722" rx="340" ry="104" fill="#462b1c" opacity="0.33"/>
+  <ellipse cx="560" cy="712" rx="250" ry="74" fill="#3a2215" opacity="0.22"/>
+
+  <!-- Coiled EVA Suit / Habitat Power Umbilical Cable on left regolith -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M446 668 C372 688, 305 745, 226 732 C178 724, 178 680, 224 676" stroke="#2a221e" stroke-width="20"/>
+    <path d="M446 668 C372 688, 305 745, 226 732 C178 724, 178 680, 224 676" stroke="#363c44" stroke-width="11"/>
+    <path d="M454 684 C382 710, 314 764, 244 756" stroke="#2a221e" stroke-width="16"/>
+    <path d="M454 684 C382 710, 314 764, 244 756" stroke="#b6432e" stroke-width="8"/>
+  </g>
+  <!-- Quick-disconnect charging coupler terminal -->
+  <rect x="206" y="656" width="52" height="32" rx="8" fill="#d8dee3" stroke="#2a221e" stroke-width="6"/>
+  <rect x="192" y="663" width="18" height="18" rx="4" fill="#eab308" stroke="#2a221e" stroke-width="5"/>
+  <circle cx="234" cy="672" r="5" fill="#22c55e"/>
+
+  <!-- Back Lander Legs -->
+  <g stroke="#2a221e" stroke-width="8" stroke-linejoin="round">
+    <polygon points="485,595 390,552 346,612 414,634" fill="url(#legMetal)"/>
+    <ellipse cx="358" cy="622" rx="40" ry="18" fill="#6f7780"/>
+    <ellipse cx="358" cy="616" rx="30" ry="11" fill="#b4bcc4"/>
+
+    <polygon points="635,595 730,552 774,612 706,634" fill="url(#legMetal)"/>
+    <ellipse cx="762" cy="622" rx="40" ry="18" fill="#6f7780"/>
+    <ellipse cx="762" cy="616" rx="30" ry="11" fill="#b4bcc4"/>
+  </g>
+
+  <!-- Central MPPT Power Conditioning & Battery Chassis -->
+  <g stroke="#2a221e" stroke-width="8" stroke-linejoin="round">
+    <!-- Top bevel housing -->
+    <polygon points="452,556 668,556 710,596 410,596" fill="url(#hullCream)"/>
+    <!-- Front face -->
+    <polygon points="410,596 710,596 704,672 416,672" fill="#d8ceba"/>
+    <!-- Left / Right red corner brackets -->
+    <polygon points="412,596 446,596 446,672 416,672" fill="#b6432e"/>
+    <polygon points="674,596 708,596 704,672 674,672" fill="#b6432e"/>
+  </g>
+
+  <!-- Crinkled Gold Kapton MLI Thermal Blanket pocket on right panel -->
+  <g stroke="#2a221e" stroke-width="5" stroke-linejoin="round">
+    <rect x="602" y="606" width="64" height="54" rx="6" fill="url(#goldMli)"/>
+    <path d="M608 614 L632 630 L658 612 M610 648 L636 634 L660 652" fill="none" stroke="#fef08a" stroke-width="2.5" opacity="0.72"/>
+  </g>
+
+  <!-- Telemetry Power Monitor + Status LEDs -->
+  <rect x="462" y="606" width="128" height="54" rx="7" fill="#2c333c" stroke="#2a221e" stroke-width="5"/>
+  <rect x="470" y="613" width="84" height="32" rx="4" fill="url(#screenGlow)" stroke="#16202a" stroke-width="2.5"/>
+  <path d="M476 631 L492 631 L500 621 L510 638 L522 618 L532 629 L548 629" fill="none" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="562" y="614" width="18" height="8" rx="3" fill="#4ade80" stroke="#2a221e" stroke-width="2"/>
+  <rect x="562" y="626" width="18" height="8" rx="3" fill="#facc15" stroke="#2a221e" stroke-width="2"/>
+  <rect x="562" y="638" width="18" height="8" rx="3" fill="#f97316" stroke="#2a221e" stroke-width="2"/>
+  <!-- High voltage decal bar -->
+  <rect x="470" y="649" width="110" height="6" rx="2" fill="#eab308"/>
+
+  <!-- Front Left / Right / Center Anchored Legs + Dust cuffs -->
+  <g stroke="#2a221e" stroke-width="8" stroke-linejoin="round">
+    <!-- Front Left -->
+    <polygon points="444,648 476,668 416,742 374,724" fill="url(#legMetal)"/>
+    <ellipse cx="390" cy="744" rx="52" ry="22" fill="#596068"/>
+    <ellipse cx="390" cy="736" rx="40" ry="15" fill="#b9c2ca"/>
+    <path d="M342 746 Q390 768 438 746 Q418 758 390 758 Q360 758 342 746 Z" fill="#a66d48" stroke="none" opacity="0.88"/>
+
+    <!-- Front Right -->
+    <polygon points="676,648 644,668 704,742 746,724" fill="url(#legMetal)"/>
+    <ellipse cx="730" cy="744" rx="52" ry="22" fill="#596068"/>
+    <ellipse cx="730" cy="736" rx="40" ry="15" fill="#b9c2ca"/>
+    <path d="M682 746 Q730 768 778 746 Q758 758 730 758 Q700 758 682 746 Z" fill="#a66d48" stroke="none" opacity="0.88"/>
+
+    <!-- Front Center Stabilizer Strut -->
+    <polygon points="540,664 580,664 592,756 528,756" fill="url(#legMetal)"/>
+    <ellipse cx="560" cy="762" rx="46" ry="18" fill="#596068"/>
+    <ellipse cx="560" cy="755" rx="34" ry="12" fill="#b9c2ca"/>
+  </g>
+
+  <!-- Central Sun-Tracking Azimuth & Elevation Gimbal Mast -->
+  <g stroke="#2a221e" stroke-width="8" stroke-linejoin="round">
+    <ellipse cx="560" cy="568" rx="74" ry="24" fill="#889098"/>
+    <rect x="524" y="458" width="72" height="106" rx="12" fill="url(#legMetal)"/>
+    <!-- Kapton gold wrap around elevation actuator -->
+    <rect x="530" y="492" width="60" height="44" rx="6" fill="url(#goldMli)"/>
+    <!-- Dual-axis horizontal crossbar boom supporting Left & Right Solar Wings -->
+    <rect x="330" y="394" width="460" height="24" rx="10" fill="#9ca4ac"/>
+    <!-- Central Elevation Motor Drum -->
+    <circle cx="560" cy="406" r="36" fill="#d8dee3"/>
+    <circle cx="560" cy="406" r="18" fill="#4e5660"/>
+    <circle cx="560" cy="406" r="7" fill="#38bdf8"/>
+    <!-- Support yoke struts from mast to wings -->
+    <line x1="528" y1="452" x2="380" y2="412" stroke="#2a221e" stroke-width="14"/>
+    <line x1="528" y1="452" x2="380" y2="412" stroke="#aeb6be" stroke-width="6"/>
+    <line x1="592" y1="452" x2="740" y2="412" stroke="#2a221e" stroke-width="14"/>
+    <line x1="592" y1="452" x2="740" y2="412" stroke="#aeb6be" stroke-width="6"/>
+  </g>
+
+  <!-- Tilted Left & Right Rigid Triple-Junction Solar Array Wings (3/4 sun-tracking angle) -->
+  <polygon points="78,198 520,152 492,434 48,486" fill="url(#wingFrame)" stroke="#2a221e" stroke-width="8" stroke-linejoin="round"/><polygon points="96.1,212.8 498.5,170.6 473.7,419.8 69.7,466.8" fill="#162133" stroke="#2a221e" stroke-width="4" stroke-linejoin="round"/><polygon points="118.0,219.6 182.9,212.7 194.5,221.7 189.0,274.7 175.3,286.4 110.3,293.4 98.8,284.5 104.3,231.2" fill="url(#pvCellBright)" stroke="#0b172a" stroke-width="2"/><line x1="150.2" y1="219.0" x2="143.1" y2="287.0" stroke="#93c5fd" stroke-width="1.8" opacity="0.72"/><line x1="107.2" y1="245.6" x2="188.6" y2="236.9" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><line x1="104.6" y1="270.7" x2="186.0" y2="261.9" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><circle cx="142.8" cy="289.9" r="2.7" fill="#f59e0b" opacity="0.88"/><polygon points="215.3,209.3 280.2,202.5 291.8,211.4 286.4,264.2 272.7,275.8 207.7,282.9 196.1,273.9 201.6,221.0" fill="url(#pvCellBright)" stroke="#0b172a" stroke-width="2"/><line x1="247.4" y1="208.8" x2="240.5" y2="276.5" stroke="#93c5fd" stroke-width="1.8" opacity="0.72"/><line x1="204.5" y1="235.2" x2="285.9" y2="226.5" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><line x1="201.9" y1="260.2" x2="283.3" y2="251.5" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><circle cx="240.2" cy="279.3" r="2.7" fill="#f59e0b" opacity="0.88"/><polygon points="312.5,199.1 377.5,192.3 389.1,201.1 383.8,253.6 370.1,265.2 305.1,272.3 293.5,263.4 298.9,210.7" fill="url(#pvCellBright)" stroke="#0b172a" stroke-width="2"/><line x1="344.7" y1="198.5" x2="337.9" y2="265.9" stroke="#93c5fd" stroke-width="1.8" opacity="0.72"/><line x1="301.8" y1="224.8" x2="383.2" y2="216.2" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><line x1="299.3" y1="249.7" x2="380.7" y2="241.0" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><circle cx="337.6" cy="268.7" r="2.7" fill="#f59e0b" opacity="0.88"/><polygon points="409.8,188.9 474.8,182.0 486.4,190.8 481.2,243.1 467.5,254.6 402.5,261.7 390.9,252.9 396.2,200.4" fill="url(#pvCellBright)" stroke="#0b172a" stroke-width="2"/><line x1="442.0" y1="188.3" x2="435.3" y2="255.3" stroke="#93c5fd" stroke-width="1.8" opacity="0.72"/><line x1="399.1" y1="214.5" x2="480.5" y2="205.8" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><line x1="396.6" y1="239.3" x2="478.1" y2="230.5" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><circle cx="435.0" cy="258.2" r="2.7" fill="#f59e0b" opacity="0.88"/><polygon points="109.6,300.3 174.6,293.3 186.2,302.2 180.8,355.2 167.1,366.9 101.9,374.2 90.4,365.3 95.9,312.1" fill="url(#pvCellBright)" stroke="#0b172a" stroke-width="2"/><line x1="141.8" y1="299.7" x2="134.8" y2="367.7" stroke="#93c5fd" stroke-width="1.8" opacity="0.72"/><line x1="98.8" y1="326.4" x2="180.3" y2="317.4" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><line x1="96.2" y1="351.5" x2="177.7" y2="342.4" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><circle cx="134.5" cy="370.5" r="2.7" fill="#f59e0b" opacity="0.88"/><polygon points="207.0,289.7 272.0,282.6 283.6,291.5 278.3,344.3 264.6,355.9 199.5,363.3 187.9,354.4 193.3,301.4" fill="url(#pvCellBright)" stroke="#0b172a" stroke-width="2"/><line x1="239.2" y1="289.0" x2="232.3" y2="356.7" stroke="#93c5fd" stroke-width="1.8" opacity="0.72"/><line x1="196.2" y1="315.6" x2="277.7" y2="306.7" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><line x1="193.7" y1="340.6" x2="275.2" y2="331.6" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><circle cx="232.0" cy="359.6" r="2.7" fill="#f59e0b" opacity="0.88"/><polygon points="304.4,279.1 369.4,272.0 381.1,280.9 375.8,333.4 362.1,345.0 297.0,352.3 285.4,343.5 290.7,290.7" fill="url(#pvCellBright)" stroke="#0b172a" stroke-width="2"/><line x1="336.6" y1="278.4" x2="329.8" y2="345.8" stroke="#93c5fd" stroke-width="1.8" opacity="0.72"/><line x1="293.7" y1="304.9" x2="375.2" y2="295.9" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><line x1="291.1" y1="329.8" x2="372.7" y2="320.7" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><circle cx="329.5" cy="348.6" r="2.7" fill="#f59e0b" opacity="0.88"/><polygon points="401.8,268.5 466.8,261.4 478.5,270.2 473.3,322.5 459.6,334.0 394.5,341.4 382.9,332.6 388.1,280.1" fill="url(#pvCellBright)" stroke="#0b172a" stroke-width="2"/><line x1="434.0" y1="267.8" x2="427.3" y2="334.9" stroke="#93c5fd" stroke-width="1.8" opacity="0.72"/><line x1="391.1" y1="294.2" x2="472.6" y2="285.2" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><line x1="388.6" y1="319.0" x2="470.1" y2="309.9" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><circle cx="427.0" cy="337.7" r="2.7" fill="#f59e0b" opacity="0.88"/><polygon points="101.2,381.1 166.3,373.8 177.9,382.6 172.5,435.6 158.8,447.4 93.6,455.0 82.0,446.1 87.5,392.9" fill="url(#pvCellBright)" stroke="#0b172a" stroke-width="2"/><line x1="133.5" y1="380.3" x2="126.5" y2="448.3" stroke="#93c5fd" stroke-width="1.8" opacity="0.72"/><line x1="90.4" y1="407.2" x2="172.0" y2="397.9" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><line x1="87.8" y1="432.3" x2="169.4" y2="422.9" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><circle cx="126.2" cy="451.2" r="2.7" fill="#f59e0b" opacity="0.88"/><polygon points="198.8,370.1 263.9,362.8 275.5,371.6 270.1,424.4 256.4,436.1 191.2,443.6 179.6,434.8 185.0,381.8" fill="url(#pvCellBright)" stroke="#0b172a" stroke-width="2"/><line x1="231.0" y1="369.3" x2="224.1" y2="437.0" stroke="#93c5fd" stroke-width="1.8" opacity="0.72"/><line x1="188.0" y1="396.1" x2="269.6" y2="386.8" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><line x1="185.4" y1="421.1" x2="267.0" y2="411.7" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><circle cx="223.8" cy="439.9" r="2.7" fill="#f59e0b" opacity="0.88"/><polygon points="296.3,359.1 361.4,351.8 373.0,360.6 367.7,413.1 354.0,424.8 288.9,432.3 277.2,423.5 282.6,370.8" fill="url(#pvCellBright)" stroke="#0b172a" stroke-width="2"/><line x1="328.6" y1="358.3" x2="321.7" y2="425.7" stroke="#93c5fd" stroke-width="1.8" opacity="0.72"/><line x1="285.5" y1="385.0" x2="367.1" y2="375.7" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><line x1="283.0" y1="409.9" x2="364.6" y2="400.5" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><circle cx="321.4" cy="428.5" r="2.7" fill="#f59e0b" opacity="0.88"/><polygon points="393.8,348.2 458.9,340.8 470.6,349.6 465.4,401.8 451.7,413.4 386.5,421.0 374.8,412.3 380.1,359.8" fill="url(#pvCellBright)" stroke="#0b172a" stroke-width="2"/><line x1="426.1" y1="347.3" x2="419.4" y2="414.4" stroke="#93c5fd" stroke-width="1.8" opacity="0.72"/><line x1="383.1" y1="373.9" x2="464.7" y2="364.6" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><line x1="380.6" y1="398.6" x2="462.2" y2="389.3" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><circle cx="419.1" cy="417.2" r="2.7" fill="#f59e0b" opacity="0.88"/><polygon points="119.8,216.4 261.3,201.5 156.9,450.6 77.0,459.9" fill="#ffffff" opacity="0.11"/><line x1="85.6" y1="461.7" x2="458.5" y2="418.4" stroke="#a66d48" stroke-width="7" stroke-linecap="round" opacity="0.42"/>
+  <polygon points="600,152 1042,198 1072,486 628,434" fill="url(#wingFrame)" stroke="#2a221e" stroke-width="8" stroke-linejoin="round"/><polygon points="621.5,170.6 1023.9,212.8 1050.3,466.8 646.3,419.8" fill="#162133" stroke="#2a221e" stroke-width="4" stroke-linejoin="round"/><polygon points="645.2,182.0 710.2,188.9 723.8,200.4 729.1,252.9 717.5,261.7 652.5,254.6 638.8,243.1 633.6,190.8" fill="url(#pvCellMid)" stroke="#0b172a" stroke-width="2"/><line x1="678.0" y1="188.3" x2="684.7" y2="255.3" stroke="#93c5fd" stroke-width="1.8" opacity="0.72"/><line x1="639.5" y1="205.8" x2="720.9" y2="214.5" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><line x1="641.9" y1="230.5" x2="723.4" y2="239.3" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><circle cx="685.0" cy="258.2" r="2.7" fill="#f59e0b" opacity="0.88"/><polygon points="742.5,192.3 807.5,199.1 821.1,210.7 826.5,263.4 814.9,272.3 749.9,265.2 736.2,253.6 730.9,201.1" fill="url(#pvCellMid)" stroke="#0b172a" stroke-width="2"/><line x1="775.3" y1="198.5" x2="782.1" y2="265.9" stroke="#93c5fd" stroke-width="1.8" opacity="0.72"/><line x1="736.8" y1="216.2" x2="818.2" y2="224.8" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><line x1="739.3" y1="241.0" x2="820.7" y2="249.7" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><circle cx="782.4" cy="268.7" r="2.7" fill="#f59e0b" opacity="0.88"/><polygon points="839.8,202.5 904.7,209.3 918.4,221.0 923.9,273.9 912.3,282.9 847.3,275.8 833.6,264.2 828.2,211.4" fill="url(#pvCellMid)" stroke="#0b172a" stroke-width="2"/><line x1="872.6" y1="208.8" x2="879.5" y2="276.5" stroke="#93c5fd" stroke-width="1.8" opacity="0.72"/><line x1="834.1" y1="226.5" x2="915.5" y2="235.2" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><line x1="836.7" y1="251.5" x2="918.1" y2="260.2" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><circle cx="879.8" cy="279.3" r="2.7" fill="#f59e0b" opacity="0.88"/><polygon points="937.1,212.7 1002.0,219.6 1015.7,231.2 1021.2,284.5 1009.7,293.4 944.7,286.4 931.0,274.7 925.5,221.7" fill="url(#pvCellMid)" stroke="#0b172a" stroke-width="2"/><line x1="969.8" y1="219.0" x2="976.9" y2="287.0" stroke="#93c5fd" stroke-width="1.8" opacity="0.72"/><line x1="931.4" y1="236.9" x2="1012.8" y2="245.6" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><line x1="934.0" y1="261.9" x2="1015.4" y2="270.7" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><circle cx="977.2" cy="289.9" r="2.7" fill="#f59e0b" opacity="0.88"/><polygon points="653.2,261.4 718.2,268.5 731.9,280.1 737.1,332.6 725.5,341.4 660.4,334.0 646.7,322.5 641.5,270.2" fill="url(#pvCellMid)" stroke="#0b172a" stroke-width="2"/><line x1="686.0" y1="267.8" x2="692.7" y2="334.9" stroke="#93c5fd" stroke-width="1.8" opacity="0.72"/><line x1="647.4" y1="285.2" x2="728.9" y2="294.2" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><line x1="649.9" y1="309.9" x2="731.4" y2="319.0" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><circle cx="693.0" cy="337.7" r="2.7" fill="#f59e0b" opacity="0.88"/><polygon points="750.6,272.0 815.6,279.1 829.3,290.7 834.6,343.5 823.0,352.3 757.9,345.0 744.2,333.4 738.9,280.9" fill="url(#pvCellMid)" stroke="#0b172a" stroke-width="2"/><line x1="783.4" y1="278.4" x2="790.2" y2="345.8" stroke="#93c5fd" stroke-width="1.8" opacity="0.72"/><line x1="744.8" y1="295.9" x2="826.3" y2="304.9" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><line x1="747.3" y1="320.7" x2="828.9" y2="329.8" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><circle cx="790.5" cy="348.6" r="2.7" fill="#f59e0b" opacity="0.88"/><polygon points="848.0,282.6 913.0,289.7 926.7,301.4 932.1,354.4 920.5,363.3 855.4,355.9 841.7,344.3 836.4,291.5" fill="url(#pvCellMid)" stroke="#0b172a" stroke-width="2"/><line x1="880.8" y1="289.0" x2="887.7" y2="356.7" stroke="#93c5fd" stroke-width="1.8" opacity="0.72"/><line x1="842.3" y1="306.7" x2="923.8" y2="315.6" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><line x1="844.8" y1="331.6" x2="926.3" y2="340.6" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><circle cx="888.0" cy="359.6" r="2.7" fill="#f59e0b" opacity="0.88"/><polygon points="945.4,293.3 1010.4,300.3 1024.1,312.1 1029.6,365.3 1018.1,374.2 952.9,366.9 939.2,355.2 933.8,302.2" fill="url(#pvCellMid)" stroke="#0b172a" stroke-width="2"/><line x1="978.2" y1="299.7" x2="985.2" y2="367.7" stroke="#93c5fd" stroke-width="1.8" opacity="0.72"/><line x1="939.7" y1="317.4" x2="1021.2" y2="326.4" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><line x1="942.3" y1="342.4" x2="1023.8" y2="351.5" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><circle cx="985.5" cy="370.5" r="2.7" fill="#f59e0b" opacity="0.88"/><polygon points="661.1,340.8 726.2,348.2 739.9,359.8 745.2,412.3 733.5,421.0 668.3,413.4 654.6,401.8 649.4,349.6" fill="url(#pvCellMid)" stroke="#0b172a" stroke-width="2"/><line x1="693.9" y1="347.3" x2="700.6" y2="414.4" stroke="#93c5fd" stroke-width="1.8" opacity="0.72"/><line x1="655.3" y1="364.6" x2="736.9" y2="373.9" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><line x1="657.8" y1="389.3" x2="739.4" y2="398.6" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><circle cx="700.9" cy="417.2" r="2.7" fill="#f59e0b" opacity="0.88"/><polygon points="758.6,351.8 823.7,359.1 837.4,370.8 842.8,423.5 831.1,432.3 766.0,424.8 752.3,413.1 747.0,360.6" fill="url(#pvCellMid)" stroke="#0b172a" stroke-width="2"/><line x1="791.4" y1="358.3" x2="798.3" y2="425.7" stroke="#93c5fd" stroke-width="1.8" opacity="0.72"/><line x1="752.9" y1="375.7" x2="834.5" y2="385.0" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><line x1="755.4" y1="400.5" x2="837.0" y2="409.9" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><circle cx="798.6" cy="428.5" r="2.7" fill="#f59e0b" opacity="0.88"/><polygon points="856.1,362.8 921.2,370.1 935.0,381.8 940.4,434.8 928.8,443.6 863.6,436.1 849.9,424.4 844.5,371.6" fill="url(#pvCellMid)" stroke="#0b172a" stroke-width="2"/><line x1="889.0" y1="369.3" x2="895.9" y2="437.0" stroke="#93c5fd" stroke-width="1.8" opacity="0.72"/><line x1="850.4" y1="386.8" x2="932.0" y2="396.1" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><line x1="853.0" y1="411.7" x2="934.6" y2="421.1" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><circle cx="896.2" cy="439.9" r="2.7" fill="#f59e0b" opacity="0.88"/><polygon points="953.7,373.8 1018.8,381.1 1032.5,392.9 1038.0,446.1 1026.4,455.0 961.2,447.4 947.5,435.6 942.1,382.6" fill="url(#pvCellMid)" stroke="#0b172a" stroke-width="2"/><line x1="986.5" y1="380.3" x2="993.5" y2="448.3" stroke="#93c5fd" stroke-width="1.8" opacity="0.72"/><line x1="948.0" y1="397.9" x2="1029.6" y2="407.2" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><line x1="950.6" y1="422.9" x2="1032.2" y2="432.3" stroke="#e0f2fe" stroke-width="1.1" opacity="0.42"/><circle cx="993.8" cy="451.2" r="2.7" fill="#f59e0b" opacity="0.88"/><polygon points="646.5,179.2 787.9,194.1 732.3,423.8 652.4,414.5" fill="#ffffff" opacity="0.11"/><line x1="661.5" y1="418.4" x2="1034.4" y2="461.7" stroke="#a66d48" stroke-width="7" stroke-linecap="round" opacity="0.42"/>
+
+  <!-- Center Hinge Clamps tying wings to tracking boom & upper strut -->
+  <g stroke="#2a221e" stroke-width="6" stroke-linejoin="round" fill="#cfd6de">
+    <rect x="498" y="348" width="36" height="22" rx="5" transform="rotate(-6 516 359)"/>
+    <rect x="586" y="348" width="36" height="22" rx="5" transform="rotate(6 604 359)"/>
+    <rect x="492" y="394" width="38" height="24" rx="5"/>
+    <rect x="590" y="394" width="38" height="24" rx="5"/>
+  </g>
+
+  <!-- Small Sun-Sensor & Dust Pyranometer on top of center mast -->
+  <g stroke="#2a221e" stroke-width="6">
+    <line x1="560" y1="370" x2="560" y2="296" stroke-width="12" stroke="#889098"/>
+    <line x1="560" y1="370" x2="560" y2="296" stroke-width="18" stroke="#2a221e"/>
+    <line x1="560" y1="370" x2="560" y2="296" stroke-width="9" stroke="#cfd6de"/>
+    <rect x="536" y="264" width="48" height="36" rx="8" fill="url(#hullCream)"/>
+    <circle cx="560" cy="282" r="10" fill="#38bdf8"/>
+  </g>
+
+</svg>

@@ -1,0 +1,232 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1024" viewBox="0 0 1280 1024">
+  <defs>
+  <linearGradient id="kaptonGold" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#fde047"/>
+    <stop offset="45%" stop-color="#f59e0b"/>
+    <stop offset="100%" stop-color="#b45309"/>
+  </linearGradient>
+  <linearGradient id="kaptonDark" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#f59e0b"/>
+    <stop offset="55%" stop-color="#b45309"/>
+    <stop offset="100%" stop-color="#78350f"/>
+  </linearGradient>
+  <linearGradient id="ascentHull" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#faf6ec"/>
+    <stop offset="55%" stop-color="#e3dac7"/>
+    <stop offset="100%" stop-color="#b8ad96"/>
+  </linearGradient>
+  <linearGradient id="inconelDark" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#47515c"/>
+    <stop offset="55%" stop-color="#2e353d"/>
+    <stop offset="100%" stop-color="#1b2026"/>
+  </linearGradient>
+  <linearGradient id="legMetal" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#d4dbe2"/>
+    <stop offset="50%" stop-color="#8b949e"/>
+    <stop offset="100%" stop-color="#555d66"/>
+  </linearGradient>
+  <linearGradient id="windowGlass" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#38bdf8"/>
+    <stop offset="40%" stop-color="#0c4a6e"/>
+    <stop offset="100%" stop-color="#081c2e"/>
+  </linearGradient>
+  <linearGradient id="screenDark" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#071929"/>
+    <stop offset="100%" stop-color="#0f314d"/>
+  </linearGradient>
+</defs>
+  
+  <!-- Ground shadow & descent engine blast scorch ring on Martian regolith -->
+  <ellipse cx="640" cy="836" rx="495" ry="134" fill="#462b1c" opacity="0.35"/>
+  <ellipse cx="640" cy="828" rx="350" ry="92" fill="#2c1910" opacity="0.28"/>
+
+  <!-- Rear-left & Rear-right Outrigger Landing Legs -->
+  <g stroke="#2a221e" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <!-- Rear Left Leg Struts -->
+    <line x1="392" y1="620" x2="212" y2="736" stroke-width="18"/>
+    <line x1="392" y1="620" x2="212" y2="736" stroke="#c09236" stroke-width="9"/>
+    <line x1="358" y1="686" x2="212" y2="736" stroke-width="14"/>
+    <line x1="358" y1="686" x2="212" y2="736" stroke="#8b949e" stroke-width="6"/>
+    <ellipse cx="206" cy="744" rx="58" ry="24" fill="#596068"/>
+    <ellipse cx="206" cy="736" rx="44" ry="16" fill="url(#kaptonGold)"/>
+
+    <!-- Rear Right Leg Struts -->
+    <line x1="888" y1="620" x2="1068" y2="736" stroke-width="18"/>
+    <line x1="888" y1="620" x2="1068" y2="736" stroke="#c09236" stroke-width="9"/>
+    <line x1="922" y1="686" x2="1068" y2="736" stroke-width="14"/>
+    <line x1="922" y1="686" x2="1068" y2="736" stroke="#8b949e" stroke-width="6"/>
+    <ellipse cx="1074" cy="744" rx="58" ry="24" fill="#596068"/>
+    <ellipse cx="1074" cy="736" rx="44" ry="16" fill="url(#kaptonGold)"/>
+  </g>
+
+  <!-- Descent Engine Bell Skirt under Octagonal Descent Stage -->
+  <polygon points="566,734 714,734 746,812 534,812" fill="url(#inconelDark)" stroke="#2a221e" stroke-width="8" stroke-linejoin="round"/>
+  <line x1="552" y1="774" x2="728" y2="774" stroke="#64748b" stroke-width="5"/>
+  <line x1="544" y1="794" x2="736" y2="794" stroke="#64748b" stroke-width="5"/>
+
+  <!-- =================================================================== -->
+  <!-- OCTAGONAL DESCENT STAGE (GOLD KAPTON MLI FOIL + MESA BAY)           -->
+  <!-- =================================================================== -->
+  <g stroke="#2a221e" stroke-width="8" stroke-linejoin="round">
+    <!-- Top octagonal deck -->
+    <polygon points="416,528 864,528 938,578 342,578" fill="#e6c365"/>
+    <!-- Left angled facet (Kapton dark gold) -->
+    <polygon points="342,578 468,578 468,742 352,722" fill="url(#kaptonDark)"/>
+    <!-- Right angled facet (Kapton dark gold) -->
+    <polygon points="812,578 938,578 928,722 812,742" fill="url(#kaptonDark)"/>
+    <!-- Center front octagon face (Bright Kapton Gold Foil) -->
+    <rect x="468" y="578" width="344" height="164" fill="url(#kaptonGold)"/>
+  </g>
+
+  <!-- Crinkled Kapton Foil Facet Lines & MESA Scientific Bay Details -->
+  <g fill="none" stroke="#fef08a" stroke-width="3" opacity="0.68">
+    <path d="M366 602 L448 648 L372 702"/>
+    <path d="M486 596 L568 652 L492 718"/>
+    <path d="M794 596 L712 652 L788 718"/>
+    <path d="M914 602 L832 648 L908 702"/>
+  </g>
+  <!-- Black Inconel heat shields & Silver MESA Equipment Bay Panel -->
+  <rect x="486" y="602" width="82" height="68" rx="6" fill="#d8dee3" stroke="#2a221e" stroke-width="6"/>
+  <rect x="497" y="614" width="60" height="18" rx="3" fill="#b6432e"/>
+  <text x="527" y="654" font-family="Arial,sans-serif" font-weight="900" font-size="14" fill="#1e293b" text-anchor="middle" stroke="none">APOLLO</text>
+  <rect x="706" y="602" width="88" height="68" rx="6" fill="url(#inconelDark)" stroke="#2a221e" stroke-width="6"/>
+  <circle cx="732" cy="636" r="12" fill="#f59e0b" stroke="#2a221e" stroke-width="4"/>
+  <circle cx="766" cy="636" r="12" fill="#38bdf8" stroke="#2a221e" stroke-width="4"/>
+
+  <!-- Front-Left & Front-Right Cantilever Landing Legs (Apollo A-Frame Struts + Footpads) -->
+  <g stroke="#2a221e" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <!-- Front Left Leg -->
+    <line x1="464" y1="588" x2="294" y2="824" stroke-width="22"/>
+    <line x1="464" y1="588" x2="294" y2="824" stroke="url(#kaptonGold)" stroke-width="12"/>
+    <line x1="468" y1="716" x2="326" y2="782" stroke-width="16"/>
+    <line x1="468" y1="716" x2="326" y2="782" stroke="#9ca4ac" stroke-width="7"/>
+    <line x1="392" y1="678" x2="464" y2="716" stroke-width="14"/>
+    <line x1="392" y1="678" x2="464" y2="716" stroke="#9ca4ac" stroke-width="6"/>
+    <!-- Left Circular Footpad + Martian Dust Cuff + Lunar Surface Sensing Probe -->
+    <ellipse cx="288" cy="836" rx="74" ry="28" fill="#47515c"/>
+    <ellipse cx="288" cy="826" rx="58" ry="20" fill="url(#kaptonGold)"/>
+    <path d="M222 840 Q288 868 354 840 Q328 856 288 856 Q248 856 222 840 Z" fill="#a66d48" stroke="none" opacity="0.9"/>
+    <path d="M242 842 L208 874 L182 868" fill="none" stroke="#64748b" stroke-width="5"/>
+
+    <!-- Front Right Leg -->
+    <line x1="816" y1="588" x2="986" y2="824" stroke-width="22"/>
+    <line x1="816" y1="588" x2="986" y2="824" stroke="url(#kaptonGold)" stroke-width="12"/>
+    <line x1="812" y1="716" x2="954" y2="782" stroke-width="16"/>
+    <line x1="812" y1="716" x2="954" y2="782" stroke="#9ca4ac" stroke-width="7"/>
+    <line x1="888" y1="678" x2="816" y2="716" stroke-width="14"/>
+    <line x1="888" y1="678" x2="816" y2="716" stroke="#9ca4ac" stroke-width="6"/>
+    <!-- Right Circular Footpad + Martian Dust Cuff + Surface Probe -->
+    <ellipse cx="992" cy="836" rx="74" ry="28" fill="#47515c"/>
+    <ellipse cx="992" cy="826" rx="58" ry="20" fill="url(#kaptonGold)"/>
+    <path d="M926 840 Q992 868 1058 840 Q1032 856 992 856 Q952 856 926 840 Z" fill="#a66d48" stroke="none" opacity="0.9"/>
+    <path d="M1038 842 L1072 874 L1098 868" fill="none" stroke="#64748b" stroke-width="5"/>
+  </g>
+
+  <!-- =================================================================== -->
+  <!-- ICONIC APOLLO LM FORWARD PORCH & 9-RUNG EVA LADDER (CENTER FRONT)    -->
+  <!-- =================================================================== -->
+  <g stroke="#2a221e" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+    <!-- Forward Porch Platform below EVA Hatch -->
+    <polygon points="576,554 704,554 724,590 556,590" fill="url(#legMetal)"/>
+    <!-- Porch Handrails -->
+    <path d="M566 554 L566 520 L588 520 M714 554 L714 520 L692 520" fill="none" stroke="#d4dbe2" stroke-width="7"/>
+    <!-- Primary Center Strut & 9-Rung Ladder descending to regolith -->
+    <polygon points="596,590 684,590 700,858 580,858" fill="#3a424c"/>
+    <line x1="600" y1="590" x2="586" y2="856" stroke="#d4dbe2" stroke-width="10"/>
+    <line x1="680" y1="590" x2="694" y2="856" stroke="#d4dbe2" stroke-width="10"/>
+    <!-- 9 Horizontal Ladder Rungs -->
+    <line x1="598" y1="616" x2="682" y2="616" stroke="#e2e8f0" stroke-width="6"/>
+    <line x1="596" y1="644" x2="684" y2="644" stroke="#e2e8f0" stroke-width="6"/>
+    <line x1="595" y1="672" x2="685" y2="672" stroke="#e2e8f0" stroke-width="6"/>
+    <line x1="593" y1="700" x2="687" y2="700" stroke="#e2e8f0" stroke-width="6"/>
+    <line x1="592" y1="728" x2="688" y2="728" stroke="#e2e8f0" stroke-width="6"/>
+    <line x1="590" y1="756" x2="690" y2="756" stroke="#e2e8f0" stroke-width="6"/>
+    <line x1="589" y1="784" x2="691" y2="784" stroke="#e2e8f0" stroke-width="6"/>
+    <line x1="587" y1="812" x2="693" y2="812" stroke="#e2e8f0" stroke-width="6"/>
+    <line x1="586" y1="840" x2="694" y2="840" stroke="#e2e8f0" stroke-width="6"/>
+    <!-- Center Forward Footpad under Ladder -->
+    <ellipse cx="640" cy="868" rx="76" ry="26" fill="#47515c"/>
+    <ellipse cx="640" cy="860" rx="60" ry="18" fill="url(#kaptonGold)"/>
+  </g>
+
+  <!-- =================================================================== -->
+  <!-- POLYHEDRAL APOLLO ASCENT STAGE (CREW CABIN, WINDOWS, EVA HATCH, RCS) -->
+  <!-- =================================================================== -->
+  <g stroke="#2a221e" stroke-width="8" stroke-linejoin="round">
+    <!-- Side Equipment Bays (Left & Right bulges of Ascent Stage) -->
+    <polygon points="368,360 448,296 448,524 368,494" fill="url(#inconelDark)"/>
+    <polygon points="912,360 832,296 832,524 912,494" fill="url(#inconelDark)"/>
+
+    <!-- Main Faceted Crew Cabin Pressure Hull -->
+    <polygon points="484,234 796,234 848,318 832,542 448,542 432,318" fill="url(#ascentHull)"/>
+
+    <!-- Upper Dark Inconel / Micrometeoroid Shield Band & Docking Tunnel Crown -->
+    <polygon points="516,192 764,192 796,234 484,234" fill="url(#inconelDark)"/>
+    <ellipse cx="640" cy="192" rx="74" ry="20" fill="#8b949e"/>
+    <ellipse cx="640" cy="190" rx="48" ry="12" fill="#2e353d"/>
+
+    <!-- Black Thermal Plume Deflector Panels under RCS Quads -->
+    <polygon points="444,376 520,392 520,516 448,516" fill="url(#inconelDark)"/>
+    <polygon points="836,376 760,392 760,516 832,516" fill="url(#inconelDark)"/>
+  </g>
+
+  <!-- Iconic Apollo LM Angled Triangular Commander & LMP Landing Windows -->
+  <g stroke="#2a221e" stroke-width="7" stroke-linejoin="round">
+    <!-- Left Triangular Window (Commander) -->
+    <polygon points="476,282 590,308 576,374 462,356" fill="url(#windowGlass)"/>
+    <line x1="494" y1="296" x2="562" y2="314" stroke="#bae6fd" stroke-width="4" stroke-linecap="round" opacity="0.75"/>
+    <!-- Right Triangular Window (Lunar Module Pilot) -->
+    <polygon points="804,282 690,308 704,374 818,356" fill="url(#windowGlass)"/>
+    <line x1="718" y1="314" x2="786" y2="296" stroke="#bae6fd" stroke-width="4" stroke-linecap="round" opacity="0.75"/>
+    <!-- Center Rendezvous Radar & Alignment Optical Sight -->
+    <rect x="614" y="258" width="52" height="54" rx="8" fill="#d4dbe2"/>
+    <circle cx="640" cy="285" r="14" fill="#0f172a" stroke="#38bdf8" stroke-width="3"/>
+  </g>
+
+  <!-- Forward Square EVA Entry Hatch (81x81cm Apollo LM Forward Hatch) -->
+  <g stroke="#2a221e" stroke-width="7" stroke-linejoin="round">
+    <rect x="576" y="396" width="128" height="138" rx="12" fill="#cfd6de"/>
+    <rect x="590" y="410" width="100" height="110" rx="8" fill="#e5e0d3"/>
+    <!-- Hatch Pressure Latch Wheel & Vent Valve -->
+    <circle cx="640" cy="464" r="22" fill="#47515c"/>
+    <circle cx="640" cy="464" r="9" fill="#f59e0b"/>
+    <line x1="618" y1="464" x2="662" y2="464" stroke="#d4dbe2" stroke-width="5"/>
+    <line x1="640" y1="442" x2="640" y2="486" stroke="#d4dbe2" stroke-width="5"/>
+    <!-- Green EVA Ready Beacon above Hatch -->
+    <rect x="616" y="376" width="48" height="14" rx="5" fill="#22c55e" stroke-width="4"/>
+  </g>
+
+  <!-- Left & Right Quad RCS (Reaction Control System) Thruster Pods -->
+  <g stroke="#2a221e" stroke-width="6" stroke-linejoin="round">
+    <!-- Left RCS Quad -->
+    <rect x="342" y="328" width="54" height="58" rx="10" fill="#d4dbe2"/>
+    <polygon points="342,344 312,334 312,358 342,352" fill="#47515c"/>
+    <polygon points="362,328 352,298 378,298 372,328" fill="#47515c"/>
+    <polygon points="362,386 352,416 378,416 372,386" fill="#47515c"/>
+    <circle cx="368" cy="357" r="11" fill="#1e293b"/>
+
+    <!-- Right RCS Quad -->
+    <rect x="884" y="328" width="54" height="58" rx="10" fill="#d4dbe2"/>
+    <polygon points="938,344 968,334 968,358 938,352" fill="#47515c"/>
+    <polygon points="908,328 902,298 928,298 918,328" fill="#47515c"/>
+    <polygon points="908,386 902,416 928,416 918,386" fill="#47515c"/>
+    <circle cx="912" cy="357" r="11" fill="#1e293b"/>
+  </g>
+
+  <!-- Steerable S-Band Parabolic Dish & VHF Scimitar Antennas on Roof -->
+  <g stroke="#2a221e" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <!-- Left Steerable S-Band Dish -->
+    <line x1="528" y1="198" x2="482" y2="136" stroke-width="12"/>
+    <line x1="528" y1="198" x2="482" y2="136" stroke="#c6cdd4" stroke-width="6"/>
+    <ellipse cx="468" cy="124" rx="52" ry="48" fill="#e5e0d3"/>
+    <ellipse cx="468" cy="124" rx="36" ry="32" fill="#9ca4ac"/>
+    <circle cx="468" cy="124" r="10" fill="#f59e0b"/>
+    <!-- Right VHF Omnidirectional Antenna Mast -->
+    <line x1="748" y1="198" x2="778" y2="108" stroke-width="10"/>
+    <line x1="748" y1="198" x2="778" y2="108" stroke="#d4dbe2" stroke-width="5"/>
+    <line x1="746" y1="128" x2="810" y2="112" stroke="#d4dbe2" stroke-width="5"/>
+    <line x1="752" y1="110" x2="804" y2="134" stroke="#d4dbe2" stroke-width="5"/>
+    <circle cx="778" cy="104" r="9" fill="#ef4444"/>
+  </g>
+
+</svg>

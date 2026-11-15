@@ -71,7 +71,15 @@ public sealed class PlasmaCloudOverlayController : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
         Instance = this;
+        if (transform.parent != null)
+            transform.SetParent(null);
+        DontDestroyOnLoad(gameObject);
     }
 
     private void Start()
@@ -81,6 +89,11 @@ public sealed class PlasmaCloudOverlayController : MonoBehaviour
 
     private void Update()
     {
+        bool isExteriorScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Mars_Natural_Landscape_01";
+        if (containerRoot != null && containerRoot.gameObject.activeSelf != isExteriorScene)
+        {
+            containerRoot.gameObject.SetActive(isExteriorScene);
+        }
         var cme = DONKICMEManager.Instance;
         bool tormentaActiva = cme != null && cme.HayTormentaCMEActiva;
 

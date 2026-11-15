@@ -2,41 +2,132 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// [PERSONA 2] Hallazgo científico que puede recoger el astronauta o el rover.
-/// Muestra su etiqueta flotante en el mundo y actualiza el contador global de muestras en el HUD.
+/// [PERSONA 2] Hallazgo científico / Muestra Geológica que puede recoger el astronauta o el rover.
+/// Integra el catálogo NASA (MAHLI/SAM/CheMin + Hallazgos) con el bucle realista EVA:
+/// el astronauta lleva 1 muestra física a la vez (1/1) y vuelve a la Nave para depositarla antes de salir por otra.
 /// </summary>
 [RequireComponent(typeof(MarsWorldPlaceholder2D))]
 public sealed class MarsSampleNode2D : MonoBehaviour
 {
     private static readonly HashSet<MarsSampleNode2D> AllNodes = new HashSet<MarsSampleNode2D>();
-    private static int bonusSamples;
-    private static int mapSampleCount;
-    public static int TotalSamples => mapSampleCount + bonusSamples;
+    private static readonly HashSet<string> KnownMapSampleKeys = new HashSet<string>();
+    private static readonly HashSet<string> PickedNodeKeys = new HashSet<string>();
+    private static readonly HashSet<string> PickedEquipmentKeys = new HashSet<string>();
+    private static readonly HashSet<string> AnalyzedNodeKeys = new HashSet<string>();
+
+    private static int knownMapSamplesTotal = 9;
+    private static int bonusAnalyzedCount;
+
+    public static string HeldSampleKey { get; private set; }
+    public static string HeldSampleLabel { get; private set; }
+    public static string HeldSampleDescription { get; private set; }
+    public static bool HasHeldSample => !string.IsNullOrEmpty(HeldSampleKey);
+
+    public static int TotalSamples => Mathf.Max(knownMapSamplesTotal, KnownMapSampleKeys.Count) + bonusAnalyzedCount;
+    public static int CollectedSamples => AnalyzedNodeKeys.Count + bonusAnalyzedCount;
+
     internal static MarsSampleNode2D LatestDiscovery { get; private set; }
     internal static int DiscoveryVersion { get; private set; }
-    public static int CollectedSamples { get; private set; }
 
     [Header("Datos de la Muestra")]
     [SerializeField] private string sampleLabel = "[MUESTRA GEOLÓGICA #1]";
     [SerializeField] private string sampleDescription = "Muestra de regolito y minerales marcianos.";
-
     [SerializeField] private string discoveryId;
 
     internal MarsDiscovery Discovery { get; private set; }
     internal bool DeliveredByRover { get; private set; }
     public bool IsCollected { get; private set; }
-    public bool IsAvailable => isActiveAndEnabled && !IsCollected && reservedBy == null;
+    public bool IsAvailable =>
+        isActiveAndEnabled &&
+        !IsCollected &&
+        !PickedNodeKeys.Contains(NodeKey) &&
+        !PickedEquipmentKeys.Contains(NodeKey) &&
+        reservedBy == null;
+
     private RobotCompanionFollow2D reservedBy;
     private MarsWorldPlaceholder2D placeholder;
+    private bool lastVisualHeldState;
 
-    public static void AddBonusSample()
+    private string NodeKey => gameObject.name;
+
+    private void Update()
     {
-        bonusSamples++;
-        RecalculateCollectedCount();
+        if (lastVisualHeldState != HasHeldSample)
+        {
+            lastVisualHeldState = HasHeldSample;
+            UpdateVisuals();
+        }
+    }
+
+    public static void ResetAllSampleState()
+    {
+        PickedNodeKeys.Clear();
+        PickedEquipmentKeys.Clear();
+        AnalyzedNodeKeys.Clear();
+        bonusAnalyzedCount = 0;
+        HeldSampleKey = null;
+        HeldSampleLabel = null;
+        HeldSampleDescription = null;
+        LatestDiscovery = null;
+        foreach (var node in AllNodes)
+        {
+            if (node == null) continue;
+            node.IsCollected = false;
+            node.DeliveredByRover = false;
+            node.reservedBy = null;
+            node.UpdateVisuals();
+        }
+    }
+
+    public static bool TryPickupBonusFromRover(string fact, out string message)
+    {
+        if (HasHeldSample)
+        {
+            message = $"Contenedor lleno (1/1): lleva '{HeldSampleLabel}' a la Nave antes de recibir la muestra del rover.";
+            return false;
+        }
+
+        HeldSampleKey = $"ROVER_BONUS_{System.Guid.NewGuid():N}";
+        HeldSampleLabel = "[MUESTRA ROVER EXTRA]";
+        HeldSampleDescription = fact;
+        message = $"¡Recibiste la muestra extra del rover! Vuelve a la Nave para analizarla. {fact}";
+        return true;
+    }
+
+    public static bool TryDeliverHeldSampleToShip(out string message)
+    {
+        if (!HasHeldSample)
+        {
+            message = "No llevas ninguna muestra en tu contenedor EVA. Sal a explorar Marte para recoger una.";
+            return false;
+        }
+
+        if (CommsTowerCMEEvent.HaySobrecargaActivaPorCME)
+        {
+            message = "📡 ¡Interferencia CME! La Antena HGA encendida bloquea el laboratorio de la Nave. Ve a apagar la antena [E] primero.";
+            return false;
+        }
+
+        string label = HeldSampleLabel;
+        if (HeldSampleKey.StartsWith("ROVER_BONUS_"))
+        {
+            bonusAnalyzedCount++;
+        }
+        else
+        {
+            AnalyzedNodeKeys.Add(HeldSampleKey);
+        }
+
+        HeldSampleKey = null;
+        HeldSampleLabel = null;
+        HeldSampleDescription = null;
+
+        message = $"✅ Muestra {label} analizada y guardada en la Nave ({CollectedSamples}/{TotalSamples}). ¡Ya puedes salir por otra!";
+        return true;
     }
 
     public static bool AllMapSamplesCollected =>
-        mapSampleCount > 0 && CollectedSamples - bonusSamples == mapSampleCount;
+        KnownMapSampleKeys.Count > 0 && PickedNodeKeys.Count >= KnownMapSampleKeys.Count;
 
     public static void GetAvailableSamples(UnityEngine.SceneManagement.Scene scene, List<MarsSampleNode2D> results)
     {
@@ -68,6 +159,13 @@ public sealed class MarsSampleNode2D : MonoBehaviour
         message = null;
         if (!isActiveAndEnabled || IsCollected || rover == null || reservedBy != rover) return false;
 
+        bool isEquip = Discovery != null && Discovery.isEquipment;
+        if (!isEquip && HasHeldSample)
+        {
+            message = $"Contenedor lleno (1/1): entrega '{HeldSampleLabel}' en la Nave primero.";
+            return false;
+        }
+
         reservedBy = null;
         message = CollectSample(true);
         return true;
@@ -84,8 +182,21 @@ public sealed class MarsSampleNode2D : MonoBehaviour
 
     private void OnEnable()
     {
+        if (Discovery == null && !string.IsNullOrEmpty(discoveryId))
+            Discovery = MarsDiscovery.Find(discoveryId);
+
         AllNodes.Add(this);
-        RecalculateCollectedCount();
+        bool isEquip = Discovery != null && Discovery.isEquipment;
+        if (!isEquip)
+        {
+            KnownMapSampleKeys.Add(NodeKey);
+            if (KnownMapSampleKeys.Count > knownMapSamplesTotal)
+                knownMapSamplesTotal = KnownMapSampleKeys.Count;
+        }
+
+        if (PickedEquipmentKeys.Contains(NodeKey) || PickedNodeKeys.Contains(NodeKey) || AnalyzedNodeKeys.Contains(NodeKey))
+            IsCollected = true;
+
         UpdateVisuals();
     }
 
@@ -95,48 +206,51 @@ public sealed class MarsSampleNode2D : MonoBehaviour
         AllNodes.Remove(this);
         if (LatestDiscovery == this)
             LatestDiscovery = null;
-        if (AllNodes.Count == 0)
-            bonusSamples = 0;
-        RecalculateCollectedCount();
-    }
-
-    private static void RecalculateCollectedCount()
-    {
-        int count = bonusSamples;
-        mapSampleCount = 0;
-        foreach (var node in AllNodes)
-        {
-            if (node == null || node.Discovery?.isEquipment == true) continue;
-            mapSampleCount++;
-            if (node.IsCollected)
-                count++;
-        }
-        CollectedSamples = count;
     }
 
     public string CollectSample() => CollectSample(false);
 
     private string CollectSample(bool deliveredByRover)
     {
-        if (IsCollected)
-            return $"{sampleLabel}: ya fue recolectada.";
+        bool isEquip = Discovery != null && Discovery.isEquipment;
+
+        if (IsCollected || (isEquip ? PickedEquipmentKeys.Contains(NodeKey) : PickedNodeKeys.Contains(NodeKey)))
+            return $"{(Discovery != null ? Discovery.title : sampleLabel)}: ya fue registrada.";
         if (reservedBy != null)
             return "El rover lleva esta muestra.";
 
+        if (isEquip)
+        {
+            IsCollected = true;
+            DeliveredByRover = deliveredByRover;
+            PickedEquipmentKeys.Add(NodeKey);
+            LatestDiscovery = this;
+            DiscoveryVersion++;
+            UpdateVisuals();
+            return $"Hallazgo registrado: {Discovery.title}.";
+        }
+
+        if (HasHeldSample)
+            return $"Contenedor lleno (1/1): lleva '{HeldSampleLabel}' a la Nave [E] antes de recoger otra muestra.";
+
         IsCollected = true;
         DeliveredByRover = deliveredByRover;
+        PickedNodeKeys.Add(NodeKey);
+        HeldSampleKey = NodeKey;
+        HeldSampleLabel = Discovery != null ? Discovery.title : sampleLabel;
+        HeldSampleDescription = Discovery != null ? $"{Discovery.instrument}: {Discovery.title}" : sampleDescription;
+
         if (Discovery != null)
         {
             LatestDiscovery = this;
             DiscoveryVersion++;
         }
 
-        RecalculateCollectedCount();
         UpdateVisuals();
         if (Discovery != null)
-            return $"Hallazgo registrado: {Discovery.title}.";
+            return $"Muestra '{Discovery.title}' guardada (1/1) — Tras análisis rápido, deposítala en la Nave [E].";
 
-        return $"{sampleLabel} recolectada ({CollectedSamples}/{TotalSamples}) — {sampleDescription}";
+        return $"{sampleLabel} guardada en contenedor (1/1) — Vuelve a la Nave [E] para depositarla. ({sampleDescription})";
     }
 
     private void UpdateVisuals()
@@ -148,31 +262,50 @@ public sealed class MarsSampleNode2D : MonoBehaviour
         if (Discovery != null)
         {
             bool visible = IsAvailable;
-            GetComponent<SpriteRenderer>().enabled = visible;
+            var sr = GetComponent<SpriteRenderer>();
+            if (sr != null) sr.enabled = visible;
             placeholder.enabled = visible;
             if (visible)
-                placeholder.SetVisualState(Color.white, Discovery.title, "Pulsa [E] para recoger");
+            {
+                string sub = (HasHeldSample && !Discovery.isEquipment)
+                    ? "Entrega tu muestra en la Nave (1/1)"
+                    : "Pulsa [E] para recoger";
+                placeholder.SetVisualState(Color.white, Discovery.title, sub);
+            }
             return;
         }
 
-        if (IsCollected)
+        bool analyzed = AnalyzedNodeKeys.Contains(NodeKey);
+        if (analyzed)
+        {
+            placeholder.SetVisualState(CollectedColor, sampleLabel, "Analizada en Nave ✓");
+        }
+        else if (IsCollected || PickedNodeKeys.Contains(NodeKey))
         {
             placeholder.SetVisualState(
                 CollectedColor,
                 sampleLabel,
-                "Recolectada ✓"
+                HeldSampleKey == NodeKey ? "En mano (1/1) → Llévala a la Nave" : "Recogida ✓"
             );
         }
         else if (reservedBy != null)
         {
             placeholder.SetVisualState(CollectedColor, sampleLabel, "Recogida por el rover");
         }
+        else if (HasHeldSample)
+        {
+            placeholder.SetVisualState(
+                new Color(0.85f, 0.56f, 0.20f, 0.90f),
+                sampleLabel,
+                "Entrega tu muestra en la Nave primero"
+            );
+        }
         else
         {
             placeholder.SetVisualState(
                 UncollectedColor,
                 sampleLabel,
-                "Presiona [E] para recoger muestra"
+                "Presiona [E] para recoger muestra (1/1)"
             );
         }
     }

@@ -71,7 +71,10 @@ public sealed class AstronautController2D : MonoBehaviour
             return;
         }
 
-        if (CommsTowerCMEEvent.IsMinigameActive || MarsMissionHUD.IsScienceLabOpen)
+        if (CommsTowerCMEEvent.IsMinigameActive ||
+            MarsMissionHUD.IsScienceLabOpen ||
+            MarsSpaceshipStation2D.IsMinigameActive ||
+            (DONKIFLRManager.Instance != null && DONKIFLRManager.Instance.MisionFallida))
         {
             moveInput = Vector2.zero;
             UpdateSprite();
@@ -95,6 +98,8 @@ public sealed class AstronautController2D : MonoBehaviour
         FindNearbyInteractable();
         if (keyboard.eKey.wasPressedThisFrame)
             Interact();
+        else if (keyboard.eKey.isPressed)
+            HandleHoldInteract();
 
         UpdateSprite();
     }
@@ -106,12 +111,17 @@ public sealed class AstronautController2D : MonoBehaviour
             body.linearVelocity = Vector2.zero;
             return;
         }
-        if (MarsMonitorScreen2D.IsOpen)
+        if (MarsMonitorScreen2D.IsOpen ||
+            MarsSpaceshipStation2D.IsMinigameActive ||
+            (DONKIFLRManager.Instance != null && DONKIFLRManager.Instance.MisionFallida))
         {
             body.linearVelocity = Vector2.zero;
             return;
         }
-        body.linearVelocity = moveInput * moveSpeed;
+        float speedMul = (DONKIFLRManager.Instance != null && DONKIFLRManager.Instance.EscudoSobrecargadoSinControlTermico)
+            ? 0.72f
+            : 1f;
+        body.linearVelocity = moveInput * (moveSpeed * speedMul);
     }
 
     public void SetTransitionLocked(bool locked)
@@ -249,6 +259,18 @@ public sealed class AstronautController2D : MonoBehaviour
 
         foreach (var hit in hits)
         {
+            var shipStation = hit.GetComponent<MarsSpaceshipStation2D>();
+            if (shipStation != null)
+            {
+                statusMessage = shipStation.InteractTapFromPlayer();
+                statusUntil = Time.time + 3.5f;
+                poseUntil = Time.time + interactionPoseDuration;
+                return;
+            }
+        }
+
+        foreach (var hit in hits)
+        {
             var portal = hit.GetComponent<MarsScenePortal2D>();
             if (portal == null) continue;
 
@@ -263,6 +285,30 @@ public sealed class AstronautController2D : MonoBehaviour
             {
                 statusMessage = tower.InteractFromPlayer();
                 statusUntil = Time.time + 3f;
+                poseUntil = Time.time + interactionPoseDuration;
+                return;
+            }
+        }
+
+        foreach (var hit in hits)
+        {
+            var solar = hit.GetComponent<MarsSolarPanelStation2D>();
+            if (solar != null)
+            {
+                statusMessage = solar.InteractHoldFromPlayer(0.14f);
+                statusUntil = Time.time + 2.2f;
+                poseUntil = Time.time + interactionPoseDuration;
+                return;
+            }
+        }
+
+        foreach (var hit in hits)
+        {
+            var ice = hit.GetComponent<MarsIceDepositNode2D>();
+            if (ice != null)
+            {
+                statusMessage = ice.InteractHoldFromPlayer(0.14f);
+                statusUntil = Time.time + 2.2f;
                 poseUntil = Time.time + interactionPoseDuration;
                 return;
             }
@@ -310,6 +356,48 @@ public sealed class AstronautController2D : MonoBehaviour
         poseUntil = Time.time + interactionPoseDuration;
     }
 
+    private void HandleHoldInteract()
+    {
+        float searchRadius = ActiveInteractionRadius;
+        var hits = Physics2D.OverlapCircleAll(transform.position, searchRadius);
+
+        foreach (var hit in hits)
+        {
+            var solar = hit.GetComponent<MarsSolarPanelStation2D>();
+            if (solar != null)
+            {
+                statusMessage = solar.InteractHoldFromPlayer(Time.deltaTime);
+                statusUntil = Time.time + 1.2f;
+                poseUntil = Time.time + 0.15f;
+                return;
+            }
+        }
+
+        foreach (var hit in hits)
+        {
+            var ice = hit.GetComponent<MarsIceDepositNode2D>();
+            if (ice != null)
+            {
+                statusMessage = ice.InteractHoldFromPlayer(Time.deltaTime);
+                statusUntil = Time.time + 1.2f;
+                poseUntil = Time.time + 0.15f;
+                return;
+            }
+        }
+
+        foreach (var hit in hits)
+        {
+            var shipStation = hit.GetComponent<MarsSpaceshipStation2D>();
+            if (shipStation != null && shipStation.SupportsHoldInteraction)
+            {
+                statusMessage = shipStation.InteractHoldFromPlayer(Time.deltaTime);
+                statusUntil = Time.time + 1.2f;
+                poseUntil = Time.time + 0.15f;
+                return;
+            }
+        }
+    }
+
     private void UpdateSprite()
     {
         spriteRenderer.sortingOrder = 10 + Mathf.RoundToInt(-transform.position.y * 3f);
@@ -351,7 +439,7 @@ public sealed class AstronautController2D : MonoBehaviour
 
     private void OnGUI()
     {
-        if (MarsMonitorScreen2D.IsOpen) return;
+        if (MarsMonitorScreen2D.IsOpen || MarsSpaceshipStation2D.IsMinigameActive || CommsTowerCMEEvent.IsMinigameActive || MarsMissionHUD.IsScienceLabOpen) return;
         string message = Time.time < statusUntil
             ? statusMessage
             : nearbyDecontaminationPanel != null

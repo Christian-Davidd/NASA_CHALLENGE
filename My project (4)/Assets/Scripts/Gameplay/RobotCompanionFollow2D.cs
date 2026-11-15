@@ -95,7 +95,9 @@ public sealed class RobotCompanionFollow2D : MonoBehaviour
         if (sampleTrip == SampleTrip.Searching)
             notice = "Voy por una muestra…";
         else if (sampleTrip == SampleTrip.Returning)
-            notice = CanDeliverTo(targetAstronaut) ? "¡Tengo una muestra! Pulsa [E]" : "¡Encontré una muestra!";
+            notice = MarsSampleNode2D.HasHeldSample
+                ? "¡Tengo muestra! Deja la tuya en la Nave"
+                : (CanDeliverTo(targetAstronaut) ? "¡Tengo una muestra! Pulsa [E]" : "¡Encontré una muestra!");
         else
             return;
 
@@ -280,11 +282,12 @@ public sealed class RobotCompanionFollow2D : MonoBehaviour
     {
         message = null;
         if (sampleTrip != SampleTrip.Returning || !CanDeliverTo(astronaut)) return false;
+        if (MarsSampleNode2D.HasHeldSample) return false;
 
         if (carryingBonus)
         {
-            MarsSampleNode2D.AddBonusSample();
-            message = $"Muestra extra del rover ({MarsSampleNode2D.CollectedSamples}/{MarsSampleNode2D.TotalSamples}). {BonusFact}";
+            if (!MarsSampleNode2D.TryPickupBonusFromRover(BonusFact, out message))
+                return false;
         }
         else if (mapSample == null || !mapSample.TryDeliverFromRover(this, out message))
         {

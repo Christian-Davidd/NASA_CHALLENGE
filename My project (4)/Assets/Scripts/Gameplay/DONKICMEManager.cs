@@ -76,6 +76,9 @@ public sealed class DONKICMEManager : MonoBehaviour
             return;
         }
         Instance = this;
+        if (transform.parent != null)
+            transform.SetParent(null);
+        DontDestroyOnLoad(gameObject);
     }
 
     private void Start()
@@ -86,6 +89,9 @@ public sealed class DONKICMEManager : MonoBehaviour
 
     private void Update()
     {
+        if (DONKIFLRManager.Instance != null && DONKIFLRManager.Instance.MisionFallida)
+            return;
+
         var keyboard = Keyboard.current;
         if (keyboard != null && keyboard.tKey.wasPressedThisFrame)
         {
@@ -108,6 +114,16 @@ public sealed class DONKICMEManager : MonoBehaviour
                 DispararNubeDePlasma();
             }
         }
+
+        // La sobrecarga por nube de plasma corre siempre aunque el jugador no abra la consola de la antena
+        CommsTowerCMEEvent.TickStaticOverloadDuringCME(Time.deltaTime);
+    }
+
+    public void ReiniciarEstadoPartida()
+    {
+        HayTormentaCMEActiva = false;
+        TiempoRestanteEvento = 0f;
+        TiempoParaSiguienteCME = primerEventoSegundos;
     }
 
     private IEnumerator FlujoCarga3Niveles()

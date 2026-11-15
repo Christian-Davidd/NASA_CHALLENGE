@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2240" height="1480" viewBox="0 0 2240 1480">
+  <defs>
+  <linearGradient id="kaptonGold" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#fde047"/>
+    <stop offset="45%" stop-color="#f59e0b"/>
+    <stop offset="100%" stop-color="#b45309"/>
+  </linearGradient>
+  <linearGradient id="kaptonDark" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#f59e0b"/>
+    <stop offset="55%" stop-color="#b45309"/>
+    <stop offset="100%" stop-color="#78350f"/>
+  </linearGradient>
+  <linearGradient id="ascentHull" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#faf6ec"/>
+    <stop offset="55%" stop-color="#e3dac7"/>
+    <stop offset="100%" stop-color="#b8ad96"/>
+  </linearGradient>
+  <linearGradient id="inconelDark" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#47515c"/>
+    <stop offset="55%" stop-color="#2e353d"/>
+    <stop offset="100%" stop-color="#1b2026"/>
+  </linearGradient>
+  <linearGradient id="legMetal" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#d4dbe2"/>
+    <stop offset="50%" stop-color="#8b949e"/>
+    <stop offset="100%" stop-color="#555d66"/>
+  </linearGradient>
+  <linearGradient id="windowGlass" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#38bdf8"/>
+    <stop offset="40%" stop-color="#0c4a6e"/>
+    <stop offset="100%" stop-color="#081c2e"/>
+  </linearGradient>
+  <linearGradient id="screenDark" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#071929"/>
+    <stop offset="100%" stop-color="#0f314d"/>
+  </linearGradient>
+
+  <pattern id="isoGrid" width="64" height="64" patternUnits="userSpaceOnUse">
+    <rect width="64" height="64" fill="#cfc9bc"/>
+    <path d="M0 0H64V64" fill="none" stroke="#bab3a4" stroke-width="3"/>
+    <circle cx="32" cy="32" r="4" fill="#9c9587"/>
+  </pattern>
+</defs>
+  
+  <!-- Dark space/Martian exterior backdrop -->
+  <rect width="2240" height="1480" fill="#18202c"/>
+
+  <!-- Outer Gold Kapton MLI Thermal Insulation Blanket around Octagonal Hull -->
+  <polygon points="390,54 1850,54 2176,340 2176,1140 1850,1426 390,1426 64,1140 64,340"
+           fill="url(#kaptonGold)" stroke="#0f172a" stroke-width="18" stroke-linejoin="round"/>
+
+  <!-- Heavy Riveted Aluminum Pressure Hull Frame (Apollo LM Octagonal Cabin) -->
+  <polygon points="416,86 1824,86 2138,362 2138,1118 1824,1394 416,1394 102,1118 102,362"
+           fill="#525a62" stroke="#2a3036" stroke-width="16" stroke-linejoin="round"/>
+
+  <!-- Pressurized Interior Cabin Wall Ring -->
+  <polygon points="444,122 1796,122 2096,386 2096,1094 1796,1358 444,1358 144,1094 144,386"
+           fill="#e4dfd4" stroke="#8c887f" stroke-width="10" stroke-linejoin="round"/>
+
+  <!-- Main Walkable Iso-Grid Cabin Deck -->
+  <polygon points="476,166 1764,166 2046,414 2046,1066 1764,1314 476,1314 194,1066 194,414"
+           fill="url(#isoGrid)" stroke="#948e82" stroke-width="8" stroke-linejoin="round"/>
+
+  <!-- =================================================================== -->
+  <!-- FORWARD BRIDGE (TOP): APOLLO DSKY COMPUTER, FDAI 8-BALL & WINDOWS    -->
+  <!-- =================================================================== -->
+  <g stroke="#2a3036" stroke-width="7" stroke-linejoin="round">
+    <!-- Left & Right Angled Triangular Observation Windows looking out at Mars -->
+    <polygon points="520,126 830,126 790,174 550,174" fill="url(#windowGlass)"/>
+    <polygon points="1410,126 1720,126 1690,174 1450,174" fill="url(#windowGlass)"/>
+
+    <!-- Center Apollo Guidance Computer (AGC / DSKY) & Attitude Console -->
+    <rect x="866" y="108" width="508" height="86" rx="12" fill="#374151"/>
+    <!-- DSKY Green Electroluminescent Numeric Readout -->
+    <rect x="894" y="122" width="142" height="58" rx="6" fill="#062e1e" stroke="#64748b" stroke-width="4"/>
+    <line x1="912" y1="138" x2="1018" y2="138" stroke="#4ade80" stroke-width="6"/>
+    <line x1="912" y1="154" x2="994" y2="154" stroke="#4ade80" stroke-width="6"/>
+    <line x1="912" y1="168" x2="1012" y2="168" stroke="#4ade80" stroke-width="6"/>
+    <!-- FDAI "8-Ball" Attitude Indicator -->
+    <circle cx="1120" cy="151" r="28" fill="#1e293b" stroke="#cbd5e1" stroke-width="5"/>
+    <path d="M1094 151 H1146 M1120 125 V177" stroke="#38bdf8" stroke-width="3"/>
+    <!-- Circuit Breaker Matrix & Abort/Stage Switches -->
+    <rect x="1186" y="122" width="162" height="58" rx="6" fill="#1f2937"/>
+    <circle cx="1214" cy="140" r="7" fill="#ef4444"/>
+    <circle cx="1244" cy="140" r="7" fill="#facc15"/>
+    <circle cx="1274" cy="140" r="7" fill="#22c55e"/>
+    <circle cx="1304" cy="140" r="7" fill="#38bdf8"/>
+    <line x1="1206" y1="164" x2="1328" y2="164" stroke="#94a3b8" stroke-width="6" stroke-dasharray="10 8"/>
+  </g>
+
+  <!-- =================================================================== -->
+  <!-- FOURDEDICATED STATION BAYS & FLOOR CONDUITS (MATCHING SCENE POS)     -->
+  <!-- Stations sit at y=+2.2 (canvas y=465) and x=-5.4, -1.8, +1.8, +5.4   -->
+  <!-- =================================================================== -->
+  <!-- Floor Utility Conduits connecting the 4 bays to the central hub -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- O2 Cyan Line from Bay 1 (x=445,y=465) -->
+    <path d="M445 495 V740 H1120" stroke="#0284c7" stroke-width="14" opacity="0.55"/>
+    <!-- H2O Blue Line from Bay 2 (x=895,y=465) -->
+    <path d="M895 495 V680 H1120" stroke="#2563eb" stroke-width="14" opacity="0.55"/>
+    <!-- Bio/Sample Green Line from Bay 3 (x=1345,y=465) -->
+    <path d="M1345 495 V680 H1120" stroke="#16a34a" stroke-width="14" opacity="0.55"/>
+    <!-- Thermal Orange Line from Bay 4 (x=1795,y=465) -->
+    <path d="M1795 495 V740 H1120" stroke="#ea580c" stroke-width="14" opacity="0.55"/>
+  </g>
+
+  <!-- Recessed Floor Pads for the 4 Apollo-Mars Interior Stations -->
+  <g fill="#bab3a4" stroke="#646a70" stroke-width="6">
+    <rect x="295" y="310" width="300" height="260" rx="22"/>
+    <rect x="745" y="310" width="300" height="260" rx="22"/>
+    <rect x="1195" y="310" width="300" height="260" rx="22"/>
+    <rect x="1645" y="310" width="300" height="260" rx="22"/>
+  </g>
+
+  <!-- Central Apollo Ascent Engine Cover / Telemetry Hub Medallion on Deck -->
+  <g stroke="#525a62" stroke-width="7">
+    <circle cx="1120" cy="740" r="108" fill="#bab3a4"/>
+    <circle cx="1120" cy="740" r="78" fill="#858c94"/>
+    <circle cx="1120" cy="740" r="38" fill="#374151"/>
+    <circle cx="1120" cy="740" r="14" fill="#38bdf8"/>
+  </g>
+
+  <!-- Lower Forward Vestibule & Decon Grate leading to Forward EVA Hatch (y=-3.4 -> canvas y=1165) -->
+  <g stroke="#525a62" stroke-width="7">
+    <rect x="920" y="1020" width="400" height="250" rx="20" fill="#b4ada0"/>
+    <line x1="940" y1="1060" x2="1300" y2="1060" stroke="#eab308" stroke-width="8" stroke-dasharray="22 14"/>
+  </g>
+
+  <!-- NASA Technical Deck Markings -->
+  <g font-family="Arial,sans-serif" font-weight="700" font-size="22" fill="#5e6468" letter-spacing="2" text-anchor="middle">
+    <text x="445" y="285">ECS / MOXIE O2 BAY</text>
+    <text x="895" y="285">UPA WATER RECOVERY</text>
+    <text x="1345" y="285">LUNAR-MARS SAMPLE LAB</text>
+    <text x="1795" y="285">PLSS THERMAL BENCH</text>
+    <text x="1120" y="232" font-size="26" fill="#475569">APOLLO-MARS LANDER — PRESSURIZED CABIN</text>
+    <text x="1120" y="995">FORWARD EVA AIRLOCK VESTIBULE</text>
+  </g>
+
+</svg>
