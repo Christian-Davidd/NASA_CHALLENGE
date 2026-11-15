@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
-/// <summary>Plays the bilingual launch cinematic, then opens the Mars gameplay scene.</summary>
+/// <summary>Plays the Spanish launch cinematic, then opens the Mars gameplay scene. The English clip is retained for later use.</summary>
 [DisallowMultipleComponent]
 public sealed class FirstOnMarsCinematicController : MonoBehaviour
 {
@@ -15,15 +15,13 @@ public sealed class FirstOnMarsCinematicController : MonoBehaviour
     [SerializeField] private VideoClip englishClip;
     [SerializeField] private string gameplayScene = "Mars_Natural_Landscape_01";
 
-    private Button spanishButton;
-    private Button englishButton;
-    private Image spanishButtonImage;
-    private Image englishButtonImage;
     private Text statusText;
+    private RectTransform controlsPanelRect;
+    private int previousScreenWidth = -1;
+    private int previousScreenHeight = -1;
+    private float previousVideoAspect = -1f;
     private bool isLoadingGameplay;
 
-    private static readonly Color PanelColor = new(0.025f, 0.055f, 0.075f, 0.78f);
-    private static readonly Color SelectedColor = new(0.67f, 0.30f, 0.17f, 0.98f);
     private static readonly Color IdleColor = new(0.12f, 0.19f, 0.22f, 0.94f);
 
     private void Start()
@@ -50,12 +48,14 @@ public sealed class FirstOnMarsCinematicController : MonoBehaviour
         videoPlayer.loopPointReached += OnVideoEnded;
         videoPlayer.errorReceived += OnVideoError;
 
-        // Start in Spanish; the language controls can switch to the English clip.
+        // The Spanish clip starts automatically; only the skip control is shown for now.
         PlaySpanish();
     }
 
     private void Update()
     {
+        UpdateLanguageOverlayLayout();
+
         if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
             LoadGameplay();
     }
@@ -87,18 +87,14 @@ public sealed class FirstOnMarsCinematicController : MonoBehaviour
         scaler.matchWidthOrHeight = 0.5f;
 
         var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        var panelObject = new GameObject("Language and Skip", typeof(RectTransform), typeof(Image));
+        var panelObject = new GameObject("Cinematic Skip Button Anchor", typeof(RectTransform));
         var panelRect = panelObject.GetComponent<RectTransform>();
         panelRect.SetParent(canvas.transform, false);
-        panelRect.anchorMin = panelRect.anchorMax = new Vector2(1f, 1f);
-        panelRect.pivot = new Vector2(1f, 1f);
-        panelRect.anchoredPosition = new Vector2(-28f, -28f);
-        panelRect.sizeDelta = new Vector2(500f, 84f);
-        panelObject.GetComponent<Image>().color = PanelColor;
+        controlsPanelRect = panelRect;
+        panelRect.sizeDelta = new Vector2(148f, 60f);
 
-        spanishButton = CreateButton(panelRect, font, "ESPAÑOL", new Vector2(-172f, -42f), 148f, PlaySpanish, out spanishButtonImage);
-        englishButton = CreateButton(panelRect, font, "ENGLISH", new Vector2(-18f, -42f), 148f, PlayEnglish, out englishButtonImage);
-        CreateButton(panelRect, font, "OMITIR / SKIP", new Vector2(165f, -42f), 168f, LoadGameplay, out _);
+        CreateButton(panelRect, font, "OMITIR", Vector2.zero, 148f, LoadGameplay, out _);
+        UpdateLanguageOverlayLayout(true);
 
         var statusObject = new GameObject("Cinematic Status", typeof(RectTransform), typeof(Text));
         var statusRect = statusObject.GetComponent<RectTransform>();
@@ -113,6 +109,45 @@ public sealed class FirstOnMarsCinematicController : MonoBehaviour
         statusText.alignment = TextAnchor.MiddleCenter;
         statusText.color = Color.white;
         statusText.raycastTarget = false;
+    }
+
+    private void UpdateLanguageOverlayLayout(bool force = false)
+    {
+        if (controlsPanelRect == null || Screen.width <= 0 || Screen.height <= 0)
+            return;
+
+        VideoClip referenceClip = videoPlayer != null && videoPlayer.clip != null
+            ? videoPlayer.clip
+            : spanishClip;
+        float videoAspect = referenceClip != null && referenceClip.height > 0
+            ? (float)referenceClip.width / referenceClip.height
+            : 16f / 9f;
+
+        if (!force && previousScreenWidth == Screen.width &&
+            previousScreenHeight == Screen.height &&
+            Mathf.Approximately(previousVideoAspect, videoAspect))
+            return;
+
+        float screenAspect = (float)Screen.width / Screen.height;
+        float contentWidth = Screen.width;
+        float contentHeight = Screen.height;
+        if (screenAspect > videoAspect)
+            contentWidth = Screen.height * videoAspect;
+        else
+            contentHeight = Screen.width / videoAspect;
+
+        float contentRight = (Screen.width + contentWidth) * 0.5f;
+        float contentTop = (Screen.height - contentHeight) * 0.5f;
+        controlsPanelRect.anchorMin = controlsPanelRect.anchorMax = new Vector2(
+            contentRight / Screen.width,
+            1f - contentTop / Screen.height
+        );
+        controlsPanelRect.pivot = Vector2.one;
+        controlsPanelRect.anchoredPosition = new Vector2(-28f, -28f);
+
+        previousScreenWidth = Screen.width;
+        previousScreenHeight = Screen.height;
+        previousVideoAspect = videoAspect;
     }
 
     private Button CreateButton(Transform parent, Font font, string label, Vector2 position, float width, UnityEngine.Events.UnityAction action, out Image image)
@@ -150,13 +185,11 @@ public sealed class FirstOnMarsCinematicController : MonoBehaviour
 
     private void PlaySpanish()
     {
-        SetSelectedLanguage(true);
         Play(spanishClip);
     }
 
     private void PlayEnglish()
     {
-        SetSelectedLanguage(false);
         Play(englishClip);
     }
 
@@ -190,12 +223,6 @@ public sealed class FirstOnMarsCinematicController : MonoBehaviour
         Debug.LogWarning("No se pudo reproducir la cinemática: " + message, this);
         ShowStatus("La cinemática no se pudo reproducir. Abriendo Marte…");
         Invoke(nameof(LoadGameplay), 2f);
-    }
-
-    private void SetSelectedLanguage(bool spanish)
-    {
-        if (spanishButtonImage != null) spanishButtonImage.color = spanish ? SelectedColor : IdleColor;
-        if (englishButtonImage != null) englishButtonImage.color = spanish ? IdleColor : SelectedColor;
     }
 
     private void ShowStatus(string message)
