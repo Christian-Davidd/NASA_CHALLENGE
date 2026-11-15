@@ -30,6 +30,7 @@ public sealed class AstronautController2D : MonoBehaviour
     private Vector2 moveInput;
     private Vector2 facing = Vector2.down;
     private bool lastFacingLeft;
+    private bool transitionLocked;
     private MarsInteractable2D nearbyInteractable;
     private float poseUntil;
     private float nextWalkFrame;
@@ -49,6 +50,12 @@ public sealed class AstronautController2D : MonoBehaviour
 
     private void Update()
     {
+        if (transitionLocked)
+        {
+            moveInput = Vector2.zero;
+            return;
+        }
+
         if (CommsTowerCMEEvent.IsMinigameActive)
         {
             moveInput = Vector2.zero;
@@ -79,7 +86,44 @@ public sealed class AstronautController2D : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (transitionLocked)
+        {
+            body.linearVelocity = Vector2.zero;
+            return;
+        }
         body.linearVelocity = moveInput * moveSpeed;
+    }
+
+    public void SetTransitionLocked(bool locked)
+    {
+        transitionLocked = locked;
+        if (body == null) body = GetComponent<Rigidbody2D>();
+        if (body != null)
+        {
+            body.linearVelocity = Vector2.zero;
+            body.bodyType = locked ? RigidbodyType2D.Kinematic : RigidbodyType2D.Dynamic;
+        }
+    }
+
+    public Sprite GetTransitionWalkSprite(bool movingRight, int frame)
+    {
+        return movingRight
+            ? (frame == 0 ? rightWalkA : rightWalkB)
+            : (frame == 0 ? leftWalkA : leftWalkB);
+    }
+
+    public void FinishTransitionFacing(Vector2 direction)
+    {
+        facing = direction.sqrMagnitude > 0f ? direction.normalized : Vector2.right;
+        if (Mathf.Abs(facing.x) > Mathf.Abs(facing.y))
+        {
+            lastFacingLeft = facing.x < 0f;
+            spriteRenderer.sprite = lastFacingLeft ? leftIdle : rightIdle;
+        }
+        else
+        {
+            spriteRenderer.sprite = facing.y > 0f ? backIdle : frontIdle;
+        }
     }
 
     private static float Axis(bool negative, bool positive)
@@ -118,6 +162,25 @@ public sealed class AstronautController2D : MonoBehaviour
 
         float searchRadius = Mathf.Max(interactionRadius, 2.2f);
         var hits = Physics2D.OverlapCircleAll(transform.position, searchRadius);
+
+        foreach (var hit in hits)
+        {
+            var pressurePanel = hit.GetComponent<MarsPressureDoorPanel2D>();
+            if (pressurePanel == null) continue;
+            statusMessage = pressurePanel.Interact(gameObject);
+            statusUntil = Time.time + 3f;
+            poseUntil = Time.time + interactionPoseDuration;
+            return;
+        }
+
+        foreach (var hit in hits)
+        {
+            var portal = hit.GetComponent<MarsScenePortal2D>();
+            if (portal == null) continue;
+
+            portal.Interact(gameObject);
+            return;
+        }
 
         foreach (var hit in hits)
         {
@@ -166,11 +229,7 @@ public sealed class AstronautController2D : MonoBehaviour
         }
 
         if (nearbyInteractable == null)
-        {
-            statusMessage = "Acércate a la Torre, Cultivos o una Muestra y presiona [E].";
-            statusUntil = Time.time + 2f;
             return;
-        }
 
         statusMessage = nearbyInteractable.Interact();
         statusUntil = Time.time + 3f;
