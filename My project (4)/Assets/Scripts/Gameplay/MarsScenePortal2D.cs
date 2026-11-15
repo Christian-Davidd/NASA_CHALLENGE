@@ -29,6 +29,8 @@ public sealed class MarsScenePortal2D : MonoBehaviour
     {
         if (player == null || string.IsNullOrWhiteSpace(destinationScene))
             return "La compuerta no está disponible.";
+        if (awaitingSceneChange)
+            return "La transición entre el exterior y el módulo ya está en curso.";
 
         if (returnToExterior)
         {
@@ -45,9 +47,6 @@ public sealed class MarsScenePortal2D : MonoBehaviour
         pendingSpawnObjectName = spawnObjectName;
         DontDestroyOnLoad(player);
 
-        if (awaitingSceneChange)
-            SceneManager.sceneLoaded -= OnSceneLoaded;
-
         awaitingSceneChange = true;
         SceneManager.sceneLoaded += OnSceneLoaded;
         SceneManager.LoadScene(destinationScene, LoadSceneMode.Single);
@@ -62,6 +61,8 @@ public sealed class MarsScenePortal2D : MonoBehaviour
         awaitingSceneChange = false;
 
         if (travelingPlayer == null) return;
+
+        RemoveDuplicateAstronauts(travelingPlayer);
 
         if (scene.name == "Mars_Natural_Landscape_01" && hasExteriorReturnPosition)
         {
@@ -85,6 +86,16 @@ public sealed class MarsScenePortal2D : MonoBehaviour
         {
             var airlock = Object.FindFirstObjectByType<MarsAirlockCycle2D>();
             if (airlock != null) airlock.BeginEntry(travelingPlayer);
+        }
+    }
+
+    private static void RemoveDuplicateAstronauts(GameObject keep)
+    {
+        var astronauts = Object.FindObjectsByType<AstronautController2D>(FindObjectsSortMode.None);
+        foreach (var astronaut in astronauts)
+        {
+            if (astronaut != null && astronaut.gameObject != keep)
+                Object.Destroy(astronaut.gameObject);
         }
     }
 }

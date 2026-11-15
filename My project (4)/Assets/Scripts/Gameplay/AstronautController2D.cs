@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(SpriteRenderer))]
 public sealed class AstronautController2D : MonoBehaviour
@@ -25,6 +26,10 @@ public sealed class AstronautController2D : MonoBehaviour
     [SerializeField, Min(0.1f)] private float interactionRadius = 1.6f;
     [SerializeField, Min(0.1f)] private float interactionPoseDuration = 0.7f;
 
+    private float ActiveInteractionRadius => SceneManager.GetActiveScene().name == "Cultivation_Module_Interior"
+        ? 0.9f
+        : Mathf.Max(interactionRadius, 2.2f);
+
     private Rigidbody2D body;
     private SpriteRenderer spriteRenderer;
     private Vector2 moveInput;
@@ -32,6 +37,9 @@ public sealed class AstronautController2D : MonoBehaviour
     private bool lastFacingLeft;
     private bool transitionLocked;
     private MarsInteractable2D nearbyInteractable;
+    private MarsPressureDoorPanel2D nearbyPressurePanel;
+    private MarsDecontaminationPanel2D nearbyDecontaminationPanel;
+    private MarsCropLifecycle2D nearbyCropBank;
     private float poseUntil;
     private float nextWalkFrame;
     private int walkFrame;
@@ -53,6 +61,13 @@ public sealed class AstronautController2D : MonoBehaviour
         if (transitionLocked)
         {
             moveInput = Vector2.zero;
+            return;
+        }
+
+        if (MarsMonitorScreen2D.IsOpen)
+        {
+            moveInput = Vector2.zero;
+            UpdateSprite();
             return;
         }
 
@@ -87,6 +102,11 @@ public sealed class AstronautController2D : MonoBehaviour
     private void FixedUpdate()
     {
         if (transitionLocked)
+        {
+            body.linearVelocity = Vector2.zero;
+            return;
+        }
+        if (MarsMonitorScreen2D.IsOpen)
         {
             body.linearVelocity = Vector2.zero;
             return;
@@ -134,16 +154,55 @@ public sealed class AstronautController2D : MonoBehaviour
     private void FindNearbyInteractable()
     {
         nearbyInteractable = null;
-        var hits = Physics2D.OverlapCircleAll(transform.position, interactionRadius);
+        nearbyPressurePanel = null;
+        nearbyDecontaminationPanel = null;
+        nearbyCropBank = null;
+        var hits = Physics2D.OverlapCircleAll(transform.position, ActiveInteractionRadius);
         float bestDistance = float.MaxValue;
+        float bestPressureDistance = float.MaxValue;
+        float bestDecontaminationDistance = float.MaxValue;
+        float bestCropDistance = float.MaxValue;
         foreach (var hit in hits)
         {
+            var decontaminationPanel = hit.GetComponent<MarsDecontaminationPanel2D>();
+            if (decontaminationPanel != null && !decontaminationPanel.IsComplete)
+            {
+                float decontaminationDistance = Vector2.Distance(transform.position, hit.ClosestPoint(transform.position));
+                if (decontaminationDistance < bestDecontaminationDistance)
+                {
+                    bestDecontaminationDistance = decontaminationDistance;
+                    nearbyDecontaminationPanel = decontaminationPanel;
+                }
+            }
+
+            var pressurePanel = hit.GetComponent<MarsPressureDoorPanel2D>();
+            if (pressurePanel != null)
+            {
+                float pressureDistance = Vector2.Distance(transform.position, hit.ClosestPoint(transform.position));
+                if (pressureDistance < bestPressureDistance)
+                {
+                    bestPressureDistance = pressureDistance;
+                    nearbyPressurePanel = pressurePanel;
+                }
+            }
+
+            var cropBank = hit.GetComponent<MarsCropLifecycle2D>();
+            if (cropBank != null)
+            {
+                float cropDistance = Vector2.Distance(transform.position, hit.ClosestPoint(transform.position));
+                if (cropDistance < bestCropDistance)
+                {
+                    bestCropDistance = cropDistance;
+                    nearbyCropBank = cropBank;
+                }
+            }
+
             var candidate = hit.GetComponent<MarsInteractable2D>();
             if (candidate == null || candidate.IsComplete) continue;
-            float distance = Vector2.Distance(transform.position, hit.ClosestPoint(transform.position));
-            if (distance < bestDistance)
+            float candidateDistance = Vector2.Distance(transform.position, hit.ClosestPoint(transform.position));
+            if (candidateDistance < bestDistance)
             {
-                bestDistance = distance;
+                bestDistance = candidateDistance;
                 nearbyInteractable = candidate;
             }
         }
@@ -151,6 +210,31 @@ public sealed class AstronautController2D : MonoBehaviour
 
     private void Interact()
     {
+        if (nearbyDecontaminationPanel != null)
+        {
+            statusMessage = nearbyDecontaminationPanel.Interact();
+            statusUntil = Time.time + 4f;
+            poseUntil = Time.time + interactionPoseDuration;
+            return;
+        }
+
+        if (nearbyPressurePanel != null)
+        {
+            statusMessage = nearbyPressurePanel.Interact(gameObject);
+            statusUntil = Time.time + 4f;
+            poseUntil = Time.time + interactionPoseDuration;
+            return;
+        }
+
+        if (nearbyCropBank != null)
+        {
+            MarsMonitorScreen2D.OpenCrop(nearbyCropBank);
+            statusMessage = $"Inspección de {nearbyCropBank.CropName}: etapa {nearbyCropBank.StageLabel}.";
+            statusUntil = Time.time + 4f;
+            poseUntil = Time.time + interactionPoseDuration;
+            return;
+        }
+
         var rover = FindFirstObjectByType<RobotCompanionFollow2D>();
         if (rover != null && rover.TryDeliverSample(transform, out string roverMessage))
         {
@@ -160,18 +244,8 @@ public sealed class AstronautController2D : MonoBehaviour
             return;
         }
 
-        float searchRadius = Mathf.Max(interactionRadius, 2.2f);
+        float searchRadius = ActiveInteractionRadius;
         var hits = Physics2D.OverlapCircleAll(transform.position, searchRadius);
-
-        foreach (var hit in hits)
-        {
-            var pressurePanel = hit.GetComponent<MarsPressureDoorPanel2D>();
-            if (pressurePanel == null) continue;
-            statusMessage = pressurePanel.Interact(gameObject);
-            statusUntil = Time.time + 3f;
-            poseUntil = Time.time + interactionPoseDuration;
-            return;
-        }
 
         foreach (var hit in hits)
         {
@@ -232,7 +306,7 @@ public sealed class AstronautController2D : MonoBehaviour
             return;
 
         statusMessage = nearbyInteractable.Interact();
-        statusUntil = Time.time + 3f;
+        statusUntil = Time.time + 6f;
         poseUntil = Time.time + interactionPoseDuration;
     }
 
@@ -277,7 +351,17 @@ public sealed class AstronautController2D : MonoBehaviour
 
     private void OnGUI()
     {
-        if (Time.time >= statusUntil) return;
+        if (MarsMonitorScreen2D.IsOpen) return;
+        string message = Time.time < statusUntil
+            ? statusMessage
+            : nearbyDecontaminationPanel != null
+                ? nearbyDecontaminationPanel.InteractionPrompt
+                : nearbyPressurePanel != null
+                ? nearbyPressurePanel.InteractionPrompt
+                : nearbyCropBank != null
+                    ? nearbyCropBank.InteractionPrompt
+                    : nearbyInteractable != null ? nearbyInteractable.InteractionPrompt : null;
+        if (string.IsNullOrEmpty(message)) return;
 
         if (hudStyle == null)
         {
@@ -291,7 +375,7 @@ public sealed class AstronautController2D : MonoBehaviour
         }
 
         GUI.Box(new Rect(18, Screen.height - 82, Mathf.Min(700, Screen.width - 36), 60),
-            statusMessage, hudStyle);
+            message, hudStyle);
     }
 
     private void OnDrawGizmosSelected()

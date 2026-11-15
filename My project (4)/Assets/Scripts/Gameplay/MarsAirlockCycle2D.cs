@@ -19,7 +19,9 @@ public sealed class MarsAirlockCycle2D : MonoBehaviour
 
     private void Start()
     {
-        var astronaut = GameObject.FindGameObjectWithTag("Player");
+        // Reuse the astronaut brought through the scene portal even if its prefab tag differs.
+        var controller = Object.FindFirstObjectByType<AstronautController2D>();
+        var astronaut = controller != null ? controller.gameObject : GameObject.FindGameObjectWithTag("Player");
         if (astronaut == null && fallbackAstronautPrefab != null)
         {
             MarsScenePortal2D.SetDefaultExteriorReturnPosition(new Vector3(3.8f, -4.2f, 0f));

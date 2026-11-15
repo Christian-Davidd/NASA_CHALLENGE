@@ -157,8 +157,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   m_RenderShadows: 1
   m_RequiresDepthTextureOption: 2
   m_RequiresOpaqueTextureOption: 2
@@ -284,8 +284,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 073797afb82c5a1438f328866b10b3f0, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   m_ComponentVersion: 3
   m_LightType: 4
   m_BlendStyleIndex: 0
@@ -351,8 +351,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aa245e742f8a45a8a3bd36f30dd4f8a6, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   target: {fileID: 910000338}
   damping: 6
   mapSize: {x: 108, y: 72}
@@ -1853,8 +1853,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 61b6d4e3f6df4c69ad08a27749d1d83f, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   displayName: Estratos del macizo
   result: "Capas sedimentarias y bloques angulosos expuestos. Muestra geol\xF3gica
     registrada."
@@ -2008,8 +2008,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 61b6d4e3f6df4c69ad08a27749d1d83f, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   displayName: Escarpe escalonado
   result: "Frente de erosi\xF3n con terrazas rocosas. Muestra geol\xF3gica registrada."
   repeatable: 0
@@ -2576,8 +2576,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 61b6d4e3f6df4c69ad08a27749d1d83f, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   displayName: "Dep\xF3sito de bloques"
   result: "Acumulaci\xF3n de rocas al pie de un escarpe. Muestra geol\xF3gica registrada."
   repeatable: 0
@@ -3844,7 +3844,7 @@ Transform:
   m_GameObject: {fileID: 910000113}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0.782608, w: -0.622515}
-  m_LocalPosition: {x: 7.290452, y: -2.842279, z: 0}
+  m_LocalPosition: {x: 8.73, y: -2.48, z: 0}
   m_LocalScale: {x: 1.386706, y: 1.455111, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -11722,8 +11722,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8a463eda0f7a4f20ac86f9dcc2d85cc3, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   frontIdle: {fileID: 21300000, guid: 69646dcbac6144749301d4e50cdb48ac, type: 3}
   backIdle: {fileID: 21300000, guid: 59668b21cd264012b1a597c24cc3ee77, type: 3}
   leftIdle: {fileID: 21300000, guid: ce845a7f549b44b9aa062bd4ed75f304, type: 3}
@@ -12132,8 +12132,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000002, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   apiKey: DEMO_KEY
   githubRawJsonUrl: https://raw.githubusercontent.com/Christian-Davidd/NASA_CHALLENGE/main/nasa-data/cme_semana.json
   cacheVigenciaHoras: 6
@@ -12149,8 +12149,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000007, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &910000414
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12161,8 +12161,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000008, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   foregroundBandSprite: {fileID: 21300000, guid: d2000000000040008000000000000004, type: 3}
   cloudLargeSprite: {fileID: 21300000, guid: d2000000000040008000000000000005, type: 3}
   cloudMediumSprite: {fileID: 21300000, guid: d2000000000040008000000000000006, type: 3}
@@ -12329,8 +12329,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000003, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   baseRenderer: {fileID: 910000422}
   anemometerRotor: {fileID: 910000521}
   dishPivot: {fileID: 910000531}
@@ -12374,7 +12374,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 910000444, guid: e1dd1dbe0ab741aa8ddd48ef091461e4, type: 3}
       propertyPath: targetAstronaut
-      value:
+      value: 
       objectReference: {fileID: 910000338}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -12568,8 +12568,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000001, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   labelTitle: '[MUESTRA #1 - Cuenca Central]'
   labelSubtitle: Presiona [E] para recoger muestra
   squareColor: {r: 1, g: 0.78, b: 0.18, a: 0.94}
@@ -12585,8 +12585,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000005, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   sampleLabel: '[MUESTRA #1 - Cuenca Central]'
   sampleDescription: Regolito ferruginoso de la cuenca central marciana.
 --- !u!1 &910000470
@@ -12739,8 +12739,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000001, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   labelTitle: '[MUESTRA #2 - Explanada Este]'
   labelSubtitle: Presiona [E] para recoger muestra
   squareColor: {r: 1, g: 0.78, b: 0.18, a: 0.94}
@@ -12756,8 +12756,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000005, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   sampleLabel: '[MUESTRA #2 - Explanada Este]'
   sampleDescription: Sedimento compactado de la llanura oriental.
 --- !u!1 &910000480
@@ -12910,8 +12910,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000001, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   labelTitle: "[MUESTRA #3 - Canal de Erosi\xF3n]"
   labelSubtitle: Presiona [E] para recoger muestra
   squareColor: {r: 1, g: 0.78, b: 0.18, a: 0.94}
@@ -12927,8 +12927,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000005, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   sampleLabel: "[MUESTRA #3 - Canal de Erosi\xF3n]"
   sampleDescription: Arcilla hidratada de un antiguo cauce seco.
 --- !u!1 &910000490
@@ -13081,8 +13081,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000001, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   labelTitle: '[MUESTRA #4 - Terraza Suroeste]'
   labelSubtitle: Presiona [E] para recoger muestra
   squareColor: {r: 1, g: 0.78, b: 0.18, a: 0.94}
@@ -13098,8 +13098,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000005, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   sampleLabel: '[MUESTRA #4 - Terraza Suroeste]'
   sampleDescription: Fragmento estratificado de la meseta suroeste.
 --- !u!1 &910000500
@@ -13252,8 +13252,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000001, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   labelTitle: '[MUESTRA #5 - Escarpe Norte]'
   labelSubtitle: Presiona [E] para recoger muestra
   squareColor: {r: 1, g: 0.78, b: 0.18, a: 0.94}
@@ -13269,8 +13269,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000005, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   sampleLabel: '[MUESTRA #5 - Escarpe Norte]'
   sampleDescription: "Roca bas\xE1ltica antigua al pie del escarpe norte."
 --- !u!1 &910000510
@@ -13423,8 +13423,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000001, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   labelTitle: '[MUESTRA #6 - Dunas Noreste]'
   labelSubtitle: Presiona [E] para recoger muestra
   squareColor: {r: 1, g: 0.78, b: 0.18, a: 0.94}
@@ -13440,8 +13440,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000005, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   sampleLabel: '[MUESTRA #6 - Dunas Noreste]'
   sampleDescription: "Arena e\xF3lica del campo de dunas noreste."
 --- !u!1 &910000520
@@ -14161,6 +14161,14 @@ PrefabInstance:
     - target: {fileID: 71497298313079188, guid: 62b4413ee75d009458388edf51355f76, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2808923659772735162, guid: 62b4413ee75d009458388edf51355f76, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 4.69
+      objectReference: {fileID: 0}
+    - target: {fileID: 2808923659772735162, guid: 62b4413ee75d009458388edf51355f76, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.99
       objectReference: {fileID: 0}
     - target: {fileID: 6895984669656512259, guid: 62b4413ee75d009458388edf51355f76, type: 3}
       propertyPath: m_Name
