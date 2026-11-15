@@ -23,7 +23,6 @@ public sealed class MarsMissionHUD : MonoBehaviour
     private GUIStyle heldSampleStyle;
     private GUIStyle gameOverTitleStyle;
     private GUIStyle gameOverBodyStyle;
-    private GUIStyle retryBtnStyle;
     private GUIStyle discoveryTitleStyle;
     private GUIStyle discoveryTextStyle;
 
@@ -280,16 +279,12 @@ public sealed class MarsMissionHUD : MonoBehaviour
         bool enModoSeguro,
         float topY)
     {
-        Color prev = GUI.color;
         float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * 4.2f);
         var plasma = PlasmaCloudOverlayController.Instance;
 
         float bannerW = Mathf.Min(680f, Screen.width - 720f);
         if (bannerW < 420f) bannerW = 460f;
         Rect bannerRect = new Rect((Screen.width - bannerW) * 0.5f, topY, bannerW, 64f);
-
-        GUI.color = new Color(0.10f, 0.06f, 0.16f, 0.94f);
-        GUI.DrawTexture(bannerRect, solidTex);
 
         Color barColor;
         string linea1;
@@ -302,28 +297,25 @@ public sealed class MarsMissionHUD : MonoBehaviour
         if (hayInterferencia)
         {
             barColor = Color.Lerp(new Color(1f, 0.25f, 0.55f, 1f), new Color(0.3f, 0.9f, 1f, 1f), pulse);
-            alertBannerStyle.normal.textColor = new Color(1f, 0.55f, 0.85f, 1f);
             linea1 = $"⚡ ALERTA CME ({vel:F0} km/s | Sobrecarga {cargaPct}% | Nube {cobPct}%) — ¡DRENANDO ENERGÍA!";
             linea2 = $"La antena activa daña la red y bloquea el Lab. Ve a la Torre HGA y apágala [E] ({rest:F0}s)";
         }
         else if (hayCME && enModoSeguro)
         {
             barColor = new Color(1f, 0.78f, 0.25f, 1f);
-            alertBannerStyle.normal.textColor = new Color(1f, 0.86f, 0.40f, 1f);
             linea1 = $"🛡️ TORMENTA CME ({vel:F0} km/s) — ANTENA PROTEGIDA EN MODO SEGURO";
             linea2 = $"El transmisor está a salvo y sin cortocircuitos. Espera {rest:F0}s para reencender";
         }
         else
         {
             barColor = new Color(0.28f, 0.95f, 0.58f, 1f);
-            alertBannerStyle.normal.textColor = new Color(0.45f, 1f, 0.72f, 1f);
             linea1 = "☀️ CIELO DESPEJADO — TRANSMISOR LISTO PARA REENCENDER";
             linea2 = "Ve a la Antena HGA y presiona [E] para encenderlo paso a paso";
         }
 
-        GUI.color = barColor;
-        GUI.DrawTexture(new Rect(bannerRect.x, bannerRect.y, bannerRect.width, 4f), solidTex);
-        GUI.color = prev;
+        alertBannerStyle.normal.textColor = Color.Lerp(barColor, new Color(0.16f, 0.19f, 0.23f, 1f), 0.62f);
+        alertSubStyle.normal.textColor = new Color(0.30f, 0.34f, 0.37f, 1f);
+        MarsMissionUIArt.DrawCard(bannerRect, barColor, pulse);
 
         GUI.Label(new Rect(bannerRect.x + 12f, bannerRect.y + 8f, bannerRect.width - 24f, 24f), linea1, alertBannerStyle);
         GUI.Label(new Rect(bannerRect.x + 12f, bannerRect.y + 34f, bannerRect.width - 24f, 22f), linea2, alertSubStyle);
@@ -331,15 +323,11 @@ public sealed class MarsMissionHUD : MonoBehaviour
 
     private void DibujarBannerTormentaFLR(DONKIFLRManager flr, float topY)
     {
-        Color prev = GUI.color;
         float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * 5.2f);
 
         float bannerW = Mathf.Min(680f, Screen.width - 720f);
         if (bannerW < 420f) bannerW = 460f;
         Rect bannerRect = new Rect((Screen.width - bannerW) * 0.5f, topY, bannerW, 64f);
-
-        GUI.color = new Color(0.16f, 0.09f, 0.03f, 0.95f);
-        GUI.DrawTexture(bannerRect, solidTex);
 
         Color barColor;
         string linea1;
@@ -348,14 +336,12 @@ public sealed class MarsMissionHUD : MonoBehaviour
         if (flr.EnPreaviso)
         {
             barColor = Color.Lerp(new Color(1.0f, 0.86f, 0.22f, 1f), new Color(1.0f, 0.52f, 0.12f, 1f), pulse);
-            alertBannerStyle.normal.textColor = new Color(1.0f, 0.90f, 0.38f, 1f);
             linea1 = $"☀️ ¡PREAVISO LLAMARADA / CALOR (CLASE {flr.ClaseActual})! — PICO EN {flr.TiempoRestantePreaviso:F1}s";
             linea2 = "Refúgiate en el Módulo Agrícola o Nave [E]. Afuera consume Agua/Energía y desgasta Control Térmico";
         }
         else if (flr.EstaEnRefugioDomo)
         {
             barColor = new Color(0.32f, 0.95f, 0.55f, 1f);
-            alertBannerStyle.normal.textColor = new Color(0.55f, 1.0f, 0.72f, 1f);
             string refugioNombre = flr.EstaEnNaveInterior ? "NAVE ESPACIAL" : "MÓDULO AGRÍCOLA";
             linea1 = $"🛡️ REFUGIO EN {refugioNombre} — CALOR Y RADIACIÓN BLOQUEADOS ({flr.TiempoRestanteEvento:F0}s)";
             linea2 = flr.EstaEnInvernaderoInterior
@@ -365,21 +351,19 @@ public sealed class MarsMissionHUD : MonoBehaviour
         else if (flr.EscudoSobrecargadoSinControlTermico)
         {
             barColor = Color.Lerp(new Color(1.0f, 0.18f, 0.12f, 1f), new Color(1.0f, 0.65f, 0.15f, 1f), pulse);
-            alertBannerStyle.normal.textColor = new Color(1.0f, 0.48f, 0.35f, 1f);
             linea1 = $"🚨 ¡CONTROL TÉRMICO AGOTADO (0%)! — SOBRECALENTAMIENTO ({flr.IntegridadTraje:F0}% | {flr.TiempoRestanteEvento:F0}s)";
             linea2 = "¡Entra YA al Módulo Agrícola o Nave [E] antes que falle el traje!";
         }
         else
         {
             barColor = Color.Lerp(new Color(1.0f, 0.62f, 0.14f, 1f), new Color(1.0f, 0.84f, 0.28f, 1f), pulse);
-            alertBannerStyle.normal.textColor = new Color(1.0f, 0.78f, 0.32f, 1f);
             linea1 = $"🌡️ {flr.NivelAlertaTexto} — SUBLIMADOR CONSUMIENDO AGUA ({flr.TiempoRestanteEvento:F0}s)";
             linea2 = $"Térmico Nv.{flr.NivelControlTermico}: {flr.EstadoControlTermico:F0}% | Refúgiate en Módulo Agrícola / Nave [E]";
         }
 
-        GUI.color = barColor;
-        GUI.DrawTexture(new Rect(bannerRect.x, bannerRect.y, bannerRect.width, 4f), solidTex);
-        GUI.color = prev;
+        alertBannerStyle.normal.textColor = Color.Lerp(barColor, new Color(0.16f, 0.19f, 0.23f, 1f), 0.62f);
+        alertSubStyle.normal.textColor = new Color(0.30f, 0.34f, 0.37f, 1f);
+        MarsMissionUIArt.DrawCard(bannerRect, barColor, pulse);
 
         GUI.Label(new Rect(bannerRect.x + 12f, bannerRect.y + 8f, bannerRect.width - 24f, 24f), linea1, alertBannerStyle);
         GUI.Label(new Rect(bannerRect.x + 12f, bannerRect.y + 34f, bannerRect.width - 24f, 22f), linea2, alertSubStyle);
@@ -393,24 +377,22 @@ public sealed class MarsMissionHUD : MonoBehaviour
         bool hayInterferencia,
         bool hayFLR)
     {
-        float vitalWidth = Mathf.Min(258f, Mathf.Max(180f, Screen.width * 0.23f));
-        float progressWidth = Mathf.Min(278f, Mathf.Max(196f, Screen.width * 0.23f));
-        float x = 16f + vitalWidth + 12f;
-        float rightX = Screen.width - progressWidth - 16f;
-        float width = Mathf.Max(120f, rightX - x - 12f);
+        float vitalWidth = GetVitalCardWidth();
+        float progressWidth = Mathf.Min(258f, Mathf.Max(196f, Screen.width * 0.20f));
+        float gapLeft = 16f + vitalWidth + 16f;
+        float gapRight = Screen.width - progressWidth - 16f;
+        float availableWidth = Mathf.Max(150f, gapRight - gapLeft);
+        float width = Mathf.Min(330f, availableWidth);
+        float x = gapLeft + Mathf.Max(0f, (availableWidth - width) * 0.5f);
         bool expanded = ShowExtendedContext;
-        float height = expanded ? 108f : 64f;
+        float height = expanded ? 102f : 60f;
         Rect rect = new Rect(x, 16f, width, height);
-        Color prev = GUI.color;
 
         Color accent = hayInterferencia ? new Color(1f, 0.34f, 0.45f, 1f)
             : hayFLR || hayCME ? new Color(1f, 0.66f, 0.23f, 1f)
             : new Color(0.39f, 0.83f, 0.91f, 1f);
-        GUI.color = new Color(0.035f, 0.047f, 0.075f, 0.94f);
-        GUI.DrawTexture(rect, solidTex);
-        GUI.color = accent;
-        GUI.DrawTexture(new Rect(rect.x, rect.y, rect.width, 3f), solidTex);
-        GUI.color = prev;
+        float pulse = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 3.1f);
+        MarsMissionUIArt.DrawCard(rect, accent, pulse);
 
         string clima = hayCME && hayFLR ? "Tormenta solar doble"
             : hayInterferencia ? "Interferencia CME"
@@ -420,8 +402,8 @@ public sealed class MarsMissionHUD : MonoBehaviour
         string antena = hayInterferencia ? "Antena: apagar [E]"
             : !CommsTowerCMEEvent.StaticTransmisorEncendido ? "Antena: protegida"
             : "Antena: en línea";
-        GUI.Label(new Rect(rect.x + 11f, rect.y + 5f, rect.width - 22f, 20f), "CLIMA ESPACIAL", panelTitleStyle);
-        GUI.Label(new Rect(rect.x + 11f, rect.y + 27f, rect.width - 22f, 22f), clima + "  ·  " + antena, bodyTextStyle);
+        GUI.Label(new Rect(rect.x + 14f, rect.y + 5f, rect.width - 28f, 20f), "CLIMA ESPACIAL", panelTitleStyle);
+        GUI.Label(new Rect(rect.x + 14f, rect.y + 27f, rect.width - 28f, 22f), clima + "  ·  " + antena, bodyTextStyle);
         if (expanded)
         {
             string cmeInfo = cme != null && cme.HayTormentaCMEActiva
@@ -430,30 +412,21 @@ public sealed class MarsMissionHUD : MonoBehaviour
             string flrInfo = flr == null ? "FLR: cargando" : flr.HayTormentaFLRActiva
                 ? $"FLR {flr.ClaseActual}: {(flr.EnPreaviso ? flr.TiempoRestantePreaviso : flr.TiempoRestanteEvento):F0}s"
                 : $"FLR: {flr.TotalLlamaradasSemana}/sem · próxima en {flr.TiempoParaSiguienteFLR:F0}s";
-            GUI.Label(new Rect(rect.x + 11f, rect.y + 50f, rect.width - 22f, 20f), cmeInfo, smallHintStyle);
-            GUI.Label(new Rect(rect.x + 11f, rect.y + 72f, rect.width - 22f, 20f), flrInfo, smallHintStyle);
+            GUI.Label(new Rect(rect.x + 14f, rect.y + 50f, rect.width - 28f, 20f), cmeInfo, smallHintStyle);
+            GUI.Label(new Rect(rect.x + 14f, rect.y + 72f, rect.width - 28f, 20f), flrInfo, smallHintStyle);
         }
         else
         {
-            GUI.Label(new Rect(rect.xMax - 94f, rect.y + 5f, 84f, 18f), "[G] DETALLE", smallHintStyle);
+            GUI.Label(new Rect(rect.xMax - 88f, rect.y + 5f, 78f, 18f), "[G] INFO", smallHintStyle);
         }
-
-        GUI.color = prev;
     }
 
     private void DibujarBarrasVitales(DONKIFLRManager flr)
     {
-        float scale = Mathf.Clamp(Screen.height / 900f, 0.72f, 1f);
-        float width = Mathf.Min(258f, Mathf.Max(180f, Screen.width * 0.23f));
-        float rowHeight = 31f * scale;
-        float height = 12f + rowHeight * 4f + 18f;
-        var panel = new Rect(16f, 16f, width, height);
-        Color previous = GUI.color;
-        GUI.color = new Color(0.035f, 0.047f, 0.075f, 0.96f);
-        GUI.DrawTexture(panel, solidTex);
-        GUI.color = new Color(1f, 0.58f, 0.28f, 1f);
-        GUI.DrawTexture(new Rect(panel.x, panel.y, panel.width, 3f), solidTex);
-        GUI.color = previous;
+        float scale = Mathf.Clamp(Screen.width / 1600f, 0.68f, 1f);
+        float width = GetVitalCardWidth();
+        float cardHeight = 43f * scale;
+        float rowGap = 7f * scale;
 
         float[] values =
         {
@@ -472,33 +445,41 @@ public sealed class MarsMissionHUD : MonoBehaviour
         };
         for (int i = 0; i < values.Length; i++)
         {
-            float y = panel.y + 8f + i * rowHeight;
-            Rect row = new Rect(panel.x + 7f, y, panel.width - 14f, rowHeight - 2f);
-            GUI.color = new Color(0.07f, 0.09f, 0.13f, 0.92f);
-            GUI.DrawTexture(row, solidTex);
-            GUI.color = colors[i];
-            GUI.DrawTexture(new Rect(row.x, row.y, 3f, row.height), solidTex);
-            GUI.color = previous;
+            float y = 16f + i * (cardHeight + rowGap);
+            Rect card = new Rect(16f, y, width, cardHeight);
+            float pulse = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * (2.7f + i * 0.22f) + i * 0.7f);
+            bool critical = values[i] <= 25f;
+            Color accent = critical
+                ? Color.Lerp(colors[i], new Color(1f, 0.28f, 0.22f, 1f), 0.5f + pulse * 0.35f)
+                : colors[i];
+            MarsMissionUIArt.DrawCard(card, accent, critical ? pulse : pulse * 0.35f);
+            MarsMissionUIArt.DrawIcon(new Rect(card.x + 10f, card.y + 7f * scale, 29f * scale, 29f * scale), i, accent, pulse);
 
-            string label = i == 3 && flr != null ? $"{labels[i]} · NV.{flr.NivelControlTermico}" : labels[i];
-            barLabelStyle.normal.textColor = new Color(0.96f, 0.91f, 0.82f, 1f);
-            GUI.Label(new Rect(row.x + 9f, row.y + 1f, row.width - 58f, 15f * scale), label, barLabelStyle);
+            string label = i == 3 && flr != null ? $"{labels[i]}  ·  NV.{flr.NivelControlTermico}" : labels[i];
+            barLabelStyle.fontSize = Mathf.RoundToInt(10f * scale);
+            GUI.Label(new Rect(card.x + 47f * scale, card.y + 4f * scale, card.width - 105f * scale, 15f * scale), label, barLabelStyle);
             Color previousCounterColor = sampleCounterStyle.normal.textColor;
-            sampleCounterStyle.normal.textColor = colors[i];
+            sampleCounterStyle.normal.textColor = accent;
             sampleCounterStyle.fontSize = Mathf.RoundToInt(12f * scale);
-            GUI.Label(new Rect(row.xMax - 48f, row.y + 1f, 44f, 15f * scale), $"{values[i]:F0}%", sampleCounterStyle);
+            GUI.Label(new Rect(card.xMax - 53f * scale, card.y + 2f * scale, 43f * scale, 17f * scale), $"{values[i]:F0}%", sampleCounterStyle);
             sampleCounterStyle.fontSize = 14;
             sampleCounterStyle.normal.textColor = previousCounterColor;
 
-            Rect track = new Rect(row.x + 9f, row.y + row.height - 8f, row.width - 18f, 4f);
-            GUI.color = new Color(0.16f, 0.19f, 0.24f, 1f);
-            GUI.DrawTexture(track, solidTex);
-            GUI.color = colors[i];
-            GUI.DrawTexture(new Rect(track.x, track.y, track.width * Mathf.Clamp01(values[i] / 100f), track.height), solidTex);
-            GUI.color = previous;
+            Rect track = new Rect(card.x + 48f * scale, card.y + card.height - 12f * scale, card.width - 63f * scale, 5f * scale);
+            MarsMissionUIArt.DrawProgress(track, values[i] / 100f, accent, Time.unscaledTime * 0.46f + i * 0.19f);
+            if (critical)
+            {
+                GUI.Label(new Rect(card.xMax - 16f * scale, card.y + 12f * scale, 9f * scale, 12f * scale), "!", alertBannerStyle);
+            }
         }
+    }
 
-        GUI.Label(new Rect(panel.x + 8f, panel.yMax - 18f, panel.width - 16f, 16f), "TRAJE EVA  ·  [G] MÁS CONTEXTO", smallHintStyle);
+    private static float GetVitalCardWidth() => Mathf.Min(260f, Mathf.Max(204f, Screen.width * 0.20f));
+
+    private static float GetVitalCardsBottom()
+    {
+        float scale = Mathf.Clamp(Screen.width / 1600f, 0.68f, 1f);
+        return 16f + 4f * 43f * scale + 3f * 7f * scale;
     }
 
     private void DibujarAlertaCompacta(
@@ -538,79 +519,46 @@ public sealed class MarsMissionHUD : MonoBehaviour
             return;
         }
 
-        float width = Mathf.Min(560f, Screen.width - 32f);
-        float vitalScale = Mathf.Clamp(Screen.height / 900f, 0.72f, 1f);
-        float vitalHeight = 12f + 31f * vitalScale * 4f + 18f;
-        float topY = 16f + Mathf.Max(vitalHeight, 126f) + 10f;
+        float width = Mathf.Min(400f, Screen.width - 32f);
+        float topY = GetVitalCardsBottom() + 10f;
         Rect rect = new Rect((Screen.width - width) * 0.5f, topY, width, 40f);
-        Color previous = GUI.color;
-        GUI.color = new Color(0.075f, 0.045f, 0.075f, 0.96f);
-        GUI.DrawTexture(rect, solidTex);
-        GUI.color = accent;
-        GUI.DrawTexture(new Rect(rect.x, rect.y, 4f, rect.height), solidTex);
-        GUI.DrawTexture(new Rect(rect.x, rect.y, rect.width, 2f), solidTex);
-        GUI.color = previous;
+        MarsMissionUIArt.DrawCard(rect, accent, 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 4f));
         alertBannerStyle.alignment = TextAnchor.MiddleLeft;
         alertBannerStyle.fontSize = 13;
-        alertBannerStyle.normal.textColor = accent;
+        alertBannerStyle.normal.textColor = Color.Lerp(accent, new Color(0.16f, 0.20f, 0.23f, 1f), 0.60f);
         GUI.Label(new Rect(rect.x + 13f, rect.y + 4f, rect.width - 26f, rect.height - 8f), "⚠  " + mensaje, alertBannerStyle);
-    }
-
-    private void DrawSurvivalBar(Rect area, string label, float ratio, Color fillColor)
-    {
-        Color prev = GUI.color;
-        GUI.Label(new Rect(area.x, area.y, area.width, 18f), label, barLabelStyle);
-
-        Rect bg = new Rect(area.x, area.y + 19f, area.width, 12f);
-        GUI.color = new Color(0.14f, 0.18f, 0.25f, 1f);
-        GUI.DrawTexture(bg, solidTex);
-
-        GUI.color = fillColor;
-        GUI.DrawTexture(new Rect(bg.x, bg.y, bg.width * Mathf.Clamp01(ratio), bg.height), solidTex);
-        GUI.color = prev;
     }
 
     private void DibujarPanelMuestrasYCultivos()
     {
-        float panelW = Mathf.Min(278f, Mathf.Max(196f, Screen.width * 0.23f));
-        const float panelH = 126f;
+        float panelW = Mathf.Min(258f, Mathf.Max(196f, Screen.width * 0.20f));
+        const float panelH = 112f;
         Rect rect = new Rect(Screen.width - panelW - 16f, 16f, panelW, panelH);
-
-        Color prev = GUI.color;
-        GUI.color = new Color(0.05f, 0.08f, 0.13f, 0.92f);
-        GUI.DrawTexture(rect, solidTex);
-
-        GUI.color = new Color(1.0f, 0.66f, 0.29f, 1f);
-        GUI.DrawTexture(new Rect(rect.x, rect.y, rect.width, 3f), solidTex);
+        Color accent = new Color(1f, 0.63f, 0.27f, 1f);
+        MarsMissionUIArt.DrawCard(rect, accent, 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 2.2f));
 
         int collected = MarsSampleNode2D.CollectedSamples;
         int total = Mathf.Max(1, MarsSampleNode2D.TotalSamples);
 
-        GUI.color = prev;
-        GUI.Label(new Rect(rect.x + 12f, rect.y + 8f, rect.width - 24f, 22f), "MISIÓN", panelTitleStyle);
+        GUI.Label(new Rect(rect.x + 14f, rect.y + 6f, rect.width - 28f, 22f), "MISIÓN", panelTitleStyle);
         GUI.Label(
-            new Rect(rect.x + 12f, rect.y + 32f, rect.width - 24f, 24f),
+            new Rect(rect.x + 14f, rect.y + 30f, rect.width - 28f, 22f),
             $"Muestras en Nave: {collected} / {total}",
             sampleCounterStyle
         );
 
-        Rect barBg = new Rect(rect.x + 12f, rect.y + 58f, rect.width - 24f, 12f);
-        GUI.color = new Color(0.16f, 0.20f, 0.26f, 1f);
-        GUI.DrawTexture(barBg, solidTex);
-
+        Rect barBg = new Rect(rect.x + 14f, rect.y + 54f, rect.width - 28f, 7f);
         float ratio = Mathf.Clamp01((float)collected / total);
-        GUI.color = new Color(1.0f, 0.66f, 0.29f, 1f);
-        GUI.DrawTexture(new Rect(barBg.x, barBg.y, barBg.width * ratio, barBg.height), solidTex);
-        GUI.color = prev;
+        MarsMissionUIArt.DrawProgress(barBg, ratio, accent, Time.unscaledTime * 0.25f);
 
         string manoTexto = MarsSampleNode2D.HasHeldSample ? "Muestra: llena · vuelve a la nave" : "Muestra: contenedor libre";
-        GUI.Label(new Rect(rect.x + 12f, rect.y + 76f, rect.width - 24f, 20f), manoTexto, heldSampleStyle);
-        GUI.Label(new Rect(rect.x + 12f, rect.y + 98f, rect.width - 24f, 18f),
+        GUI.Label(new Rect(rect.x + 14f, rect.y + 66f, rect.width - 28f, 18f), manoTexto, heldSampleStyle);
+        GUI.Label(new Rect(rect.x + 14f, rect.y + 86f, rect.width - 28f, 16f),
             $"Cosechas: {MarsCropPlot2D.TotalHarvestedCrops}   ·   [G] más", smallHintStyle);
         if (ShowExtendedContext)
         {
-            GUI.Label(new Rect(rect.x + 12f, rect.y + 111f, rect.width - 24f, 14f),
-                MarsSampleNode2D.HasHeldSample ? MarsSampleNode2D.HeldSampleLabel + " · WASD mover · E interactuar" : "WASD mover · E interactuar · T/F eventos", smallHintStyle);
+            GUI.Label(new Rect(rect.x + 14f, rect.y + 101f, rect.width - 28f, 14f),
+                MarsSampleNode2D.HasHeldSample ? MarsSampleNode2D.HeldSampleLabel + " · E interactuar" : "WASD mover · E interactuar", smallHintStyle);
         }
     }
 
@@ -711,14 +659,12 @@ public sealed class MarsMissionHUD : MonoBehaviour
         float top = Screen.height - height - 16f;
         Rect panel = new Rect(left, top, width, height);
         Color previous = GUI.color;
-        GUI.color = new Color(0.05f, 0.08f, 0.13f, 0.97f);
-        GUI.DrawTexture(panel, solidTex);
-        GUI.color = new Color(1f, 0.62f, 0.32f);
-        GUI.DrawTexture(new Rect(left, top, width, 3f), solidTex);
+        MarsMissionUIArt.DrawCard(panel, new Color(0.99f, 0.57f, 0.24f, 1f),
+            0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 2.6f));
         GUI.color = previous;
 
         GUI.Label(new Rect(left + 12f, top + 7f, width - 58f, 22f), "HALLAZGO CIENTÍFICO", panelTitleStyle);
-        if (GUI.Button(new Rect(panel.xMax - 36f, top + 6f, 26f, 25f), "×"))
+        if (MarsMissionUIArt.DrawButton(new Rect(panel.xMax - 38f, top + 6f, 28f, 25f), "×", new Color(0.88f, 0.35f, 0.23f, 1f), 16))
         {
             discoveryVisibleUntil = 0;
             return;
@@ -751,7 +697,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
         GUI.Label(new Rect(0, footerY, contentWidth, 20f), GetContextText(discovery.credit, 90), discoveryTextStyle);
         const float sourceWidth = 128f;
         GUI.Label(new Rect(0f, footerY + 20f, contentWidth, 20f), "[G] Más contexto", smallHintStyle);
-        if (GUI.Button(new Rect((contentWidth - sourceWidth) * 0.5f, footerY + 42f, sourceWidth, 24f), "Fuente NASA"))
+        if (MarsMissionUIArt.DrawButton(new Rect((contentWidth - sourceWidth) * 0.5f, footerY + 42f, sourceWidth, 24f), "Fuente NASA", new Color(0.27f, 0.68f, 0.72f, 1f), 11))
             Application.OpenURL(discovery.source);
 
         GUI.EndScrollView();
@@ -759,15 +705,10 @@ public sealed class MarsMissionHUD : MonoBehaviour
 
     private void DibujarAvisoEmergencia(string texto)
     {
-        Color prev = GUI.color;
         float w = Mathf.Min(780f, Screen.width - 40f);
         Rect rect = new Rect((Screen.width - w) * 0.5f, Screen.height - 134f, w, 44f);
-
-        GUI.color = new Color(0.18f, 0.08f, 0.04f, 0.94f);
-        GUI.DrawTexture(rect, solidTex);
-        GUI.color = new Color(1.0f, 0.72f, 0.18f, 1f);
-        GUI.DrawTexture(new Rect(rect.x, rect.y, rect.width, 3f), solidTex);
-        GUI.color = prev;
+        Color accent = new Color(1.0f, 0.55f, 0.20f, 1f);
+        MarsMissionUIArt.DrawCard(rect, accent, 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 4f));
 
         GUI.Label(new Rect(rect.x + 12f, rect.y + 8f, rect.width - 24f, 28f), GetContextText(texto, 112), alertSubStyle);
     }
@@ -775,17 +716,14 @@ public sealed class MarsMissionHUD : MonoBehaviour
     private void DibujarPantallaDerrota(DONKIFLRManager flr)
     {
         Color prev = GUI.color;
-        GUI.color = new Color(0.04f, 0.02f, 0.03f, 0.82f);
+        GUI.color = new Color(0.08f, 0.06f, 0.07f, 0.58f);
         GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), solidTex);
 
         float boxW = Mathf.Min(580f, Screen.width - 40f);
         float boxH = 260f;
         Rect box = new Rect((Screen.width - boxW) * 0.5f, (Screen.height - boxH) * 0.5f, boxW, boxH);
 
-        GUI.color = new Color(0.11f, 0.05f, 0.07f, 0.97f);
-        GUI.DrawTexture(box, solidTex);
-        GUI.color = new Color(1.0f, 0.25f, 0.22f, 1f);
-        GUI.DrawTexture(new Rect(box.x, box.y, box.width, 5f), solidTex);
+        MarsMissionUIArt.DrawCard(box, new Color(0.91f, 0.25f, 0.20f, 1f), 0.6f + 0.4f * Mathf.Sin(Time.unscaledTime * 3f));
         GUI.color = prev;
 
         GUI.Label(new Rect(box.x + 24f, box.y + 22f, box.width - 48f, 36f), "MISIÓN FALLIDA", gameOverTitleStyle);
@@ -794,7 +732,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
         GUI.Label(new Rect(box.x + 28f, box.y + 184f, box.width - 56f, 20f), "[G] Más contexto", smallHintStyle);
 
         Rect btnRect = new Rect(box.x + (box.width - 230f) * 0.5f, box.y + boxH - 64f, 230f, 44f);
-        if (GUI.Button(btnRect, "Reintentar Misión", retryBtnStyle))
+        if (MarsMissionUIArt.DrawButton(btnRect, "Reintentar Misión", new Color(0.96f, 0.43f, 0.22f, 1f), 15))
         {
             flr.ReiniciarPartidaCompleta();
         }
@@ -815,7 +753,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
             {
                 fontSize = 13,
                 fontStyle = FontStyle.Bold,
-                normal = { textColor = new Color(1f, 0.70f, 0.38f, 1f) }
+                normal = { textColor = new Color(0.72f, 0.31f, 0.10f, 1f) }
             };
         }
 
@@ -824,7 +762,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
             bodyTextStyle = new GUIStyle(GUI.skin.label)
             {
                 fontSize = 12,
-                normal = { textColor = new Color(0.96f, 0.92f, 0.85f, 0.96f) }
+                normal = { textColor = new Color(0.15f, 0.20f, 0.24f, 1f) }
             };
         }
 
@@ -833,7 +771,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
             smallHintStyle = new GUIStyle(GUI.skin.label)
             {
                 fontSize = 11,
-                normal = { textColor = new Color(0.76f, 0.80f, 0.84f, 0.94f) }
+                normal = { textColor = new Color(0.35f, 0.40f, 0.43f, 1f) }
             };
         }
 
@@ -843,7 +781,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
             {
                 fontSize = 11,
                 fontStyle = FontStyle.Bold,
-                normal = { textColor = new Color(1f, 0.91f, 0.75f, 1f) }
+                normal = { textColor = new Color(0.16f, 0.20f, 0.23f, 1f) }
             };
         }
 
@@ -853,7 +791,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
             {
                 fontSize = 12,
                 fontStyle = FontStyle.Bold,
-                normal = { textColor = new Color(0.63f, 0.85f, 1f, 1f) }
+                normal = { textColor = new Color(0.08f, 0.42f, 0.62f, 1f) }
             };
         }
 
@@ -863,7 +801,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
             {
                 fontSize = 14,
                 fontStyle = FontStyle.Bold,
-                normal = { textColor = new Color(1f, 0.75f, 0.32f, 1f) }
+                normal = { textColor = new Color(0.72f, 0.36f, 0.08f, 1f) }
             };
         }
 
@@ -874,7 +812,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
                 alignment = TextAnchor.MiddleCenter,
                 fontSize = 14,
                 fontStyle = FontStyle.Bold,
-                normal = { textColor = new Color(1f, 0.55f, 0.85f, 1f) }
+                normal = { textColor = new Color(0.70f, 0.14f, 0.34f, 1f) }
             };
         }
 
@@ -885,7 +823,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
                 alignment = TextAnchor.MiddleCenter,
                 fontSize = 12,
                 fontStyle = FontStyle.Bold,
-                normal = { textColor = Color.white }
+                normal = { textColor = new Color(0.22f, 0.25f, 0.27f, 1f) }
             };
         }
 
@@ -896,7 +834,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
                 alignment = TextAnchor.MiddleCenter,
                 fontSize = 24,
                 fontStyle = FontStyle.Bold,
-                normal = { textColor = new Color(1f, 0.36f, 0.32f, 1f) }
+                normal = { textColor = new Color(0.76f, 0.16f, 0.14f, 1f) }
             };
         }
 
@@ -907,17 +845,9 @@ public sealed class MarsMissionHUD : MonoBehaviour
                 alignment = TextAnchor.UpperCenter,
                 fontSize = 13,
                 wordWrap = true,
-                normal = { textColor = new Color(0.94f, 0.95f, 0.98f, 1f) }
+                normal = { textColor = new Color(0.18f, 0.20f, 0.22f, 1f) }
             };
         }
 
-        if (retryBtnStyle == null)
-        {
-            retryBtnStyle = new GUIStyle(GUI.skin.button)
-            {
-                fontSize = 15,
-                fontStyle = FontStyle.Bold
-            };
-        }
     }
 }

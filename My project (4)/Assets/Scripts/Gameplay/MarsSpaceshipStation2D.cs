@@ -75,8 +75,8 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
     private const float BasePanelW = 1000f;
     private const float BasePanelH = 630f;
 
-    private static readonly Color TextMain = new Color(0.98f, 0.95f, 0.88f, 1f);
-    private static readonly Color TextDim = new Color(0.72f, 0.77f, 0.82f, 1f);
+    private static readonly Color TextMain = new Color(0.13f, 0.19f, 0.24f, 1f);
+    private static readonly Color TextDim = new Color(0.34f, 0.41f, 0.46f, 1f);
     private static readonly Color Success = new Color(0.36f, 0.91f, 0.62f, 1f);
     private static readonly Color Warning = new Color(1f, 0.70f, 0.28f, 1f);
     private static readonly Color Danger = new Color(1f, 0.39f, 0.35f, 1f);
@@ -478,16 +478,16 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
         {
             panelGradientTex = MakeVerticalGradient(
                 64,
-                new Color(0.105f, 0.145f, 0.205f, 0.99f),
-                new Color(0.045f, 0.070f, 0.105f, 0.99f));
+                new Color(1.00f, 0.99f, 0.96f, 1f),
+                new Color(0.93f, 0.95f, 0.94f, 1f));
         }
 
         if (headerGradientTex == null)
         {
             headerGradientTex = MakeVerticalGradient(
                 48,
-                new Color(0.135f, 0.185f, 0.255f, 1f),
-                new Color(0.055f, 0.090f, 0.135f, 1f));
+                new Color(1.00f, 0.95f, 0.85f, 1f),
+                new Color(0.98f, 0.91f, 0.79f, 1f));
         }
 
         if (clearTex == null)
@@ -581,7 +581,7 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
             fontSize = 16,
             wordWrap = true,
             richText = true,
-            normal = { textColor = new Color(0.90f, 0.94f, 1f, 1f) }
+            normal = { textColor = new Color(0.20f, 0.25f, 0.29f, 1f) }
         };
 
         bodyStyle = new GUIStyle(GUI.skin.label)
@@ -590,7 +590,7 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
             fontSize = 14,
             wordWrap = true,
             richText = true,
-            normal = { textColor = new Color(0.84f, 0.90f, 0.97f, 1f) }
+            normal = { textColor = new Color(0.25f, 0.30f, 0.33f, 1f) }
         };
 
         bodyTightStyle = new GUIStyle(bodyStyle)
@@ -606,7 +606,7 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
             fontStyle = FontStyle.Bold,
             wordWrap = true,
             richText = true,
-            normal = { textColor = new Color(0.36f, 0.98f, 0.58f, 1f) }
+            normal = { textColor = new Color(0.34f, 1f, 0.56f, 1f) }
         };
 
         buttonLabelStyle = new GUIStyle(GUI.skin.label)
@@ -622,7 +622,7 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
         primaryLabelStyle = new GUIStyle(buttonLabelStyle)
         {
             fontSize = 16,
-            normal = { textColor = new Color(1f, 0.98f, 0.90f, 1f) }
+            normal = { textColor = new Color(0.36f, 0.20f, 0.10f, 1f) }
         };
 
         badgeStyle = new GUIStyle(GUI.skin.label)
@@ -631,7 +631,7 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
             fontSize = 12,
             fontStyle = FontStyle.Bold,
             clipping = TextClipping.Clip,
-            normal = { textColor = Color.white }
+            normal = { textColor = new Color(0.18f, 0.22f, 0.25f, 1f) }
         };
 
         chipStyle = new GUIStyle(GUI.skin.label)
@@ -639,7 +639,7 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
             alignment = TextAnchor.MiddleCenter,
             fontSize = 17,
             fontStyle = FontStyle.Bold,
-            normal = { textColor = Color.white }
+            normal = { textColor = new Color(0.18f, 0.22f, 0.25f, 1f) }
         };
 
         statLabelStyle = new GUIStyle(GUI.skin.label)
@@ -657,7 +657,7 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
             fontSize = 17,
             fontStyle = FontStyle.Bold,
             clipping = TextClipping.Clip,
-            normal = { textColor = Color.white }
+            normal = { textColor = new Color(0.16f, 0.21f, 0.24f, 1f) }
         };
 
         noteTitleStyle = new GUIStyle(GUI.skin.label)
@@ -675,7 +675,7 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
             fontSize = 15,
             wordWrap = true,
             richText = true,
-            normal = { textColor = new Color(0.74f, 0.82f, 0.90f, 1f) }
+            normal = { textColor = new Color(0.25f, 0.31f, 0.34f, 1f) }
         };
 
         bulletStyle = new GUIStyle(GUI.skin.label)
@@ -782,7 +782,7 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
             Mathf.Max(0f, virtualW - 220f));
 
         Color prevColor = GUI.color;
-        GUI.color = new Color(0.012f, 0.020f, 0.036f, 0.84f);
+        GUI.color = new Color(0.11f, 0.09f, 0.08f, 0.48f);
         GUI.DrawTexture(new Rect(0f, 0f, virtualW, virtualH), solidTex);
         GUI.color = prevColor;
 
@@ -904,12 +904,12 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
         GUI.color = prev;
 
         Color prevTitle = noteTitleStyle.normal.textColor;
-        noteTitleStyle.normal.textColor = accent;
+        noteTitleStyle.normal.textColor = Color.Lerp(accent, TextMain, 0.42f);
         GUI.Label(new Rect(footer.x + 14f, footer.y + 3f, 180f, 16f), "OBJETIVO ACTUAL", noteTitleStyle);
         noteTitleStyle.normal.textColor = prevTitle;
 
         Color prevBody = bodyTightStyle.normal.textColor;
-        bodyTightStyle.normal.textColor = new Color(0.96f, 0.98f, 1f, 1f);
+        bodyTightStyle.normal.textColor = TextMain;
         GUI.Label(new Rect(footer.x + 14f, footer.y + 18f, footer.width - 230f, 25f),
             MarsMissionHUD.GetContextText(statusBanner, 96), bodyTightStyle);
         bodyTightStyle.normal.textColor = prevBody;
@@ -963,7 +963,7 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
             1f);
 
         Color prevChip = chipStyle.normal.textColor;
-        chipStyle.normal.textColor = done ? Success : accent;
+        chipStyle.normal.textColor = Color.Lerp(done ? Success : accent, TextMain, 0.38f);
         GUI.Label(new Rect(chip.x, chip.y + 4f, chip.width, 20f), done ? "✓" : step.ToString(), chipStyle);
         chipStyle.normal.textColor = prevChip;
 
@@ -974,7 +974,7 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
         Rect statePill = new Rect(card.xMax - 10f - pillW, card.y + 10f, pillW, 24f);
 
         Color prevTitle = stepTitleStyle.normal.textColor;
-        stepTitleStyle.normal.textColor = done ? Success : TextMain;
+        stepTitleStyle.normal.textColor = done ? new Color(0.08f, 0.46f, 0.29f, 1f) : TextMain;
         float titleW = Mathf.Max(60f, statePill.x - 4f - (card.x + 42f));
         GUI.Label(new Rect(card.x + 42f, card.y + 7f, titleW, 30f), title, stepTitleStyle);
         stepTitleStyle.normal.textColor = prevTitle;
@@ -998,7 +998,7 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
         GUI.Label(new Rect(rect.x + 5f, rect.y + 2f, rect.width - 10f, 14f), label, statLabelStyle);
 
         Color prev = statValueStyle.normal.textColor;
-        statValueStyle.normal.textColor = accent;
+        statValueStyle.normal.textColor = Color.Lerp(accent, TextMain, 0.34f);
         GUI.Label(new Rect(rect.x + 5f, rect.y + 16f, rect.width - 10f, rect.height - 18f), value, statValueStyle);
         statValueStyle.normal.textColor = prev;
     }
@@ -1121,8 +1121,8 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
         Color prevText = style.normal.textColor;
         style.normal.textColor = enabled
             ? primary
-                ? new Color(1f, 0.98f, 0.90f, 1f)
-                : new Color(0.92f, 0.96f, 1f, 1f)
+                ? new Color(0.37f, 0.20f, 0.09f, 1f)
+                : new Color(0.15f, 0.21f, 0.25f, 1f)
             : new Color(0.52f, 0.60f, 0.68f, 1f);
 
         GUI.Label(
@@ -1145,7 +1145,9 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
         DrawBoxWithBorder(rect, background, new Color(accent.r, accent.g, accent.b, 0.72f), 1f);
 
         Color prevText = badgeStyle.normal.textColor;
-        badgeStyle.normal.textColor = filled ? Color.white : accent;
+        badgeStyle.normal.textColor = filled
+            ? new Color(0.15f, 0.20f, 0.23f, 1f)
+            : Color.Lerp(accent, new Color(0.14f, 0.19f, 0.23f, 1f), 0.48f);
         GUI.Label(rect, text, badgeStyle);
         badgeStyle.normal.textColor = prevText;
     }
@@ -1166,7 +1168,7 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
         GUI.color = prev;
 
         Color prevTitle = noteTitleStyle.normal.textColor;
-        noteTitleStyle.normal.textColor = accent;
+        noteTitleStyle.normal.textColor = Color.Lerp(accent, TextMain, 0.42f);
         GUI.Label(new Rect(rect.x + 10f, rect.y + 4f, rect.width - 20f, 16f), title, noteTitleStyle);
         noteTitleStyle.normal.textColor = prevTitle;
 
@@ -2183,6 +2185,13 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
 
     private static void DrawBoxWithBorder(Rect rect, Color bg, Color border, float bw)
     {
+        bool instrumentDisplay = bg.g > bg.r * 1.5f && bg.g > bg.b * 1.5f && bg.g > 0.08f;
+        if (!instrumentDisplay)
+        {
+            MarsMissionUIArt.DrawCard(rect, border, 0.18f);
+            return;
+        }
+
         Color prev = GUI.color;
         GUI.color = bg;
         GUI.DrawTexture(rect, solidTex);

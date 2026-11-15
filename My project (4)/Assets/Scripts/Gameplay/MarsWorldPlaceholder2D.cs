@@ -36,7 +36,6 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
     private static Sprite fallbackSquareSprite;
     private GUIStyle titleStyle;
     private GUIStyle subtitleStyle;
-    private static Texture2D labelBgTex;
 
     public string LabelTitle
     {
@@ -197,15 +196,12 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
 
         Rect boxRect = new Rect(guiX - boxWidth * 0.5f, guiY - boxHeight * 0.5f, boxWidth, boxHeight);
 
-        Color prevColor = GUI.color;
-        GUI.color = new Color(0.075f, 0.045f, 0.055f, 0.94f);
-        GUI.DrawTexture(boxRect, labelBgTex);
+        float pulse = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 2.5f + transform.position.x);
+        MarsMissionUIArt.DrawCard(boxRect, squareColor, pulse * 0.32f);
 
-        GUI.color = new Color(squareColor.r, squareColor.g, squareColor.b, 0.95f);
-        GUI.DrawTexture(new Rect(boxRect.x, boxRect.y, boxRect.width, 4f), labelBgTex);
-        GUI.color = prevColor;
-
-        titleStyle.normal.textColor = labelTextColor;
+        titleStyle.normal.textColor = labelTextColor.maxColorComponent > 0.85f
+            ? new Color(0.15f, 0.20f, 0.23f, 1f)
+            : labelTextColor;
         GUI.Label(
             new Rect(boxRect.x + paddingX, boxRect.y + paddingY, boxRect.width - paddingX * 2f, titleLineHeight),
             labelTitle,
@@ -226,13 +222,6 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
 
     private void EnsureStyles()
     {
-        if (labelBgTex == null)
-        {
-            labelBgTex = new Texture2D(1, 1);
-            labelBgTex.SetPixel(0, 0, Color.white);
-            labelBgTex.Apply();
-        }
-
         if (titleStyle == null)
         {
             titleStyle = new GUIStyle(GUI.skin.label)
@@ -242,7 +231,7 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
                 fontStyle = FontStyle.Bold,
                 wordWrap = false,
                 clipping = TextClipping.Overflow,
-                normal = { textColor = Color.white }
+                normal = { textColor = new Color(0.15f, 0.20f, 0.23f, 1f) }
             };
         }
 
@@ -255,7 +244,7 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
                 fontStyle = FontStyle.Normal,
                 wordWrap = false,
                 clipping = TextClipping.Overflow,
-                normal = { textColor = new Color(1f, 0.87f, 0.74f, 0.98f) }
+                normal = { textColor = new Color(0.43f, 0.35f, 0.28f, 1f) }
             };
         }
     }

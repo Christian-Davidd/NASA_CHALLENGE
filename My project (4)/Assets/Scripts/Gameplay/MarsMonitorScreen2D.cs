@@ -14,7 +14,6 @@ public sealed class MarsMonitorScreen2D : MonoBehaviour
     private GUIStyle bodyStyle;
     private GUIStyle smallStyle;
     private GUIStyle valueStyle;
-    private GUIStyle buttonStyle;
     private bool waitForERelease;
 
     public static bool IsOpen => instance != null && instance.isOpen;
@@ -99,24 +98,26 @@ public sealed class MarsMonitorScreen2D : MonoBehaviour
         var panel = new Rect(vitalGutter + (availableWidth - width) * 0.5f,
             (Screen.height - height) * 0.5f, width, height);
 
-        GUI.color = new Color(0.025f, 0.026f, 0.045f, 0.76f);
+        GUI.color = new Color(0.10f, 0.08f, 0.07f, 0.48f);
         GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), WhitePixel);
         GUI.color = Color.white;
 
-        DrawRect(panel, new Color(0.045f, 0.055f, 0.080f, 0.99f));
-        DrawRect(new Rect(panel.x, panel.y, panel.width, 3f), new Color(1f, 0.59f, 0.30f, 1f));
-        DrawRect(new Rect(panel.x + 10, panel.y + 10, panel.width - 20, 58), new Color(0.12f, 0.095f, 0.095f, 1f));
-        GUI.Label(new Rect(panel.x + 30, panel.y + 17, panel.width - 170, 44), title, headerStyle);
+        float pulse = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 2.4f);
+        MarsMissionUIArt.DrawCard(panel, new Color(1f, 0.58f, 0.24f, 1f), pulse * 0.45f);
+        var header = new Rect(panel.x + 16, panel.y + 14, panel.width - 32, 58);
+        MarsMissionUIArt.DrawCard(header, new Color(1f, 0.62f, 0.27f, 1f), pulse * 0.28f);
+        GUI.Label(new Rect(panel.x + 34, panel.y + 17, panel.width - 184, 44), title, headerStyle);
 
         var close = new Rect(panel.xMax - 112, panel.y + 22, 80, 36);
-        if (GUI.Button(close, "CERRAR", buttonStyle)) Close();
+        if (MarsMissionUIArt.DrawButton(close, "CERRAR", new Color(0.94f, 0.42f, 0.20f, 1f), 12)) Close();
 
         if (crop != null)
             DrawCropPanel(panel);
         else
             DrawTelemetryPanel(panel);
 
-        DrawRect(new Rect(panel.x + 10, panel.yMax - 52, panel.width - 20, 42), new Color(0.12f, 0.095f, 0.095f, 1f));
+        MarsMissionUIArt.DrawCard(new Rect(panel.x + 16, panel.yMax - 54, panel.width - 32, 42),
+            new Color(0.26f, 0.63f, 0.70f, 1f), pulse * 0.2f);
         string footer = crop == null
             ? "[E/ESC] Cerrar     [G] Más contexto"
             : crop.CanHarvest
@@ -131,8 +132,7 @@ public sealed class MarsMonitorScreen2D : MonoBehaviour
         float margin = 28f;
         float imageSize = Mathf.Min(panel.height - 190f, panel.width * 0.31f);
         var imageRect = new Rect(panel.x + margin + 20, panel.y + 105, imageSize, imageSize);
-        DrawRect(imageRect, new Color(0.13f, 0.10f, 0.09f, 1f));
-        DrawRect(new Rect(imageRect.x, imageRect.y, imageRect.width, 3f), new Color(1f, 0.65f, 0.32f, 1f));
+        MarsMissionUIArt.DrawCard(imageRect, new Color(1f, 0.61f, 0.25f, 1f), 0.35f);
         if (crop.CurrentSprite != null)
             GUI.DrawTexture(new Rect(imageRect.x + 12, imageRect.y + 12, imageRect.width - 24, imageRect.height - 24), crop.CurrentSprite.texture, ScaleMode.ScaleToFit, true);
 
@@ -156,7 +156,8 @@ public sealed class MarsMonitorScreen2D : MonoBehaviour
         for (int i = 0; i < 3; i++)
         {
             var box = new Rect(rect.x + i * segment + 5, rect.y, segment - 10, rect.height);
-            DrawRect(box, i == current ? new Color(0.42f, 0.20f, 0.12f, 1f) : new Color(0.15f, 0.12f, 0.13f, 1f));
+            Color accent = i == current ? new Color(0.95f, 0.48f, 0.16f, 1f) : new Color(0.67f, 0.73f, 0.73f, 1f);
+            MarsMissionUIArt.DrawCard(box, accent, i == current ? 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 3f) : 0.1f);
             if (i == current && i < 2)
                 DrawRect(new Rect(box.x + 8, box.yMax - 12, (box.width - 16) * crop.StageProgress, 4), new Color(1f, 0.68f, 0.32f, 1f));
             GUI.Label(new Rect(box.x + 4, box.y + 20, box.width - 8, 40), stages[i], smallStyle);
@@ -173,7 +174,7 @@ public sealed class MarsMonitorScreen2D : MonoBehaviour
         float summaryTop = chartRect.yMax + 15f;
         var summaryRect = new Rect(panel.x + margin, summaryTop, panel.width - margin * 2f,
             panel.yMax - 62f - summaryTop);
-        DrawRect(summaryRect, new Color(0.12f, 0.09f, 0.09f, 1f));
+        MarsMissionUIArt.DrawCard(summaryRect, new Color(0.30f, 0.69f, 0.61f, 1f), 0.12f);
         GUI.Label(new Rect(summaryRect.x + 16f, summaryRect.y + 7f, summaryRect.width - 32f, 30f),
             "RESUMEN DEL SUBSISTEMA", valueStyle);
 
@@ -194,11 +195,11 @@ public sealed class MarsMonitorScreen2D : MonoBehaviour
             int row = i / 2;
             var card = new Rect(cardsX + column * (cardWidth + gap),
                 summaryRect.y + 42f + row * (cardHeight + gap), cardWidth, cardHeight);
-            DrawRect(card, new Color(0.075f, 0.065f, 0.075f, 1f));
+            MarsMissionUIArt.DrawCard(card, new Color(0.28f, 0.67f, 0.61f, 1f), 0.12f);
             GUI.Label(new Rect(card.x + 10f, card.y + 4f, card.width - 20f, 22f), reading.Item1, smallStyle);
             GUI.Label(new Rect(card.x + 10f, card.y + 23f, card.width - 20f, 29f), reading.Item2, valueStyle);
-            DrawRect(new Rect(card.x + 10f, card.yMax - 8f, card.width - 20f, 3f), new Color(0.31f, 0.22f, 0.20f, 1f));
-            DrawRect(new Rect(card.x + 10f, card.yMax - 8f, (card.width - 20f) * reading.Item3, 3f), new Color(1f, 0.62f, 0.34f, 1f));
+            MarsMissionUIArt.DrawProgress(new Rect(card.x + 10f, card.yMax - 10f, card.width - 20f, 5f),
+                reading.Item3, new Color(0.97f, 0.51f, 0.20f, 1f), Time.unscaledTime * 0.35f + i * 0.12f);
         }
     }
 
@@ -218,13 +219,13 @@ public sealed class MarsMonitorScreen2D : MonoBehaviour
 
     private void DrawTelemetryChart(Rect rect, string panelTitle)
     {
-        DrawRect(rect, new Color(0.075f, 0.065f, 0.075f, 1f));
+        MarsMissionUIArt.DrawCard(rect, new Color(0.32f, 0.72f, 0.66f, 1f), 0.25f);
         bool waterMode = IsWaterMonitor(panelTitle);
         bool cropMode = !waterMode && IsCropMonitor(panelTitle);
         string chartTitle = waterMode ? "CIRCUITO DE AGUA Y NUTRIENTES"
             : cropMode ? "SENSORES DE LA ZONA RADICULAR" : "CONDICIONES AMBIENTALES DEL MÓDULO";
         GUI.Label(new Rect(rect.x + 18f, rect.y + 8f, rect.width - 150f, 32f), chartTitle, valueStyle);
-        DrawRect(new Rect(rect.xMax - 128f, rect.y + 14f, 110f, 22f), new Color(0.35f, 0.19f, 0.12f, 1f));
+        MarsMissionUIArt.DrawCard(new Rect(rect.xMax - 128f, rect.y + 14f, 110f, 22f), new Color(0.98f, 0.63f, 0.25f, 1f), 0.2f);
         GUI.Label(new Rect(rect.xMax - 124f, rect.y + 12f, 104f, 24f), "SIMULADO", smallStyle);
 
         TrendSeries[] series = GetTrendSeries(waterMode, cropMode);
@@ -237,7 +238,7 @@ public sealed class MarsMonitorScreen2D : MonoBehaviour
         }
 
         var plot = new Rect(rect.x + 64f, rect.y + 75f, rect.width - 84f, rect.height - 117f);
-        Color grid = new Color(0.33f, 0.45f, 0.47f, 0.55f);
+        Color grid = new Color(0.55f, 0.62f, 0.61f, 0.44f);
         for (int i = 0; i <= 4; i++)
         {
             float y = plot.y + plot.height * i / 4f;
@@ -247,7 +248,7 @@ public sealed class MarsMonitorScreen2D : MonoBehaviour
         for (int i = 0; i <= 6; i++)
         {
             float x = plot.x + plot.width * i / 6f;
-            DrawRect(new Rect(x, plot.y, 1f, plot.height), new Color(0.24f, 0.34f, 0.36f, 0.45f));
+            DrawRect(new Rect(x, plot.y, 1f, plot.height), new Color(0.65f, 0.69f, 0.67f, 0.32f));
         }
 
         foreach (var line in series)
@@ -306,6 +307,12 @@ public sealed class MarsMonitorScreen2D : MonoBehaviour
         }
         Vector2 first = TrendPoint(plot, 0, series.Values[0], series.Values.Length);
         DrawRect(new Rect(first.x - 3.5f, first.y - 3.5f, 7f, 7f), series.Color);
+        Vector2 latest = TrendPoint(plot, series.Values.Length - 1, series.Values[series.Values.Length - 1], series.Values.Length);
+        float pulse = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 4f);
+        float haloSize = 10f + pulse * 7f;
+        DrawRect(new Rect(latest.x - haloSize * 0.5f, latest.y - haloSize * 0.5f, haloSize, haloSize),
+            new Color(series.Color.r, series.Color.g, series.Color.b, 0.18f + pulse * 0.16f));
+        DrawRect(new Rect(latest.x - 3.5f, latest.y - 3.5f, 7f, 7f), series.Color);
     }
 
     private static Vector2 TrendPoint(Rect plot, int index, float value, int count)
@@ -350,14 +357,13 @@ public sealed class MarsMonitorScreen2D : MonoBehaviour
     {
         if (headerStyle != null) return;
         headerStyle = new GUIStyle(GUI.skin.label) { fontSize = Mathf.Clamp(Screen.height / 36, 22, 34), fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleLeft, wordWrap = true };
-        headerStyle.normal.textColor = new Color(1f, 0.94f, 0.82f);
+        headerStyle.normal.textColor = new Color(0.16f, 0.21f, 0.24f);
         bodyStyle = new GUIStyle(GUI.skin.label) { fontSize = Mathf.Clamp(Screen.height / 62, 15, 22), alignment = TextAnchor.UpperLeft, wordWrap = true, padding = new RectOffset(4, 8, 4, 4) };
-        bodyStyle.normal.textColor = new Color(0.91f, 0.88f, 0.83f);
+        bodyStyle.normal.textColor = new Color(0.25f, 0.30f, 0.32f);
         smallStyle = new GUIStyle(GUI.skin.label) { fontSize = Mathf.Clamp(Screen.height / 76, 13, 18), alignment = TextAnchor.MiddleLeft, wordWrap = true };
-        smallStyle.normal.textColor = new Color(0.79f, 0.81f, 0.81f);
+        smallStyle.normal.textColor = new Color(0.40f, 0.45f, 0.45f);
         valueStyle = new GUIStyle(GUI.skin.label) { fontSize = Mathf.Clamp(Screen.height / 56, 16, 23), fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleLeft, wordWrap = true };
-        valueStyle.normal.textColor = new Color(1f, 0.67f, 0.35f);
-        buttonStyle = new GUIStyle(GUI.skin.button) { fontSize = Mathf.Clamp(Screen.height / 75, 13, 18), fontStyle = FontStyle.Bold };
+        valueStyle.normal.textColor = new Color(0.73f, 0.34f, 0.12f);
     }
 
     private static Texture2D WhitePixel

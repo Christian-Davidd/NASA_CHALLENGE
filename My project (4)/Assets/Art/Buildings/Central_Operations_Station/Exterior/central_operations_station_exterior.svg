@@ -1,0 +1,192 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2048" height="1152" viewBox="0 0 2048 1152">
+  <defs>
+    <linearGradient id="hull" x1="0" y1="0" x2="0.08" y2="1">
+      <stop offset="0" stop-color="#fffdf4"/><stop offset="0.58" stop-color="#f0eee5"/><stop offset="1" stop-color="#d8d6ce"/>
+    </linearGradient>
+    <linearGradient id="hullSide" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f5f2e9"/><stop offset="1" stop-color="#c9c8c1"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#536a70"/><stop offset="0.4" stop-color="#263a40"/><stop offset="1" stop-color="#172328"/>
+    </linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d6d7d1"/><stop offset="0.48" stop-color="#8e9391"/><stop offset="1" stop-color="#666c6b"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f1c66a"/><stop offset="1" stop-color="#c58a35"/>
+    </linearGradient>
+    <filter id="groundShadow" x="-20%" y="-70%" width="140%" height="250%">
+      <feGaussianBlur stdDeviation="23"/>
+    </filter>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="9" result="blur"/>
+      <feOffset dy="13" result="offset"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.30"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <g id="bolt">
+      <circle r="13" fill="#a5a8a3" stroke="#62696a" stroke-width="6"/>
+      <circle r="5" fill="#586063"/>
+    </g>
+    <g id="window">
+      <rect width="110" height="104" rx="27" fill="#667071" stroke="#596163" stroke-width="9"/>
+      <rect x="12" y="11" width="86" height="80" rx="20" fill="url(#glass)" stroke="#d8d7cd" stroke-width="6"/>
+      <path d="M28 32 Q48 15 71 22" fill="none" stroke="#a5b4b2" stroke-opacity=".55" stroke-width="5" stroke-linecap="round"/>
+    </g>
+  </defs>
+
+  <!-- Ground contact shadow; transparent outside the station. -->
+  <ellipse cx="1030" cy="965" rx="870" ry="105" fill="#382b23" opacity=".48" filter="url(#groundShadow)"/>
+
+  <!-- Landing plinth and load-spreading feet. -->
+  <g stroke="#5f6667" stroke-linejoin="round">
+    <path d="M268 835 H1790 L1854 900 V946 H214 V899 Z" fill="url(#metal)" stroke-width="19"/>
+    <path d="M293 858 H1771 L1807 895 H255 Z" fill="#aeb0a9" stroke-width="8"/>
+    <path d="M318 897 H1740 V925 H318 Z" fill="#666d6d" stroke-width="7"/>
+    <g fill="url(#metal)" stroke-width="12">
+      <path d="M405 884 H465 V986 H397 Q385 986 389 972 Z"/>
+      <path d="M748 884 H811 V986 H739 Q727 986 731 972 Z"/>
+      <path d="M1288 884 H1351 V986 H1279 Q1267 986 1271 972 Z"/>
+      <path d="M1600 884 H1663 V986 H1591 Q1579 986 1583 972 Z"/>
+    </g>
+    <path d="M365 985 H491 M714 985 H834 M1265 985 H1380 M1576 985 H1689" fill="none" stroke="#555d5e" stroke-width="22" stroke-linecap="round"/>
+  </g>
+
+  <!-- Rear utility spine: environmental control, power storage and thermal rejection. -->
+  <g filter="url(#softShadow)" stroke="#62696a" stroke-linejoin="round">
+    <rect x="1284" y="343" width="534" height="366" rx="105" fill="url(#hullSide)" stroke-width="20"/>
+    <path d="M1332 365 V687 M1773 383 V668" fill="none" stroke="#b4b5af" stroke-width="17"/>
+    <path d="M1388 409 H1704 V621 H1388 Z" fill="#e7e5dc" stroke-width="12"/>
+    <rect x="1428" y="449" width="247" height="132" rx="22" fill="#4b5556" stroke-width="10"/>
+    <rect x="1446" y="466" width="211" height="96" rx="12" fill="url(#glass)" stroke="#bac0b8" stroke-width="6"/>
+    <path d="M1467 533 H1494 V512 H1521 V490 H1548 V521 H1575 V478 H1602 V508 H1634" fill="none" stroke="#62c6cf" stroke-width="8" stroke-linejoin="round"/>
+    <circle cx="1469" cy="605" r="10" fill="#57c4c4" stroke="none"/>
+    <circle cx="1504" cy="605" r="10" fill="#e9b84e" stroke="none"/>
+    <circle cx="1539" cy="605" r="10" fill="#c94b3f" stroke="none"/>
+    <!-- heat exchanger grille -->
+    <rect x="1689" y="441" width="84" height="180" rx="17" fill="#858b89" stroke-width="9"/>
+    <g stroke="#d8d8d0" stroke-width="7">
+      <path d="M1706 461 V600 M1724 461 V600 M1742 461 V600 M1760 461 V600"/>
+    </g>
+    <path d="M1378 650 H1654" stroke="#a6aaa5" stroke-width="9"/>
+  </g>
+
+  <!-- Main pressurized operations and habitation hull. -->
+  <g filter="url(#softShadow)" stroke="#606768" stroke-linejoin="round">
+    <path d="M426 348 Q426 240 540 240 H1335 Q1457 240 1457 354 V779 Q1457 858 1372 858 H509 Q426 858 426 778 Z" fill="url(#hull)" stroke-width="23"/>
+    <path d="M468 358 Q468 282 545 282 H1325 Q1415 282 1415 360 V760 Q1415 813 1361 813 H522 Q468 813 468 760 Z" fill="none" stroke="#ffffff" stroke-opacity=".76" stroke-width="13"/>
+
+    <!-- Pressure-shell ribs and reinforced seams. -->
+    <path d="M555 270 Q520 390 540 799 M1309 266 Q1350 420 1328 803" fill="none" stroke="#babcb6" stroke-width="20"/>
+    <path d="M709 267 V815 M1161 267 V815" fill="none" stroke="#cfcec5" stroke-width="13"/>
+    <path d="M715 275 V810 M1155 275 V810" fill="none" stroke="#ffffff" stroke-opacity=".75" stroke-width="4"/>
+
+    <!-- Low-profile service panels. -->
+    <rect x="582" y="609" width="214" height="137" rx="20" fill="#e1dfd5" stroke-width="10"/>
+    <rect x="601" y="626" width="177" height="103" rx="12" fill="#343e42" stroke="#a5aaa4" stroke-width="7"/>
+    <path d="M626 654 H752 M626 673 H721 M626 692 H739" stroke="#9dc2c0" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="750" cy="708" r="8" fill="#58c4c2" stroke="none"/>
+    <rect x="1094" y="608" width="176" height="138" rx="19" fill="#e4e2d9" stroke-width="10"/>
+    <path d="M1125 635 H1239 M1125 658 H1239 M1125 681 H1239 M1125 704 H1239" stroke="#7d8583" stroke-width="9" stroke-linecap="round"/>
+    <path d="M1115 725 H1252" stroke="#b6463c" stroke-width="9"/>
+
+    <!-- Protected observation windows. -->
+    <use href="#window" x="841" y="378"/>
+    <use href="#window" x="1003" y="378"/>
+    <rect x="824" y="523" width="305" height="132" rx="24" fill="#f1eee5" stroke="#777e7d" stroke-width="10"/>
+    <text x="976" y="573" text-anchor="middle" fill="#425a60" font-family="Arial,sans-serif" font-size="27" font-weight="700" letter-spacing="2">CENTRAL HABITAT</text>
+    <text x="976" y="613" text-anchor="middle" fill="#777f7c" font-family="Arial,sans-serif" font-size="19" font-weight="700" letter-spacing="3">PRESSURIZED MODULE</text>
+
+    <!-- Roof-mounted protected communication feed-through, not a separate asset. -->
+    <path d="M947 239 V193 Q947 173 967 173 H1044 Q1064 173 1064 193 V240" fill="url(#metal)" stroke-width="13"/>
+    <rect x="970" y="184" width="71" height="37" rx="12" fill="#465356" stroke="#d5d6ce" stroke-width="6"/>
+    <circle cx="991" cy="202" r="6" fill="#62c8ce" stroke="none"/><circle cx="1019" cy="202" r="6" fill="#e6b849" stroke="none"/>
+
+    <!-- bolted perimeter -->
+    <use href="#bolt" x="520" y="330"/><use href="#bolt" x="1362" y="330"/>
+    <use href="#bolt" x="520" y="770"/><use href="#bolt" x="1362" y="770"/>
+    <use href="#bolt" x="791" y="272"/><use href="#bolt" x="1075" y="272"/>
+    <use href="#bolt" x="791" y="821"/><use href="#bolt" x="1075" y="821"/>
+  </g>
+
+  <!-- Habitat-to-service pressure collars and two small living/operations pods. -->
+  <g stroke="#606768" stroke-linejoin="round" filter="url(#softShadow)">
+    <!-- Left crew pod -->
+    <path d="M226 412 Q226 331 307 331 H473 V797 H307 Q226 797 226 716 Z" fill="url(#hullSide)" stroke-width="21"/>
+    <path d="M257 418 Q257 365 312 365 H435 V765 H312 Q257 765 257 711 Z" fill="none" stroke="#ffffff" stroke-width="12"/>
+    <path d="M278 383 V744 M414 377 V753" fill="none" stroke="#b5b7b0" stroke-width="11"/>
+    <use href="#window" x="303" y="407"/>
+    <rect x="291" y="555" width="122" height="165" rx="19" fill="#d8d8d0" stroke-width="11"/>
+    <rect x="307" y="570" width="91" height="136" rx="14" fill="url(#glass)" stroke="#f8f6ef" stroke-width="7"/>
+    <path d="M314 585 H391 V605 H314 Z" fill="#d1a248" stroke="none"/>
+    <path d="M328 632 H378 M328 651 H378" stroke="#9baead" stroke-width="5"/>
+    <circle cx="383" cy="686" r="7" fill="#58c4c2" stroke="none"/>
+    <!-- broad pressure collar -->
+    <rect x="438" y="448" width="71" height="220" rx="32" fill="url(#metal)" stroke-width="11"/>
+    <path d="M454 464 V652 M493 464 V652" stroke="#e1e1da" stroke-width="7"/>
+    <use href="#bolt" x="474" y="436"/><use href="#bolt" x="474" y="680"/>
+
+    <!-- Right communications / mission support cabin -->
+    <path d="M1460 407 Q1460 340 1528 340 H1736 Q1806 340 1806 410 V729 Q1806 799 1736 799 H1528 Q1460 799 1460 729 Z" fill="url(#hullSide)" stroke-width="21"/>
+    <path d="M1496 414 Q1496 376 1533 376 H1727 Q1770 376 1770 417 V722 Q1770 762 1728 762 H1533 Q1496 762 1496 722 Z" fill="none" stroke="#fffdf6" stroke-width="12"/>
+    <path d="M1517 392 V743 M1747 392 V743" stroke="#b7b9b2" stroke-width="12"/>
+    <rect x="1540" y="437" width="170" height="111" rx="23" fill="#626b6c" stroke-width="9"/>
+    <rect x="1553" y="449" width="143" height="86" rx="15" fill="url(#glass)" stroke="#d7d8cf" stroke-width="6"/>
+    <path d="M1571 507 L1593 487 L1611 496 L1631 468 L1651 491 L1677 477" fill="none" stroke="#67c7cb" stroke-width="6"/>
+    <rect x="1545" y="585" width="164" height="111" rx="17" fill="#e1dfd5" stroke-width="9"/>
+    <path d="M1571 610 H1682 M1571 634 H1682 M1571 658 H1682" stroke="#838986" stroke-width="8" stroke-linecap="round"/>
+    <path d="M1540 714 H1708" stroke="#b94b3d" stroke-width="9"/>
+    <!-- Service collar -->
+    <rect x="1415" y="461" width="81" height="226" rx="34" fill="url(#metal)" stroke-width="11"/>
+    <path d="M1435 479 V668 M1476 479 V668" stroke="#e2e2da" stroke-width="7"/>
+    <use href="#bolt" x="1454" y="448"/><use href="#bolt" x="1454" y="700"/>
+  </g>
+
+  <!-- Single forward-facing personnel airlock, directly attached to the main hull. -->
+  <g stroke="#596162" stroke-linejoin="round" filter="url(#softShadow)">
+    <path d="M633 777 V850 H1119 V777" fill="#b8bbb4" stroke-width="15"/>
+    <path d="M684 846 V911 M1066 846 V911" stroke="#626a6a" stroke-width="20"/>
+    <path d="M642 911 H1110" stroke="#5d6565" stroke-width="22" stroke-linecap="round"/>
+    <path d="M727 775 Q727 703 799 703 H953 Q1024 703 1024 775 V861 H727 Z" fill="url(#hull)" stroke-width="18"/>
+    <path d="M752 778 Q752 728 800 728 H952 Q999 728 999 778 V836 H752 Z" fill="#d9d9d1" stroke-width="10"/>
+    <rect x="788" y="738" width="176" height="117" rx="45" fill="#555f61" stroke="#e4e3db" stroke-width="12"/>
+    <rect x="804" y="751" width="144" height="91" rx="37" fill="url(#glass)" stroke="#bfc5bf" stroke-width="7"/>
+    <path d="M824 766 Q867 739 913 766" fill="none" stroke="#d1b06c" stroke-width="5"/>
+    <rect x="802" y="849" width="148" height="20" rx="8" fill="#b94a40" stroke="#555e60" stroke-width="5"/>
+    <path d="M775 716 H975" stroke="#d9d9d0" stroke-width="10"/>
+    <use href="#bolt" x="762" y="735"/><use href="#bolt" x="987" y="735"/>
+    <!-- Entry access steps and short fixed ramp -->
+    <path d="M848 868 L831 929 H906 L889 868" fill="#afb2ac" stroke-width="10"/>
+    <path d="M818 934 H919 M811 951 H926 M802 968 H935" fill="none" stroke="#616969" stroke-width="11" stroke-linecap="round"/>
+    <path d="M790 930 L766 979 M947 930 L971 979" fill="none" stroke="#777f7e" stroke-width="9" stroke-linecap="round"/>
+  </g>
+
+  <!-- Utility cabling and external power/thermal details kept attached to the structure. -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M1167 857 V900 H1402 V850" stroke="#bf4c3f" stroke-width="12"/>
+    <path d="M1198 857 V881 H1372 V850" stroke="#39708d" stroke-width="12"/>
+    <path d="M1167 900 H1402" stroke="#e5e2d7" stroke-width="4"/>
+    <path d="M554 853 V891 H665 V854" stroke="#d2a345" stroke-width="12"/>
+  </g>
+  <g stroke="#606768" stroke-linejoin="round">
+    <rect x="1837" y="626" width="74" height="166" rx="18" fill="url(#metal)" stroke-width="10"/>
+    <rect x="1850" y="643" width="48" height="125" rx="10" fill="#465153" stroke="#d4d4cb" stroke-width="6"/>
+    <g stroke="#c4c8c0" stroke-width="6"><path d="M1858 661 H1890 M1858 677 H1890 M1858 693 H1890 M1858 709 H1890 M1858 725 H1890 M1858 741 H1890"/></g>
+    <path d="M1834 808 H1915 M1847 791 V821 M1900 791 V821" fill="none" stroke-width="10"/>
+  </g>
+
+  <!-- Warm status lights and understated exterior color cues. -->
+  <g>
+    <circle cx="320" cy="739" r="12" fill="#57c5c3" stroke="#596162" stroke-width="5"/>
+    <circle cx="355" cy="739" r="12" fill="url(#gold)" stroke="#596162" stroke-width="5"/>
+    <circle cx="390" cy="739" r="12" fill="#c94b3f" stroke="#596162" stroke-width="5"/>
+    <path d="M627 796 H1113" stroke="#b7473e" stroke-width="13"/>
+    <path d="M627 813 H1113" stroke="#315f7d" stroke-width="7"/>
+  </g>
+
+  <!-- Visible fasteners on the utility wing and footings. -->
+  <use href="#bolt" x="1513" y="383"/><use href="#bolt" x="1752" y="383"/>
+  <use href="#bolt" x="1513" y="755"/><use href="#bolt" x="1752" y="755"/>
+  <use href="#bolt" x="405" y="874"/><use href="#bolt" x="780" y="874"/>
+  <use href="#bolt" x="1319" y="874"/><use href="#bolt" x="1631" y="874"/>
+</svg>

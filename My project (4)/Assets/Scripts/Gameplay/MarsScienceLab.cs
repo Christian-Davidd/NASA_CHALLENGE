@@ -4,7 +4,6 @@ using UnityEngine;
 internal sealed class MarsScienceLab
 {
     private static readonly Color Ink = new(0.07f, 0.15f, 0.20f);
-    private static readonly Color Light = new(0.96f, 0.97f, 0.92f);
     private static readonly string[] SignalClues = { "Cadena más corta", "Cadena intermedia", "Cadena más larga" };
     private static readonly string[] SamCompounds = { "Decano · 10 carbonos", "Undecano · 11 carbonos", "Dodecano · 12 carbonos" };
     private static readonly string[] GasClues = { "Vapor de agua", "Un carbono y dos oxígenos", "Dos oxígenos unidos" };
@@ -17,6 +16,7 @@ internal sealed class MarsScienceLab
     private GUIStyle buttonStyle;
     private GUIStyle sliderStyle;
     private GUIStyle thumbStyle;
+    private Texture2D clearButtonTexture;
     private MarsDiscovery specimen;
     private Texture2D specimenImage;
     private int variant;
@@ -81,7 +81,7 @@ internal sealed class MarsScienceLab
         Color previousColor = GUI.color;
         int previousDepth = GUI.depth;
         GUI.depth = -20;
-        GUI.color = new Color(0f, 0.03f, 0.05f, 0.82f);
+        GUI.color = new Color(0.08f, 0.07f, 0.06f, 0.46f);
         GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), Texture2D.whiteTexture);
         GUI.color = Color.white;
         GUI.matrix = previousMatrix * Matrix4x4.TRS(
@@ -90,8 +90,9 @@ internal sealed class MarsScienceLab
 
         try
         {
-            DrawArt(1, new Rect(0, 0, width, height));
-            DrawArt(5, new Rect(16, 14, 688, 55));
+            float pulse = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 2.6f);
+            MarsMissionUIArt.DrawCard(new Rect(0, 0, width, height), new Color(0.99f, 0.55f, 0.23f, 1f), pulse * 0.28f);
+            MarsMissionUIArt.DrawCard(new Rect(16, 14, 688, 55), new Color(0.25f, 0.68f, 0.72f, 1f), pulse * 0.18f);
             int instrumentIcon = specimen.instrument == "MAHLI" ? 31 : specimen.instrument == "SAM" ? 32 : 33;
             DrawArt(instrumentIcon, new Rect(29, 22, 37, 37), ScaleMode.ScaleToFit);
             GUI.Label(new Rect(77, 24, 557, 35), $"{specimen.instrument} · {specimen.title}", titleStyle);
@@ -156,7 +157,7 @@ internal sealed class MarsScienceLab
     private void DrawMahli()
     {
         var preview = new Rect(107, 112, 506, 240);
-        DrawArt(3, preview);
+        MarsMissionUIArt.DrawCard(preview, new Color(0.27f, 0.69f, 0.74f, 1f), 0.14f);
         if (specimenImage != null)
         {
             GUI.color = Color.Lerp(new Color(0.60f, 0.70f, 0.75f), Color.white,
@@ -178,7 +179,7 @@ internal sealed class MarsScienceLab
 
     private void DrawSam()
     {
-        DrawArt(4, new Rect(30, 113, 660, 154));
+        MarsMissionUIArt.DrawCard(new Rect(30, 113, 660, 154), new Color(0.26f, 0.68f, 0.72f, 1f), 0.12f);
         DrawArt(20, new Rect(52, 125, 616, 109));
         DrawArt(21, new Rect(53, 126, 613, 108));
         GUI.Label(new Rect(46, 236, 626, 25), "Tres señales · simulación educativa", textStyle);
@@ -197,7 +198,7 @@ internal sealed class MarsScienceLab
 
     private void DrawCheMin()
     {
-        DrawArt(4, new Rect(138, 109, 444, 153));
+        MarsMissionUIArt.DrawCard(new Rect(138, 109, 444, 153), new Color(0.26f, 0.68f, 0.72f, 1f), 0.12f);
         GUI.Label(new Rect(156, 116, 410, 26), "Patrón de referencia · simulación educativa", textStyle);
         DrawArt(22, new Rect(166, 144, 388, 102));
 
@@ -222,10 +223,15 @@ internal sealed class MarsScienceLab
 
     private bool Button(Rect rect, string text, int artId)
     {
-        Texture2D background = GetArt(!GUI.enabled && artId == 8 ? 10 : artId);
-        buttonStyle.normal.background = background;
-        buttonStyle.hover.background = background;
-        buttonStyle.active.background = GetArt(artId == 8 ? 9 : artId);
+        bool enabled = GUI.enabled;
+        Color accent = !enabled ? new Color(0.63f, 0.68f, 0.68f, 1f)
+            : artId == 8 || artId == 9 ? new Color(0.99f, 0.53f, 0.20f, 1f)
+            : new Color(0.25f, 0.68f, 0.72f, 1f);
+        float pulse = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 3f + rect.x * 0.01f);
+        MarsMissionUIArt.DrawCard(rect, accent, enabled ? pulse * 0.18f : 0f);
+        buttonStyle.normal.background = clearButtonTexture;
+        buttonStyle.hover.background = clearButtonTexture;
+        buttonStyle.active.background = clearButtonTexture;
         return GUI.Button(rect, text, buttonStyle);
     }
 
@@ -255,7 +261,10 @@ internal sealed class MarsScienceLab
     {
         if (titleStyle != null) return;
 
-        textStyle = new GUIStyle(GUI.skin.label) { fontSize = 16, wordWrap = true, normal = { textColor = Light } };
+        clearButtonTexture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+        clearButtonTexture.SetPixel(0, 0, new Color(0f, 0f, 0f, 0f));
+        clearButtonTexture.Apply();
+        textStyle = new GUIStyle(GUI.skin.label) { fontSize = 16, wordWrap = true, normal = { textColor = Ink } };
         titleStyle = new GUIStyle(textStyle) { fontSize = 23, fontStyle = FontStyle.Bold, wordWrap = false };
         buttonStyle = new GUIStyle(GUI.skin.button)
         {
