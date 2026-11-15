@@ -1006,20 +1006,37 @@ public sealed class CommsTowerCMEEvent : MonoBehaviour
 
         float gx = sp.x;
         float gy = Screen.height - sp.y;
-        float w = Mathf.Max(235f, Mathf.Max(title.Length * 7.8f, subtitle.Length * 6.8f) + 24f);
-        float h = 40f;
+        Vector2 titleSize = worldTitleStyle.CalcSize(new GUIContent(title));
+        Vector2 subtitleSize = worldSubStyle.CalcSize(new GUIContent(subtitle));
+
+        const float paddingX = 12f;
+        const float paddingY = 6f;
+        float w = Mathf.Max(235f, Mathf.Max(titleSize.x, subtitleSize.x) + paddingX * 2f);
+        float titleLineHeight = Mathf.Ceil(titleSize.y);
+        float subtitleLineHeight = Mathf.Ceil(subtitleSize.y);
+        float h = paddingY * 2f + titleLineHeight + subtitleLineHeight + 3f;
         Rect rect = new Rect(gx - w * 0.5f, gy - h * 0.5f, w, h);
 
         Color prev = GUI.color;
         GUI.color = new Color(0.05f, 0.08f, 0.13f, 0.88f);
         GUI.DrawTexture(rect, solidTex);
         GUI.color = accent;
-        GUI.DrawTexture(new Rect(rect.x, rect.y, rect.width, 3f), solidTex);
+        GUI.DrawTexture(new Rect(rect.x, rect.y, rect.width, 4f), solidTex);
         GUI.color = prev;
 
         worldTitleStyle.normal.textColor = accent;
-        GUI.Label(new Rect(rect.x + 6f, rect.y + 4f, rect.width - 12f, 18f), title, worldTitleStyle);
-        GUI.Label(new Rect(rect.x + 6f, rect.y + 20f, rect.width - 12f, 16f), subtitle, worldSubStyle);
+        GUI.Label(
+            new Rect(rect.x + paddingX, rect.y + paddingY, rect.width - paddingX * 2f, titleLineHeight),
+            title,
+            worldTitleStyle);
+        GUI.Label(
+            new Rect(
+                rect.x + paddingX,
+                rect.y + paddingY + titleLineHeight + 3f,
+                rect.width - paddingX * 2f,
+                subtitleLineHeight),
+            subtitle,
+            worldSubStyle);
     }
 
     private void DibujarMarcoPaso(Rect rect, bool completado, bool esActual, float scale)
@@ -1699,8 +1716,8 @@ public sealed class CommsTowerCMEEvent : MonoBehaviour
 
     private void DibujarTarjetaEducativa()
     {
-        const float cardW = 600f;
-        const float cardH = 345f;
+        const float cardW = 800f;
+        const float cardH = 545f;
         Rect cardRect = new Rect((Screen.width - cardW) * 0.5f, (Screen.height - cardH) * 0.5f, cardW, cardH);
 
         Color prev = GUI.color;
@@ -1711,16 +1728,16 @@ public sealed class CommsTowerCMEEvent : MonoBehaviour
         GUI.DrawTexture(new Rect(cardRect.x, cardRect.y, cardRect.width, 4f), solidTex);
         GUI.color = prev;
 
-        headerStyle.fontSize = 15;
+        headerStyle.fontSize = 35;
         headerStyle.normal.textColor = new Color(0.45f, 0.95f, 1f, 1f);
         GUI.Label(new Rect(cardRect.x + 20f, cardRect.y + 14f, cardRect.width - 40f, 28f), tarjetaTitulo, headerStyle);
         bodyStyle.alignment = TextAnchor.MiddleLeft;
         bodyStyle.fontStyle = FontStyle.Normal;
-        bodyStyle.fontSize = 13;
+        bodyStyle.fontSize = 25;
         bodyStyle.normal.textColor = new Color(0.92f, 0.96f, 1f, 1f);
         GUI.Label(new Rect(cardRect.x + 22f, cardRect.y + 50f, cardRect.width - 44f, 230f), tarjetaCuerpo, bodyStyle);
 
-        buttonStyle.fontSize = 13;
+        buttonStyle.fontSize = 16;
         if (GUI.Button(new Rect(cardRect.x + (cardRect.width - 180f) * 0.5f, cardRect.y + cardRect.height - 50f, 180f, 36f), "¡Entendido! Continuar", buttonStyle))
         {
             mostrarTarjetaEducativa = false;
@@ -1832,8 +1849,10 @@ public sealed class CommsTowerCMEEvent : MonoBehaviour
             worldTitleStyle = new GUIStyle(GUI.skin.label)
             {
                 alignment = TextAnchor.MiddleCenter,
-                fontSize = 11,
-                fontStyle = FontStyle.Bold
+                fontSize = 22,
+                fontStyle = FontStyle.Bold,
+                wordWrap = false,
+                clipping = TextClipping.Overflow
             };
         }
 
@@ -1842,7 +1861,9 @@ public sealed class CommsTowerCMEEvent : MonoBehaviour
             worldSubStyle = new GUIStyle(GUI.skin.label)
             {
                 alignment = TextAnchor.MiddleCenter,
-                fontSize = 10,
+                fontSize = 18,
+                wordWrap = false,
+                clipping = TextClipping.Overflow,
                 normal = { textColor = new Color(0.9f, 0.95f, 1f, 0.95f) }
             };
         }

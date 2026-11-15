@@ -180,8 +180,19 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
         float guiY = Screen.height - screenPos.y;
 
         bool hasSubtitle = !string.IsNullOrEmpty(labelSubtitle);
-        float boxWidth = Mathf.Max(165f, Mathf.Max(labelTitle.Length * 7.8f, hasSubtitle ? labelSubtitle.Length * 6.8f : 0f) + 22f);
-        float boxHeight = hasSubtitle ? 42f : 26f;
+        Vector2 titleSize = titleStyle.CalcSize(new GUIContent(labelTitle));
+        Vector2 subtitleSize = hasSubtitle
+            ? subtitleStyle.CalcSize(new GUIContent(labelSubtitle))
+            : Vector2.zero;
+
+        const float paddingX = 12f;
+        const float paddingY = 6f;
+        float boxWidth = Mathf.Max(200f, Mathf.Max(titleSize.x, subtitleSize.x) + paddingX * 2f);
+        float titleLineHeight = Mathf.Ceil(titleSize.y);
+        float subtitleLineHeight = hasSubtitle ? Mathf.Ceil(subtitleSize.y) : 0f;
+        float boxHeight = hasSubtitle
+            ? paddingY * 2f + titleLineHeight + subtitleLineHeight + 3f
+            : paddingY * 2f + titleLineHeight;
 
         Rect boxRect = new Rect(guiX - boxWidth * 0.5f, guiY - boxHeight * 0.5f, boxWidth, boxHeight);
 
@@ -190,15 +201,25 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
         GUI.DrawTexture(boxRect, labelBgTex);
 
         GUI.color = new Color(squareColor.r, squareColor.g, squareColor.b, 0.95f);
-        GUI.DrawTexture(new Rect(boxRect.x, boxRect.y, boxRect.width, 3f), labelBgTex);
+        GUI.DrawTexture(new Rect(boxRect.x, boxRect.y, boxRect.width, 4f), labelBgTex);
         GUI.color = prevColor;
 
         titleStyle.normal.textColor = labelTextColor;
-        GUI.Label(new Rect(boxRect.x + 4f, boxRect.y + 4f, boxRect.width - 8f, 20f), labelTitle, titleStyle);
+        GUI.Label(
+            new Rect(boxRect.x + paddingX, boxRect.y + paddingY, boxRect.width - paddingX * 2f, titleLineHeight),
+            labelTitle,
+            titleStyle);
 
         if (hasSubtitle)
         {
-            GUI.Label(new Rect(boxRect.x + 4f, boxRect.y + 21f, boxRect.width - 8f, 18f), labelSubtitle, subtitleStyle);
+            GUI.Label(
+                new Rect(
+                    boxRect.x + paddingX,
+                    boxRect.y + paddingY + titleLineHeight + 3f,
+                    boxRect.width - paddingX * 2f,
+                    subtitleLineHeight),
+                labelSubtitle,
+                subtitleStyle);
         }
     }
 
@@ -216,8 +237,10 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
             titleStyle = new GUIStyle(GUI.skin.label)
             {
                 alignment = TextAnchor.MiddleCenter,
-                fontSize = 12,
+                fontSize = 22,
                 fontStyle = FontStyle.Bold,
+                wordWrap = false,
+                clipping = TextClipping.Overflow,
                 normal = { textColor = Color.white }
             };
         }
@@ -227,8 +250,10 @@ public sealed class MarsWorldPlaceholder2D : MonoBehaviour
             subtitleStyle = new GUIStyle(GUI.skin.label)
             {
                 alignment = TextAnchor.MiddleCenter,
-                fontSize = 11,
+                fontSize = 18,
                 fontStyle = FontStyle.Normal,
+                wordWrap = false,
+                clipping = TextClipping.Overflow,
                 normal = { textColor = new Color(0.85f, 0.92f, 1f, 0.95f) }
             };
         }
