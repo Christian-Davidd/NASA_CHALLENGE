@@ -157,8 +157,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   m_RenderShadows: 1
   m_RequiresDepthTextureOption: 2
   m_RequiresOpaqueTextureOption: 2
@@ -267,8 +267,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aa245e742f8a45a8a3bd36f30dd4f8a6, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   target: {fileID: 0}
   damping: 6
   mapSize: {x: 18, y: 12}
@@ -299,8 +299,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 073797afb82c5a1438f328866b10b3f0, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   m_ComponentVersion: 3
   m_LightType: 4
   m_BlendStyleIndex: 0
@@ -560,7 +560,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 10
+  m_SortingOrder: 8
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: d5000000000040008000000000000005, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -628,14 +628,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000001, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
-  labelTitle: "[GENERADOR MOXIE / ECS O₂]"
-  labelSubtitle: "Mantén [E] para recargar Oxígeno (-⚡)"
+  m_Name: 
+  m_EditorClassIdentifier: 
+  labelTitle: "[GENERADOR MOXIE / ECS O\u2082]"
+  labelSubtitle: "Mant\xE9n [E] para recargar Ox\xEDgeno (-\u26A1)"
   squareColor: {r: 0.26, g: 0.86, b: 1, a: 0.94}
   labelTextColor: {r: 1, g: 1, b: 1, a: 1}
   labelHeightOffset: 1.35
   tintSpriteWithSquareColor: 0
+  showLabelInGame: 1
+  onlyShowNearPlayer: 1
+  detectionRadius: 2
+  playerTag: Player
 --- !u!114 &920000205
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -646,12 +650,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000012, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   stationType: 0
-  labelTitle: "[GENERADOR MOXIE / ECS O₂]"
+  labelTitle: "[GENERADOR MOXIE / ECS O\u2082]"
   activePulseSprite: {fileID: 21300000, guid: d5000000000040008000000000000010, type: 3}
   activePulseOffset: {x: 0, y: 0.05, z: 0}
+  fallbackAstronautPrefab: {fileID: 0}
+  solidObstacleSize: {x: 1.35, y: 0.85}
+  solidObstacleOffset: {x: 0, y: -0.18}
+  escalaPantallaConsola: 1.35
 --- !u!1 &920000300
 GameObject:
   m_ObjectHideFlags: 0
@@ -734,7 +742,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 10
+  m_SortingOrder: 17
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: d5000000000040008000000000000006, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -802,14 +810,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000001, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
-  labelTitle: "[FILTRO UPA (ORINA → AGUA)]"
-  labelSubtitle: "Mantén [E] para filtrar y recuperar Agua"
+  m_Name: 
+  m_EditorClassIdentifier: 
+  labelTitle: "[FILTRO UPA (ORINA \u2192 AGUA)]"
+  labelSubtitle: "Mant\xE9n [E] para filtrar y recuperar Agua"
   squareColor: {r: 0.28, g: 0.65, b: 1, a: 0.94}
   labelTextColor: {r: 1, g: 1, b: 1, a: 1}
   labelHeightOffset: 1.35
   tintSpriteWithSquareColor: 0
+  showLabelInGame: 1
+  onlyShowNearPlayer: 1
+  detectionRadius: 2
+  playerTag: Player
 --- !u!114 &920000305
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -820,12 +832,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000012, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   stationType: 1
-  labelTitle: "[FILTRO UPA (ORINA → AGUA)]"
+  labelTitle: "[FILTRO UPA (ORINA \u2192 AGUA)]"
   activePulseSprite: {fileID: 21300000, guid: d5000000000040008000000000000010, type: 3}
   activePulseOffset: {x: 0, y: 0.05, z: 0}
+  fallbackAstronautPrefab: {fileID: 0}
+  solidObstacleSize: {x: 1.35, y: 0.85}
+  solidObstacleOffset: {x: 0, y: -0.18}
+  escalaPantallaConsola: 1.35
 --- !u!1 &920000400
 GameObject:
   m_ObjectHideFlags: 0
@@ -908,7 +924,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 10
+  m_SortingOrder: 8
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: d5000000000040008000000000000007, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -976,14 +992,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000001, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
-  labelTitle: "[LABORATORIO DE MUESTRAS]"
-  labelSubtitle: "Pulsa [E] para depositar y analizar muestra"
+  m_Name: 
+  m_EditorClassIdentifier: 
+  labelTitle: '[LABORATORIO DE MUESTRAS]'
+  labelSubtitle: Pulsa [E] para depositar y analizar muestra
   squareColor: {r: 0.32, g: 0.96, b: 0.54, a: 0.94}
   labelTextColor: {r: 1, g: 1, b: 1, a: 1}
   labelHeightOffset: 1.35
   tintSpriteWithSquareColor: 0
+  showLabelInGame: 1
+  onlyShowNearPlayer: 1
+  detectionRadius: 2
+  playerTag: Player
 --- !u!114 &920000405
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -994,12 +1014,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000012, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   stationType: 2
-  labelTitle: "[LABORATORIO DE MUESTRAS]"
+  labelTitle: '[LABORATORIO DE MUESTRAS]'
   activePulseSprite: {fileID: 21300000, guid: d5000000000040008000000000000010, type: 3}
   activePulseOffset: {x: 0, y: 0.05, z: 0}
+  fallbackAstronautPrefab: {fileID: 0}
+  solidObstacleSize: {x: 1.35, y: 0.85}
+  solidObstacleOffset: {x: 0, y: -0.18}
+  escalaPantallaConsola: 1.35
 --- !u!1 &920000500
 GameObject:
   m_ObjectHideFlags: 0
@@ -1082,7 +1106,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 10
+  m_SortingOrder: 17
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: d5000000000040008000000000000008, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -1150,14 +1174,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000001, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
-  labelTitle: "[BANCO PLSS / CONTROL TÉRMICO]"
-  labelSubtitle: "Mantén [E] Mantenimiento / [E] Mejorar"
+  m_Name: 
+  m_EditorClassIdentifier: 
+  labelTitle: "[BANCO PLSS / CONTROL T\xC9RMICO]"
+  labelSubtitle: "Mant\xE9n [E] Mantenimiento / [E] Mejorar"
   squareColor: {r: 1, g: 0.65, b: 0.22, a: 0.94}
   labelTextColor: {r: 1, g: 1, b: 1, a: 1}
   labelHeightOffset: 1.35
   tintSpriteWithSquareColor: 0
+  showLabelInGame: 1
+  onlyShowNearPlayer: 1
+  detectionRadius: 2
+  playerTag: Player
 --- !u!114 &920000505
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1168,12 +1196,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000012, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   stationType: 3
-  labelTitle: "[BANCO PLSS / CONTROL TÉRMICO]"
+  labelTitle: "[BANCO PLSS / CONTROL T\xC9RMICO]"
   activePulseSprite: {fileID: 21300000, guid: d5000000000040008000000000000010, type: 3}
   activePulseOffset: {x: 0, y: 0.05, z: 0}
+  fallbackAstronautPrefab: {fileID: 0}
+  solidObstacleSize: {x: 1.35, y: 0.85}
+  solidObstacleOffset: {x: 0, y: -0.18}
+  escalaPantallaConsola: 1.35
 --- !u!1 &920000600
 GameObject:
   m_ObjectHideFlags: 0
@@ -1257,7 +1289,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 10
+  m_SortingOrder: 23
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: d5000000000040008000000000000009, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -1313,7 +1345,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 2.0, y: 1.55}
+  m_Size: {x: 2, y: 1.55}
   m_EdgeRadius: 0
 --- !u!114 &920000604
 MonoBehaviour:
@@ -1325,14 +1357,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000001, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
-  labelTitle: "[ESCOTILLA FRONTAL EVA — SALIDA]"
-  labelSubtitle: "Presiona [E] para salir a la superficie de Marte"
+  m_Name: 
+  m_EditorClassIdentifier: 
+  labelTitle: "[ESCOTILLA FRONTAL EVA \u2014 SALIDA]"
+  labelSubtitle: Presiona [E] para salir a la superficie de Marte
   squareColor: {r: 0.88, g: 0.45, b: 0.25, a: 0.94}
   labelTextColor: {r: 1, g: 1, b: 1, a: 1}
   labelHeightOffset: 1.25
   tintSpriteWithSquareColor: 0
+  showLabelInGame: 0
+  onlyShowNearPlayer: 1
+  detectionRadius: 2
+  playerTag: Player
 --- !u!114 &920000605
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1343,11 +1379,31 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 26a4adda995857e4e9467a95e8c21097, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MarsScenePortal2D
   destinationScene: Mars_Natural_Landscape_01
-  spawnObjectName:
+  spawnObjectName: 
   returnToExterior: 1
+--- !u!114 &920000606
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 920000600}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1000000000040008000000000000012, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stationType: 4
+  labelTitle: "[ESCOTILLA FRONTAL EVA \u2014 SALIDA]"
+  activePulseSprite: {fileID: 21300000, guid: d5000000000040008000000000000010, type: 3}
+  activePulseOffset: {x: 0, y: 0.05, z: 0}
+  fallbackAstronautPrefab: {fileID: 0}
+  solidObstacleSize: {x: 0, y: 0}
+  solidObstacleOffset: {x: 0, y: 0}
+  escalaPantallaConsola: 1.35
 --- !u!1 &920000700
 GameObject:
   m_ObjectHideFlags: 0
@@ -1418,6 +1474,15 @@ BoxCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 5.2}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
   m_Size: {x: 18, y: 1}
   m_EdgeRadius: 0
 --- !u!61 &920000703
@@ -1455,6 +1520,15 @@ BoxCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: -5.2}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
   m_Size: {x: 18, y: 1}
   m_EdgeRadius: 0
 --- !u!61 &920000704
@@ -1492,6 +1566,15 @@ BoxCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: -8.8, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
   m_Size: {x: 1, y: 12}
   m_EdgeRadius: 0
 --- !u!61 &920000705
@@ -1529,27 +1612,17 @@ BoxCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 8.8, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
   m_Size: {x: 1, y: 12}
   m_EdgeRadius: 0
---- !u!114 &920000606
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 920000600}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c1000000000040008000000000000012, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  stationType: 4
-  labelTitle: "[ESCOTILLA FRONTAL EVA \u2014 SALIDA]"
-  activePulseSprite: {fileID: 21300000, guid: d5000000000040008000000000000010, type: 3}
-  activePulseOffset: {x: 0, y: 0.05, z: 0}
-  fallbackAstronautPrefab: {fileID: 0}
-  solidObstacleSize: {x: 0, y: 0}
-  solidObstacleOffset: {x: 0, y: 0}
 --- !u!1 &920000800
 GameObject:
   m_ObjectHideFlags: 0
@@ -1563,6 +1636,7 @@ GameObject:
   - component: {fileID: 920000803}
   - component: {fileID: 920000804}
   - component: {fileID: 920000805}
+  - component: {fileID: 920000806}
   m_Layer: 0
   m_Name: Consola_Control_Mando
   m_TagString: Untagged
@@ -1587,6 +1661,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &920000802
 SpriteRenderer:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1631,9 +1706,10 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 6
+  m_SortingOrder: 2
+  m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: d5000000000040008000000000000011, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.2, g: 0.8, b: 0.95, a: 0.92}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -1641,7 +1717,6 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!61 &920000803
 BoxCollider2D:
@@ -1681,7 +1756,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 3.2, y: 1.87}
+    oldSize: {x: 3, y: 1.75}
     newSize: {x: 3.2, y: 1.87}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -1701,12 +1776,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000004, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  labelTitle: "[CONSOLA DE CONTROL DE MANDO \u2014 APOLLO PGNCS]"
-  labelSubtitle: "Telemetr\xEDa AGC / DSKY | [E] Operar Computadora de Vuelo"
-  squareColor: {r: 1, g: 1, b: 1, a: 1}
-  labelColor: {r: 0.35, g: 0.96, b: 0.72, a: 1}
-  labelHeightOffset: 1.25
-  tintSpriteWithSquareColor: 0
+  zoneLabel: '[ZONA DE CULTIVOS]'
 --- !u!114 &920000805
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1726,6 +1796,29 @@ MonoBehaviour:
   fallbackAstronautPrefab: {fileID: 8902274875851569486, guid: 0d55ca40c86ac654fa583abdd4e0dd55, type: 3}
   solidObstacleSize: {x: 2.5, y: 0.95}
   solidObstacleOffset: {x: 0, y: -0.15}
+  escalaPantallaConsola: 1.35
+--- !u!114 &920000806
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 920000800}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1000000000040008000000000000001, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MarsWorldPlaceholder2D
+  labelTitle: '[PLACEHOLDER]'
+  labelSubtitle: Reemplazar con asset final
+  squareColor: {r: 0.2, g: 0.8, b: 0.95, a: 0.92}
+  labelTextColor: {r: 1, g: 1, b: 1, a: 1}
+  labelHeightOffset: 1.35
+  tintSpriteWithSquareColor: 1
+  showLabelInGame: 1
+  onlyShowNearPlayer: 1
+  detectionRadius: 2
+  playerTag: Player
 --- !u!1 &920000810
 GameObject:
   m_ObjectHideFlags: 0
@@ -1739,6 +1832,7 @@ GameObject:
   - component: {fileID: 920000813}
   - component: {fileID: 920000814}
   - component: {fileID: 920000815}
+  - component: {fileID: 920000816}
   m_Layer: 0
   m_Name: Silla_Comandante_Izq
   m_TagString: Untagged
@@ -1763,6 +1857,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &920000812
 SpriteRenderer:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1808,8 +1903,9 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 6
+  m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: d5000000000040008000000000000012, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.2, g: 0.8, b: 0.95, a: 0.92}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -1817,7 +1913,6 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!61 &920000813
 BoxCollider2D:
@@ -1857,7 +1952,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.6, y: 1.6}
+    oldSize: {x: 1.5, y: 1.5}
     newSize: {x: 1.6, y: 1.6}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -1877,12 +1972,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000004, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  labelTitle: ""
-  labelSubtitle: ""
-  squareColor: {r: 1, g: 1, b: 1, a: 1}
-  labelColor: {r: 0.85, g: 0.92, b: 1, a: 1}
-  labelHeightOffset: 0.9
-  tintSpriteWithSquareColor: 0
+  zoneLabel: '[ZONA DE CULTIVOS]'
 --- !u!114 &920000815
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1896,12 +1986,35 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stationType: 6
-  labelTitle: ""
+  labelTitle: 
   activePulseSprite: {fileID: 0}
   activePulseOffset: {x: 0, y: 0, z: 0}
   fallbackAstronautPrefab: {fileID: 0}
   solidObstacleSize: {x: 0, y: 0}
   solidObstacleOffset: {x: 0, y: 0}
+  escalaPantallaConsola: 1.35
+--- !u!114 &920000816
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 920000810}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1000000000040008000000000000001, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MarsWorldPlaceholder2D
+  labelTitle: '[PLACEHOLDER]'
+  labelSubtitle: Reemplazar con asset final
+  squareColor: {r: 0.2, g: 0.8, b: 0.95, a: 0.92}
+  labelTextColor: {r: 1, g: 1, b: 1, a: 1}
+  labelHeightOffset: 1.35
+  tintSpriteWithSquareColor: 1
+  showLabelInGame: 1
+  onlyShowNearPlayer: 1
+  detectionRadius: 2
+  playerTag: Player
 --- !u!1 &920000820
 GameObject:
   m_ObjectHideFlags: 0
@@ -1915,6 +2028,7 @@ GameObject:
   - component: {fileID: 920000823}
   - component: {fileID: 920000824}
   - component: {fileID: 920000825}
+  - component: {fileID: 920000826}
   m_Layer: 0
   m_Name: Silla_Piloto_Der
   m_TagString: Untagged
@@ -1939,6 +2053,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &920000822
 SpriteRenderer:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1984,8 +2099,9 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 6
+  m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: d5000000000040008000000000000012, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.2, g: 0.8, b: 0.95, a: 0.92}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -1993,7 +2109,6 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!61 &920000823
 BoxCollider2D:
@@ -2033,7 +2148,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.6, y: 1.6}
+    oldSize: {x: 1.5, y: 1.5}
     newSize: {x: 1.6, y: 1.6}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -2053,12 +2168,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1000000000040008000000000000004, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  labelTitle: ""
-  labelSubtitle: ""
-  squareColor: {r: 1, g: 1, b: 1, a: 1}
-  labelColor: {r: 0.85, g: 0.92, b: 1, a: 1}
-  labelHeightOffset: 0.9
-  tintSpriteWithSquareColor: 0
+  zoneLabel: '[ZONA DE CULTIVOS]'
 --- !u!114 &920000825
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2072,12 +2182,35 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stationType: 6
-  labelTitle: ""
+  labelTitle: 
   activePulseSprite: {fileID: 0}
   activePulseOffset: {x: 0, y: 0, z: 0}
   fallbackAstronautPrefab: {fileID: 0}
   solidObstacleSize: {x: 0, y: 0}
   solidObstacleOffset: {x: 0, y: 0}
+  escalaPantallaConsola: 1.35
+--- !u!114 &920000826
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 920000820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1000000000040008000000000000001, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MarsWorldPlaceholder2D
+  labelTitle: '[PLACEHOLDER]'
+  labelSubtitle: Reemplazar con asset final
+  squareColor: {r: 0.2, g: 0.8, b: 0.95, a: 0.92}
+  labelTextColor: {r: 1, g: 1, b: 1, a: 1}
+  labelHeightOffset: 1.35
+  tintSpriteWithSquareColor: 1
+  showLabelInGame: 1
+  onlyShowNearPlayer: 1
+  detectionRadius: 2
+  playerTag: Player
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

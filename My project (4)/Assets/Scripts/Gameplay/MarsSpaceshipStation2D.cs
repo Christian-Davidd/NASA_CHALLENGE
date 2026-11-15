@@ -43,6 +43,10 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
     [SerializeField] private Vector2 solidObstacleSize = new Vector2(1.35f, 0.85f);
     [SerializeField] private Vector2 solidObstacleOffset = new Vector2(0f, -0.18f);
 
+    [Header("Tamaño de Interfaz [E]")]
+    [Range(1.0f, 1.8f)]
+    [SerializeField] private float escalaPantallaConsola = 1.35f;
+
     private MarsWorldPlaceholder2D placeholder;
     private SpriteRenderer spriteRenderer;
     private SpriteRenderer activePulseRenderer;
@@ -53,7 +57,10 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
     private bool consolaAbierta;
     private bool mostrarTarjetaEducativa;
     private string tarjetaTitulo = "";
-    private string tarjetaCuerpo = "";
+    private string tarjetaSubtitulo = "";
+    private string tarjetaEstado = "";
+    private readonly string[] tarjetaPuntos = new string[3];
+    private int tarjetaPuntosCount;
 
     private float step1Value;        // 0..100
     private float step2Value;        // 0..100
@@ -61,16 +68,42 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
     private int dskySelectedProgram = 1; // 1=PROG 64, 2=VERB 16/NOUN 36, 3=DONKI RADAR
     private string statusBanner = "";
     private Color statusBannerColor = new Color(0.35f, 0.92f, 1f, 1f);
+    private float currentGuiScale = 1f;
+
+    // Lienzo lógico de la consola. El GUI se escala uniformemente sobre este tamaño.
+    private const float BasePanelW = 1000f;
+    private const float BasePanelH = 630f;
+
+    private static readonly Color TextMain = new Color(0.93f, 0.96f, 1f, 1f);
+    private static readonly Color TextDim = new Color(0.62f, 0.72f, 0.83f, 1f);
+    private static readonly Color Success = new Color(0.34f, 0.94f, 0.60f, 1f);
+    private static readonly Color Warning = new Color(1f, 0.79f, 0.28f, 1f);
+    private static readonly Color Danger = new Color(1f, 0.43f, 0.40f, 1f);
 
     private static Texture2D solidTex;
+    private static Texture2D panelGradientTex;
+    private static Texture2D headerGradientTex;
+    private static Texture2D clearTex;
+    private static Texture2D thumbTex;
+
     private GUIStyle headerStyle;
     private GUIStyle subHeaderStyle;
     private GUIStyle stepTitleStyle;
+    private GUIStyle stepBodyStyle;
     private GUIStyle bodyStyle;
+    private GUIStyle bodyTightStyle;
     private GUIStyle monoGreenStyle;
-    private GUIStyle buttonStyle;
-    private GUIStyle primaryActionBtnStyle;
+    private GUIStyle buttonLabelStyle;
+    private GUIStyle primaryLabelStyle;
     private GUIStyle badgeStyle;
+    private GUIStyle chipStyle;
+    private GUIStyle statLabelStyle;
+    private GUIStyle statValueStyle;
+    private GUIStyle noteTitleStyle;
+    private GUIStyle noteBodyStyle;
+    private GUIStyle bulletStyle;
+    private GUIStyle sliderStyle;
+    private GUIStyle thumbStyle;
 
     public StationType Type => stationType;
 
@@ -303,32 +336,32 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
         switch (stationType)
         {
             case StationType.OxygenMoxie:
-                statusBanner = "PASO 1: Desliza el compresor HEPA al 100% para captar CO₂ de la atmósfera marciana.";
-                statusBannerColor = new Color(0.28f, 0.88f, 1f, 1f);
+                SetStatus("OBJETIVO 1 · Comprime el CO₂ marciano para alimentar el reactor.", StationAccent);
                 break;
             case StationType.WaterUrineFilterUPA:
-                statusBanner = "PASO 1: Abre la válvula de admisión al 100% para bombear la reserva residual al destilador.";
-                statusBannerColor = new Color(0.35f, 0.78f, 1f, 1f);
+                SetStatus("OBJETIVO 1 · Abre la admisión y recupera el agua de la cabina.", StationAccent);
                 break;
             case StationType.SampleAnalyzerLab:
-                statusBanner = MarsSampleNode2D.HasHeldSample
-                    ? $"Muestra lista: {MarsSampleNode2D.HeldSampleLabel}. PASO 1: Sella la cámara de bio-aislamiento."
-                    : "Modo Didáctico activo (no llevas muestra en mano). Puedes practicar el proceso de espectrometría.";
-                statusBannerColor = new Color(0.32f, 0.96f, 0.56f, 1f);
+                SetStatus(MarsSampleNode2D.HasHeldSample
+                    ? $"Muestra en mano: {MarsSampleNode2D.HeldSampleLabel}. Sella el guante para analizarla."
+                    : "Modo didáctico · Practica el análisis sin muestra real.", StationAccent);
                 break;
             case StationType.ThermalControlBench:
-                statusBanner = "PASO 1: Purga al 100% los 91 metros de tubos capilares LCVG del traje interior.";
-                statusBannerColor = new Color(1f, 0.68f, 0.24f, 1f);
+                SetStatus("OBJETIVO 1 · Purga los 91 m de capilares del traje LCVG.", StationAccent);
                 break;
             case StationType.EvaAirlockHatch:
-                statusBanner = "PASO 1: Presuriza el traje PLSS a 4.3 psi con O₂ puro antes de ventilar la esclusa.";
-                statusBannerColor = new Color(1f, 0.56f, 0.28f, 1f);
+                SetStatus("OBJETIVO 1 · Sella el traje a 4.3 psi antes de despresurizar.", StationAccent);
                 break;
             case StationType.FlightCommandConsole:
-                statusBanner = "COMPUTADOR DE GUÍA APOLLO (AGC / DSKY): Selecciona un programa de telemetría.";
-                statusBannerColor = new Color(0.35f, 0.98f, 0.58f, 1f);
+                SetStatus("AGC en línea · Elige un programa para leer la telemetría.", StationAccent);
                 break;
         }
+    }
+
+    private void SetStatus(string texto, Color color)
+    {
+        statusBanner = texto;
+        statusBannerColor = color;
     }
 
     private void CerrarConsola()
@@ -435,10 +468,76 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
     {
         if (solidTex == null)
         {
-            solidTex = new Texture2D(1, 1);
+            solidTex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
             solidTex.SetPixel(0, 0, Color.white);
             solidTex.Apply();
         }
+
+        if (panelGradientTex == null)
+        {
+            panelGradientTex = MakeVerticalGradient(
+                64,
+                new Color(0.105f, 0.145f, 0.205f, 0.99f),
+                new Color(0.045f, 0.070f, 0.105f, 0.99f));
+        }
+
+        if (headerGradientTex == null)
+        {
+            headerGradientTex = MakeVerticalGradient(
+                48,
+                new Color(0.135f, 0.185f, 0.255f, 1f),
+                new Color(0.055f, 0.090f, 0.135f, 1f));
+        }
+
+        if (clearTex == null)
+        {
+            clearTex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+            clearTex.SetPixel(0, 0, new Color(0f, 0f, 0f, 0f));
+            clearTex.Apply();
+        }
+
+        if (thumbTex == null)
+            thumbTex = MakeThumbTexture(16, 24);
+    }
+
+    private static Texture2D MakeVerticalGradient(int height, Color top, Color bottom)
+    {
+        height = Mathf.Max(2, height);
+        var tex = new Texture2D(1, height, TextureFormat.RGBA32, false)
+        {
+            wrapMode = TextureWrapMode.Clamp
+        };
+        for (int y = 0; y < height; y++)
+        {
+            float t = y / (float)(height - 1);
+            tex.SetPixel(0, y, Color.Lerp(bottom, top, t));
+        }
+        tex.Apply();
+        return tex;
+    }
+
+    private static Texture2D MakeThumbTexture(int width, int height)
+    {
+        var tex = new Texture2D(width, height, TextureFormat.RGBA32, false)
+        {
+            wrapMode = TextureWrapMode.Clamp
+        };
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                bool border = x <= 0 || y <= 0 || x >= width - 1 || y >= height - 1;
+                bool groove = y >= height / 2 - 1 && y <= height / 2 + 1 && x > 2 && x < width - 3;
+                Color c = border
+                    ? new Color(0.66f, 0.77f, 0.88f, 1f)
+                    : groove
+                        ? new Color(0.26f, 0.68f, 0.90f, 1f)
+                        : new Color(0.86f, 0.92f, 0.98f, 1f);
+                tex.SetPixel(x, y, c);
+            }
+        }
+        tex.Apply();
+        return tex;
     }
 
     private void EnsureStyles()
@@ -447,60 +546,82 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
 
         headerStyle = new GUIStyle(GUI.skin.label)
         {
-            alignment = TextAnchor.MiddleCenter,
-            fontSize = 18,
+            alignment = TextAnchor.MiddleLeft,
+            fontSize = 20,
             fontStyle = FontStyle.Bold,
-            normal = { textColor = new Color(1f, 0.96f, 0.82f, 1f) }
+            wordWrap = false,
+            clipping = TextClipping.Clip,
+            normal = { textColor = TextMain }
         };
 
         subHeaderStyle = new GUIStyle(GUI.skin.label)
         {
-            alignment = TextAnchor.MiddleCenter,
+            alignment = TextAnchor.MiddleLeft,
             fontSize = 12,
             fontStyle = FontStyle.Bold,
-            normal = { textColor = new Color(0.68f, 0.86f, 1f, 1f) }
+            wordWrap = false,
+            clipping = TextClipping.Clip,
+            normal = { textColor = TextDim }
         };
 
         stepTitleStyle = new GUIStyle(GUI.skin.label)
         {
             alignment = TextAnchor.MiddleLeft,
-            fontSize = 14,
+            fontSize = 16,
             fontStyle = FontStyle.Bold,
-            normal = { textColor = new Color(0.38f, 0.92f, 1f, 1f) }
+            wordWrap = false,
+            clipping = TextClipping.Clip,
+            normal = { textColor = TextMain }
+        };
+
+        stepBodyStyle = new GUIStyle(GUI.skin.label)
+        {
+            alignment = TextAnchor.UpperLeft,
+            fontSize = 16,
+            wordWrap = true,
+            richText = true,
+            normal = { textColor = new Color(0.90f, 0.94f, 1f, 1f) }
         };
 
         bodyStyle = new GUIStyle(GUI.skin.label)
         {
             alignment = TextAnchor.UpperLeft,
-            fontSize = 13,
+            fontSize = 14,
             wordWrap = true,
             richText = true,
-            normal = { textColor = new Color(0.90f, 0.95f, 1f, 1f) }
+            normal = { textColor = new Color(0.84f, 0.90f, 0.97f, 1f) }
+        };
+
+        bodyTightStyle = new GUIStyle(bodyStyle)
+        {
+            fontSize = 14,
+            alignment = TextAnchor.MiddleLeft
         };
 
         monoGreenStyle = new GUIStyle(GUI.skin.label)
         {
             alignment = TextAnchor.UpperLeft,
-            fontSize = 14,
+            fontSize = 15,
             fontStyle = FontStyle.Bold,
             wordWrap = true,
-            normal = { textColor = new Color(0.28f, 0.98f, 0.52f, 1f) }
+            richText = true,
+            normal = { textColor = new Color(0.36f, 0.98f, 0.58f, 1f) }
         };
 
-        buttonStyle = new GUIStyle(GUI.skin.button)
+        buttonLabelStyle = new GUIStyle(GUI.skin.label)
         {
-            fontSize = 13,
-            fontStyle = FontStyle.Bold,
             alignment = TextAnchor.MiddleCenter,
-            normal = { textColor = Color.white }
+            fontSize = 15,
+            fontStyle = FontStyle.Bold,
+            wordWrap = true,
+            clipping = TextClipping.Clip,
+            normal = { textColor = TextMain }
         };
 
-        primaryActionBtnStyle = new GUIStyle(GUI.skin.button)
+        primaryLabelStyle = new GUIStyle(buttonLabelStyle)
         {
-            fontSize = 14,
-            fontStyle = FontStyle.Bold,
-            alignment = TextAnchor.MiddleCenter,
-            normal = { textColor = new Color(1f, 0.98f, 0.82f, 1f) }
+            fontSize = 16,
+            normal = { textColor = new Color(1f, 0.98f, 0.90f, 1f) }
         };
 
         badgeStyle = new GUIStyle(GUI.skin.label)
@@ -508,68 +629,183 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
             alignment = TextAnchor.MiddleCenter,
             fontSize = 12,
             fontStyle = FontStyle.Bold,
+            clipping = TextClipping.Clip,
             normal = { textColor = Color.white }
         };
+
+        chipStyle = new GUIStyle(GUI.skin.label)
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontSize = 17,
+            fontStyle = FontStyle.Bold,
+            normal = { textColor = Color.white }
+        };
+
+        statLabelStyle = new GUIStyle(GUI.skin.label)
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontSize = 11,
+            fontStyle = FontStyle.Bold,
+            clipping = TextClipping.Clip,
+            normal = { textColor = TextDim }
+        };
+
+        statValueStyle = new GUIStyle(GUI.skin.label)
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontSize = 17,
+            fontStyle = FontStyle.Bold,
+            clipping = TextClipping.Clip,
+            normal = { textColor = Color.white }
+        };
+
+        noteTitleStyle = new GUIStyle(GUI.skin.label)
+        {
+            alignment = TextAnchor.MiddleLeft,
+            fontSize = 11,
+            fontStyle = FontStyle.Bold,
+            clipping = TextClipping.Clip,
+            normal = { textColor = TextDim }
+        };
+
+        noteBodyStyle = new GUIStyle(GUI.skin.label)
+        {
+            alignment = TextAnchor.UpperLeft,
+            fontSize = 15,
+            wordWrap = true,
+            richText = true,
+            normal = { textColor = new Color(0.74f, 0.82f, 0.90f, 1f) }
+        };
+
+        bulletStyle = new GUIStyle(GUI.skin.label)
+        {
+            alignment = TextAnchor.MiddleLeft,
+            fontSize = 15,
+            wordWrap = true,
+            richText = true,
+            normal = { textColor = TextMain }
+        };
+
+        sliderStyle = new GUIStyle(GUI.skin.horizontalSlider)
+        {
+            fixedHeight = 18f,
+            margin = new RectOffset(0, 0, 0, 0),
+            padding = new RectOffset(0, 0, 0, 0),
+            normal = { background = clearTex },
+            hover = { background = clearTex },
+            active = { background = clearTex },
+            focused = { background = clearTex }
+        };
+
+        thumbStyle = new GUIStyle(GUI.skin.horizontalSliderThumb)
+        {
+            fixedWidth = 16f,
+            fixedHeight = 24f,
+            border = new RectOffset(2, 2, 2, 2),
+            normal = { background = thumbTex },
+            hover = { background = thumbTex },
+            active = { background = thumbTex }
+        };
     }
+
+    private Color StationAccent => stationType switch
+    {
+        StationType.OxygenMoxie => new Color(0.26f, 0.86f, 1f, 1f),
+        StationType.WaterUrineFilterUPA => new Color(0.36f, 0.70f, 1f, 1f),
+        StationType.SampleAnalyzerLab => new Color(0.38f, 0.95f, 0.62f, 1f),
+        StationType.ThermalControlBench => new Color(1f, 0.64f, 0.24f, 1f),
+        StationType.EvaAirlockHatch => new Color(1f, 0.58f, 0.28f, 1f),
+        StationType.FlightCommandConsole => new Color(0.40f, 0.98f, 0.60f, 1f),
+        _ => new Color(0.93f, 0.71f, 0.24f, 1f)
+    };
+
+    private string StationTag => stationType switch
+    {
+        StationType.OxygenMoxie => "O₂",
+        StationType.WaterUrineFilterUPA => "H₂O",
+        StationType.SampleAnalyzerLab => "LAB",
+        StationType.ThermalControlBench => "PLSS",
+        StationType.EvaAirlockHatch => "EVA",
+        StationType.FlightCommandConsole => "AGC",
+        _ => "NASA"
+    };
+
+    private string StationTitle => stationType switch
+    {
+        StationType.OxygenMoxie => "GENERADOR DE OXÍGENO · MOXIE",
+        StationType.WaterUrineFilterUPA => "RECICLADO DE AGUA · ECLSS / UPA",
+        StationType.SampleAnalyzerLab => "LABORATORIO DE MUESTRAS · GLOVEBOX",
+        StationType.ThermalControlBench => "CONTROL TÉRMICO DEL TRAJE · PLSS",
+        StationType.EvaAirlockHatch => "ESCOTILLA EVA · APOLLO LM",
+        StationType.FlightCommandConsole => "PUENTE DE MANDO · AGC / DSKY",
+        _ => labelTitle
+    };
+
+    private string StationSubtitle => stationType switch
+    {
+        StationType.OxygenMoxie => "Atmósfera de Marte → O₂ respirable  ·  Experimento NASA Perseverance",
+        StationType.WaterUrineFilterUPA => "Ósmosis inversa y destilación centrífuga  ·  ISS / Artemis",
+        StationType.SampleAnalyzerLab => "Protección planetaria y espectrometría  ·  Protocolo Apollo",
+        StationType.ThermalControlBench => "LCVG + sublimador + Kapton MLI  ·  Traje EVA Apollo",
+        StationType.EvaAirlockHatch => "Despresurización y salida al exterior marciano",
+        StationType.FlightCommandConsole => "Computador de guía Apollo  ·  MIT Instrumentation Lab",
+        _ => "Simulación didáctica basada en ingeniería real de la NASA"
+    };
 
     private void OnGUI()
     {
         if (activeConsoleStation != this) return;
         if (!consolaAbierta && !mostrarTarjetaEducativa) return;
+        if (Screen.width <= 40 || Screen.height <= 40) return;
 
         EnsureTextures();
         EnsureStyles();
 
-        // Fondo oscuro traslúcido estilo CommsTowerCMEEvent
-        Color prev = GUI.color;
-        GUI.color = new Color(0.02f, 0.04f, 0.08f, 0.78f);
-        GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), solidTex);
-        GUI.color = prev;
+        float maxEscalaAncho = (Screen.width - 20f) / BasePanelW;
+        float maxEscalaAlto = (Screen.height - 20f) / BasePanelH;
+        float escalaFinal = Mathf.Clamp(
+            Mathf.Min(escalaPantallaConsola, Mathf.Min(maxEscalaAncho, maxEscalaAlto)),
+            0.55f,
+            1.9f);
+        currentGuiScale = escalaFinal;
+
+        Matrix4x4 prevMatrix = GUI.matrix;
+        GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(escalaFinal, escalaFinal, 1f));
+
+        float virtualW = Screen.width / escalaFinal;
+        float virtualH = Screen.height / escalaFinal;
+
+        Color prevColor = GUI.color;
+        GUI.color = new Color(0.012f, 0.020f, 0.036f, 0.84f);
+        GUI.DrawTexture(new Rect(0f, 0f, virtualW, virtualH), solidTex);
+        GUI.color = prevColor;
 
         if (mostrarTarjetaEducativa)
         {
-            DibujarTarjetaEducativaModal();
-            return;
+            DibujarTarjetaEducativaModal(virtualW, virtualH);
+        }
+        else
+        {
+            DibujarConsolaHardware(virtualW, virtualH);
         }
 
-        DibujarConsolaHardware();
+        GUI.matrix = prevMatrix;
     }
 
-    private void DibujarConsolaHardware()
+    private void DibujarConsolaHardware(float virtualW, float virtualH)
     {
-        float w = Mathf.Min(900f, Screen.width - 36f);
-        float h = Mathf.Min(560f, Screen.height - 36f);
-        Rect panel = new Rect((Screen.width - w) * 0.5f, (Screen.height - h) * 0.5f, w, h);
+        float w = Mathf.Min(BasePanelW, virtualW - 24f);
+        float h = Mathf.Min(BasePanelH, virtualH - 24f);
+        Rect panel = new Rect((virtualW - w) * 0.5f, (virtualH - h) * 0.5f, w, h);
+        Color accent = StationAccent;
 
-        // Chasis metálico Apollo LM
-        DrawBoxWithBorder(panel, new Color(0.11f, 0.15f, 0.21f, 0.98f), new Color(0.88f, 0.65f, 0.18f, 1f), 3f);
+        // Chasis principal con bisel y fondo degradado.
+        DrawBoxWithBorder(panel, new Color(0.035f, 0.050f, 0.075f, 0.99f), accent, 2.5f);
+        GUI.DrawTexture(
+            new Rect(panel.x + 3f, panel.y + 3f, panel.width - 6f, panel.height - 6f),
+            panelGradientTex);
 
-        // Barra superior dorada/azul NASA
-        Rect topBar = new Rect(panel.x + 10f, panel.y + 10f, panel.width - 20f, 52f);
-        DrawBoxWithBorder(topBar, new Color(0.07f, 0.11f, 0.17f, 1f), new Color(0.28f, 0.62f, 0.88f, 1f), 2f);
-
-        string headerText = stationType switch
-        {
-            StationType.OxygenMoxie => "ESTACIÓN NASA MOXIE + APOLLO ECS — GENERACIÓN DE OXÍGENO (CO₂ → O₂)",
-            StationType.WaterUrineFilterUPA => "SISTEMA NASA ECLSS / UPA — DESTILACIÓN CENTRÍFUGA (ORINA Y HUMEDAD → AGUA)",
-            StationType.SampleAnalyzerLab => "CAJA DE GUANTES LUNAR-MARCIANA Y ESPECTRÓMETRO LÁSER UV RAMAN",
-            StationType.ThermalControlBench => "BANCO TÉRMICO DEL TRAJE PLSS / LCVG Y SUBLIMADOR DE PLACA POROSA",
-            StationType.EvaAirlockHatch => "ESCOTILLA FRONTAL EVA APOLLO LM — DESPRESURIZACIÓN Y SALIDA A MARTE",
-            StationType.FlightCommandConsole => "PUENTE DE MANDO APOLLO LM — COMPUTADOR DE GUÍA AGC / DSKY Y TELEMETRÍA",
-            _ => labelTitle
-        };
-        GUI.Label(new Rect(topBar.x + 14f, topBar.y + 4f, topBar.width - 150f, 26f), headerText, headerStyle);
-        GUI.Label(new Rect(topBar.x + 14f, topBar.y + 28f, topBar.width - 150f, 20f),
-            "Módulo Lunar-Marciano Apollo LM  •  Entrenamiento Didáctico Basado en Ingeniería Real de la NASA", subHeaderStyle);
-
-        if (GUI.Button(new Rect(topBar.xMax - 122f, topBar.y + 10f, 112f, 32f), "✕ CERRAR [ESC]", buttonStyle))
-        {
-            CerrarConsola();
-            return;
-        }
-
-        // Contenido específico según estación
-        Rect contentArea = new Rect(panel.x + 16f, topBar.yMax + 10f, panel.width - 32f, panel.height - 134f);
+        Rect contentArea = DrawHeader(panel, accent);
 
         switch (stationType)
         {
@@ -593,16 +829,390 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
                 break;
         }
 
-        // Barra inferior de estado e instrucciones paso a paso
-        Rect bottomBar = new Rect(panel.x + 12f, panel.yMax - 52f, panel.width - 24f, 40f);
-        DrawBoxWithBorder(bottomBar, new Color(0.06f, 0.09f, 0.14f, 1f), statusBannerColor, 2f);
-        var bannerStyle = new GUIStyle(bodyStyle)
+        DrawFooter(panel, accent);
+    }
+
+    private Rect DrawHeader(Rect panel, Color accent)
+    {
+        Rect header = new Rect(panel.x + 12f, panel.y + 10f, panel.width - 24f, 70f);
+        DrawBoxWithBorder(header, new Color(0.055f, 0.080f, 0.115f, 1f), accent, 1.5f);
+        GUI.DrawTexture(
+            new Rect(header.x + 2f, header.y + 2f, header.width - 4f, header.height - 4f),
+            headerGradientTex);
+
+        Rect emblem = new Rect(header.x + 10f, header.y + 11f, 48f, 48f);
+        DrawBoxWithBorder(emblem, new Color(0.035f, 0.065f, 0.095f, 1f), accent, 1.5f);
+
+        Color prevText = chipStyle.normal.textColor;
+        chipStyle.normal.textColor = accent;
+        chipStyle.fontSize = 19;
+        while (chipStyle.fontSize > 12 &&
+               chipStyle.CalcSize(new GUIContent(StationTag)).x > emblem.width - 6f)
         {
-            alignment = TextAnchor.MiddleLeft,
-            fontStyle = FontStyle.Bold,
-            normal = { textColor = statusBannerColor }
+            chipStyle.fontSize--;
+        }
+        GUI.Label(new Rect(emblem.x + 2f, emblem.y + 12f, emblem.width - 4f, 24f), StationTag, chipStyle);
+        chipStyle.fontSize = 17;
+        chipStyle.normal.textColor = prevText;
+
+        GUI.Label(
+            new Rect(emblem.xMax + 13f, header.y + 8f, header.width - emblem.width - 132f, 27f),
+            StationTitle,
+            headerStyle);
+        GUI.Label(
+            new Rect(emblem.xMax + 13f, header.y + 35f, header.width - emblem.width - 132f, 18f),
+            StationSubtitle,
+            subHeaderStyle);
+
+        if (DrawButton(new Rect(header.xMax - 102f, header.y + 10f, 90f, 28f), "✕  ESC", new Color(0.90f, 0.46f, 0.36f, 1f), false, true))
+        {
+            CerrarConsola();
+        }
+
+        Rect missionPill = new Rect(header.xMax - 108f, header.y + 44f, 96f, 18f);
+        DrawPill(missionPill, "APOLLO LM", new Color(0.58f, 0.70f, 0.82f, 1f), false);
+
+        float contentY = header.yMax + 8f;
+        float footerTop = panel.yMax - 58f;
+        return new Rect(
+            panel.x + 14f,
+            contentY,
+            panel.width - 28f,
+            Mathf.Max(140f, footerTop - contentY - 8f));
+    }
+
+    private void DrawFooter(Rect panel, Color accent)
+    {
+        Rect footer = new Rect(panel.x + 12f, panel.yMax - 58f, panel.width - 24f, 46f);
+        DrawBoxWithBorder(
+            footer,
+            new Color(0.045f, 0.070f, 0.100f, 1f),
+            new Color(accent.r, accent.g, accent.b, 0.75f),
+            1.5f);
+
+        Color prev = GUI.color;
+        GUI.color = accent;
+        GUI.DrawTexture(new Rect(footer.x, footer.y, 4f, footer.height), solidTex);
+        GUI.color = prev;
+
+        Color prevTitle = noteTitleStyle.normal.textColor;
+        noteTitleStyle.normal.textColor = accent;
+        GUI.Label(new Rect(footer.x + 14f, footer.y + 3f, 180f, 16f), "OBJETIVO ACTUAL", noteTitleStyle);
+        noteTitleStyle.normal.textColor = prevTitle;
+
+        Color prevBody = bodyTightStyle.normal.textColor;
+        bodyTightStyle.normal.textColor = new Color(0.96f, 0.98f, 1f, 1f);
+        GUI.Label(new Rect(footer.x + 14f, footer.y + 18f, footer.width - 150f, 25f), statusBanner, bodyTightStyle);
+        bodyTightStyle.normal.textColor = prevBody;
+
+        DrawPill(
+            new Rect(footer.xMax - 116f, footer.y + 9f, 104f, 28f),
+            "ESC · CERRAR",
+            new Color(0.60f, 0.70f, 0.80f, 1f),
+            false);
+    }
+
+    private Rect[] SplitColumns(Rect area)
+    {
+        const float gap = 10f;
+        float colW = (area.width - gap * 2f) / 3f;
+        return new[]
+        {
+            new Rect(area.x, area.y, colW, area.height),
+            new Rect(area.x + colW + gap, area.y, colW, area.height),
+            new Rect(area.x + (colW + gap) * 2f, area.y, colW, area.height)
         };
-        GUI.Label(new Rect(bottomBar.x + 14f, bottomBar.y + 4f, bottomBar.width - 28f, 32f), statusBanner, bannerStyle);
+    }
+
+    private void DrawStepCard(Rect card, int step, string title, string objective, bool done, bool active, Color accent)
+    {
+        Color border = done
+            ? Success
+            : active
+                ? accent
+                : new Color(0.25f, 0.33f, 0.43f, 0.95f);
+        Color background = done
+            ? new Color(0.045f, 0.095f, 0.085f, 0.98f)
+            : new Color(0.060f, 0.088f, 0.125f, 0.98f);
+
+        DrawBoxWithBorder(card, background, border, done || active ? 2f : 1.2f);
+
+        if (active && !done)
+        {
+            float pulse = 0.45f + 0.35f * Mathf.Sin(Time.time * 4.2f);
+            Color prev = GUI.color;
+            GUI.color = new Color(accent.r, accent.g, accent.b, pulse);
+            GUI.DrawTexture(new Rect(card.x + 2f, card.y + 2f, card.width - 4f, 2f), solidTex);
+            GUI.color = prev;
+        }
+
+        Rect chip = new Rect(card.x + 10f, card.y + 10f, 28f, 28f);
+        DrawBoxWithBorder(
+            chip,
+            done ? new Color(0.06f, 0.18f, 0.13f, 1f) : new Color(0.035f, 0.075f, 0.110f, 1f),
+            border,
+            1f);
+
+        Color prevChip = chipStyle.normal.textColor;
+        chipStyle.normal.textColor = done ? Success : accent;
+        GUI.Label(new Rect(chip.x, chip.y + 4f, chip.width, 20f), done ? "✓" : step.ToString(), chipStyle);
+        chipStyle.normal.textColor = prevChip;
+
+        string stateText = done ? "LISTO" : active ? "EN CURSO" : "BLOQUEADO";
+        Color stateColor = done ? Success : active ? accent : new Color(0.55f, 0.63f, 0.73f, 1f);
+        float stateWidth = badgeStyle.CalcSize(new GUIContent(stateText)).x;
+        float pillW = Mathf.Max(72f, stateWidth + 12f);
+        Rect statePill = new Rect(card.xMax - 10f - pillW, card.y + 10f, pillW, 24f);
+
+        Color prevTitle = stepTitleStyle.normal.textColor;
+        stepTitleStyle.normal.textColor = done ? Success : TextMain;
+        float titleW = Mathf.Max(60f, statePill.x - 4f - (card.x + 42f));
+        GUI.Label(new Rect(card.x + 42f, card.y + 7f, titleW, 30f), title, stepTitleStyle);
+        stepTitleStyle.normal.textColor = prevTitle;
+
+        DrawPill(statePill, stateText, stateColor, done || active);
+
+        GUI.Label(
+            new Rect(card.x + 12f, card.y + 41f, card.width - 24f, 76f),
+            objective,
+            stepBodyStyle);
+    }
+
+    private void DrawStatTile(Rect rect, string label, string value, Color accent)
+    {
+        DrawBoxWithBorder(
+            rect,
+            new Color(0.040f, 0.068f, 0.100f, 0.98f),
+            new Color(accent.r, accent.g, accent.b, 0.42f),
+            1f);
+
+        GUI.Label(new Rect(rect.x + 5f, rect.y + 2f, rect.width - 10f, 14f), label, statLabelStyle);
+
+        Color prev = statValueStyle.normal.textColor;
+        statValueStyle.normal.textColor = accent;
+        GUI.Label(new Rect(rect.x + 5f, rect.y + 16f, rect.width - 10f, rect.height - 18f), value, statValueStyle);
+        statValueStyle.normal.textColor = prev;
+    }
+
+    private void DrawStatRow(
+        Rect rect,
+        string labelA, string valueA, Color colorA,
+        string labelB, string valueB, Color colorB)
+    {
+        float half = (rect.width - 8f) * 0.5f;
+        DrawStatTile(new Rect(rect.x, rect.y, half, rect.height), labelA, valueA, colorA);
+        DrawStatTile(new Rect(rect.x + half + 8f, rect.y, half, rect.height), labelB, valueB, colorB);
+    }
+
+    private void DrawProgressBar(Rect rect, float t01, string label, Color barColor)
+    {
+        t01 = Mathf.Clamp01(t01);
+        DrawBoxWithBorder(
+            rect,
+            new Color(0.030f, 0.052f, 0.078f, 1f),
+            new Color(0.22f, 0.30f, 0.39f, 1f),
+            1f);
+
+        if (t01 > 0.005f)
+        {
+            Color prev = GUI.color;
+            GUI.color = barColor;
+            GUI.DrawTexture(
+                new Rect(rect.x + 2f, rect.y + 2f, (rect.width - 4f) * t01, rect.height - 4f),
+                solidTex);
+
+            GUI.color = new Color(1f, 1f, 1f, 0.22f);
+            GUI.DrawTexture(
+                new Rect(rect.x + 2f, rect.y + 2f, (rect.width - 4f) * t01, 2f),
+                solidTex);
+            GUI.color = prev;
+        }
+
+        Color prevColor = GUI.color;
+        GUI.color = new Color(0f, 0f, 0f, 0.72f);
+        GUI.Label(new Rect(rect.x + 1f, rect.y + 1f, rect.width, rect.height), label, badgeStyle);
+        GUI.color = prevColor;
+        GUI.Label(rect, label, badgeStyle);
+    }
+
+    private float DrawSlider(Rect rect, float value, bool enabled, Color accent)
+    {
+        bool prevEnabled = GUI.enabled;
+        GUI.enabled = prevEnabled && enabled;
+
+        Rect track = new Rect(rect.x, rect.y + (rect.height - 10f) * 0.5f, rect.width, 10f);
+        DrawBoxWithBorder(
+            track,
+            enabled ? new Color(0.025f, 0.045f, 0.068f, 1f) : new Color(0.035f, 0.045f, 0.060f, 1f),
+            enabled ? new Color(0.24f, 0.33f, 0.44f, 1f) : new Color(0.18f, 0.22f, 0.28f, 1f),
+            1f);
+
+        float t = Mathf.Clamp01(value / 100f);
+        if (t > 0.005f)
+        {
+            Color prev = GUI.color;
+            GUI.color = enabled ? accent : new Color(0.32f, 0.38f, 0.46f, 1f);
+            GUI.DrawTexture(
+                new Rect(track.x + 2f, track.y + 2f, (track.width - 4f) * t, track.height - 4f),
+                solidTex);
+            GUI.color = prev;
+        }
+
+        Color prevTick = GUI.color;
+        GUI.color = new Color(0f, 0f, 0f, 0.24f);
+        for (int i = 1; i <= 3; i++)
+        {
+            float x = Mathf.Lerp(track.x, track.xMax, i * 0.25f);
+            GUI.DrawTexture(new Rect(x, track.y + 1f, 1f, track.height - 2f), solidTex);
+        }
+        GUI.color = prevTick;
+
+        value = GUI.HorizontalSlider(rect, value, 0f, 100f, sliderStyle, thumbStyle);
+        GUI.enabled = prevEnabled;
+        return value;
+    }
+
+    private bool DrawButton(Rect rect, string label, Color accent, bool primary, bool enabled)
+    {
+        bool prevEnabled = GUI.enabled;
+        GUI.enabled = prevEnabled && enabled;
+
+        Vector2 mouseGuiPoint = Event.current != null
+            ? Event.current.mousePosition / Mathf.Max(0.01f, currentGuiScale)
+            : Vector2.zero;
+        bool hover = enabled && prevEnabled && rect.Contains(mouseGuiPoint);
+
+        Color background = !enabled
+            ? new Color(0.085f, 0.105f, 0.135f, 0.92f)
+            : primary
+                ? Color.Lerp(new Color(0.075f, 0.115f, 0.165f, 1f), accent, hover ? 0.42f : 0.25f)
+                : Color.Lerp(new Color(0.060f, 0.090f, 0.130f, 1f), accent, hover ? 0.22f : 0.06f);
+
+        Color border = !enabled
+            ? new Color(0.27f, 0.33f, 0.41f, 1f)
+            : hover
+                ? accent
+                : new Color(
+                    Mathf.Lerp(0.20f, accent.r, 0.55f),
+                    Mathf.Lerp(0.27f, accent.g, 0.55f),
+                    Mathf.Lerp(0.35f, accent.b, 0.55f),
+                    1f);
+
+        DrawBoxWithBorder(rect, background, border, primary ? 2f : 1.4f);
+
+        if (primary && enabled)
+        {
+            Color prev = GUI.color;
+            GUI.color = new Color(accent.r, accent.g, accent.b, 0.9f);
+            GUI.DrawTexture(new Rect(rect.x + 1f, rect.y + 1f, rect.width - 2f, 2f), solidTex);
+            GUI.color = prev;
+        }
+
+        GUIStyle style = primary ? primaryLabelStyle : buttonLabelStyle;
+        Color prevText = style.normal.textColor;
+        style.normal.textColor = enabled
+            ? primary
+                ? new Color(1f, 0.98f, 0.90f, 1f)
+                : new Color(0.92f, 0.96f, 1f, 1f)
+            : new Color(0.52f, 0.60f, 0.68f, 1f);
+
+        GUI.Label(
+            new Rect(rect.x + 8f, rect.y + 2f, rect.width - 16f, rect.height - 4f),
+            label,
+            style);
+        style.normal.textColor = prevText;
+
+        bool clicked = GUI.Button(rect, GUIContent.none, GUIStyle.none);
+        GUI.enabled = prevEnabled;
+        return clicked;
+    }
+
+    private void DrawPill(Rect rect, string text, Color accent, bool filled)
+    {
+        Color background = filled
+            ? Color.Lerp(new Color(0.040f, 0.070f, 0.100f, 1f), accent, 0.42f)
+            : new Color(0.045f, 0.072f, 0.105f, 0.98f);
+
+        DrawBoxWithBorder(rect, background, new Color(accent.r, accent.g, accent.b, 0.72f), 1f);
+
+        Color prevText = badgeStyle.normal.textColor;
+        badgeStyle.normal.textColor = filled ? Color.white : accent;
+        GUI.Label(rect, text, badgeStyle);
+        badgeStyle.normal.textColor = prevText;
+    }
+
+    private void DrawNasaNote(Rect rect, string title, string body, Color accent)
+    {
+        if (rect.width < 40f || rect.height < 24f) return;
+
+        DrawBoxWithBorder(
+            rect,
+            new Color(0.035f, 0.060f, 0.090f, 0.96f),
+            new Color(accent.r, accent.g, accent.b, 0.32f),
+            1f);
+
+        Color prev = GUI.color;
+        GUI.color = new Color(accent.r, accent.g, accent.b, 0.9f);
+        GUI.DrawTexture(new Rect(rect.x, rect.y, 3f, rect.height), solidTex);
+        GUI.color = prev;
+
+        Color prevTitle = noteTitleStyle.normal.textColor;
+        noteTitleStyle.normal.textColor = accent;
+        GUI.Label(new Rect(rect.x + 10f, rect.y + 4f, rect.width - 20f, 16f), title, noteTitleStyle);
+        noteTitleStyle.normal.textColor = prevTitle;
+
+        GUI.Label(
+            new Rect(rect.x + 10f, rect.y + 22f, rect.width - 20f, rect.height - 28f),
+            body,
+            noteBodyStyle);
+    }
+
+    private void DrawHeaderStrip(Rect box, string title, string subtitle, Color accent)
+    {
+        Rect strip = new Rect(box.x + 7f, box.y + 7f, box.width - 14f, 38f);
+        DrawBoxWithBorder(
+            strip,
+            new Color(0.040f, 0.070f, 0.100f, 0.98f),
+            new Color(accent.r, accent.g, accent.b, 0.58f),
+            1f);
+
+        GUI.Label(new Rect(strip.x + 10f, strip.y + 2f, strip.width - 20f, 20f), title, stepTitleStyle);
+        GUI.Label(new Rect(strip.x + 10f, strip.y + 22f, strip.width - 20f, 15f), subtitle, subHeaderStyle);
+    }
+
+    private void DrawInfoCard(Rect rect, string number, string title, string body, Color accent)
+    {
+        DrawBoxWithBorder(
+            rect,
+            new Color(0.048f, 0.076f, 0.110f, 0.98f),
+            new Color(0.22f, 0.31f, 0.41f, 1f),
+            1f);
+
+        Rect chip = new Rect(rect.x + 9f, rect.y + 9f, 26f, 26f);
+        DrawBoxWithBorder(chip, new Color(0.035f, 0.070f, 0.105f, 1f), accent, 1f);
+
+        Color prevChip = chipStyle.normal.textColor;
+        chipStyle.fontSize = 16;
+        chipStyle.normal.textColor = accent;
+        GUI.Label(new Rect(chip.x, chip.y + 5f, chip.width, 18f), number, chipStyle);
+        chipStyle.normal.textColor = prevChip;
+        chipStyle.fontSize = 17;
+
+        GUI.Label(new Rect(rect.x + 44f, rect.y + 6f, rect.width - 54f, 26f), title, stepTitleStyle);
+        GUI.Label(new Rect(rect.x + 11f, rect.y + 36f, rect.width - 22f, rect.height - 42f), body, bodyStyle);
+    }
+
+    private void PrepararTarjeta(string titulo, string subtitulo, string estado, params string[] puntos)
+    {
+        tarjetaTitulo = titulo;
+        tarjetaSubtitulo = subtitulo;
+        tarjetaEstado = estado;
+        tarjetaPuntosCount = puntos != null ? Mathf.Min(tarjetaPuntos.Length, puntos.Length) : 0;
+        for (int i = 0; i < tarjetaPuntos.Length; i++)
+        {
+            tarjetaPuntos[i] = i < tarjetaPuntosCount ? puntos[i] : "";
+        }
+        mostrarTarjetaEducativa = true;
     }
 
     // =========================================================================
@@ -613,97 +1223,141 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
         var flr = DONKIFLRManager.Instance;
         float o2Actual = flr != null ? flr.OxigenoActual : 100f;
         float eActual = flr != null ? flr.EnergiaActual : 100f;
-
-        float colW = (area.width - 24f) / 3f;
-        Rect bay1 = new Rect(area.x, area.y, colW, area.height);
-        Rect bay2 = new Rect(bay1.xMax + 12f, area.y, colW, area.height);
-        Rect bay3 = new Rect(bay2.xMax + 12f, area.y, colW, area.height);
+        Color accent = StationAccent;
+        Rect[] col = SplitColumns(area);
 
         bool p1Done = step1Value >= 95f;
         bool p2Done = p1Done && step2Value >= 95f;
 
-        // PASO 1: Compresor HEPA
-        DrawStepBay(bay1, "PASO 1: CAPTAR Y COMPRIMIR CO₂", p1Done, !p1Done);
-        GUI.Label(new Rect(bay1.x + 12f, bay1.y + 38f, bay1.width - 24f, 76f),
-            "La atmósfera de Marte tiene <b>95% de CO₂</b> a solo 0.006 atm. El filtro HEPA aspira el gas sin polvo y el compresor scroll lo sube a 1 atm.",
-            bodyStyle);
+        // PASO 1: Captación y compresión del CO2 marciano.
+        DrawStepCard(
+            col[0], 1,
+            "CAPTURA DE CO₂",
+            "La atmósfera marciana es <b>95% CO₂</b> a 0.006 atm. El HEPA retiene polvo y el compresor la lleva a 1 atm.",
+            p1Done, !p1Done, accent);
 
-        DrawProgressBar(new Rect(bay1.x + 14f, bay1.y + 122f, bay1.width - 28f, 24f), step1Value / 100f,
-            $"Presión CO₂: {step1Value:F0}% ({Mathf.Lerp(0.01f, 1.0f, step1Value / 100f):F2} atm)", new Color(0.25f, 0.82f, 1f, 1f));
+        float y1 = col[0].y + 118f;
+        DrawStatRow(
+            new Rect(col[0].x + 12f, y1, col[0].width - 24f, 42f),
+            "ENTRADA", "95% CO₂", accent,
+            "PRESIÓN", $"{Mathf.Lerp(0.01f, 1f, step1Value / 100f):F2} atm", Warning);
 
-        step1Value = GUI.HorizontalSlider(new Rect(bay1.x + 16f, bay1.y + 158f, bay1.width - 32f, 24f), step1Value, 0f, 100f);
-        if (GUI.Button(new Rect(bay1.x + 14f, bay1.y + 190f, bay1.width - 28f, 36f),
-            p1Done ? "✓ COMPRESOR A 1.0 ATM" : "BOMBEAR CO₂ AL 100%", buttonStyle))
+        DrawProgressBar(
+            new Rect(col[0].x + 12f, y1 + 50f, col[0].width - 24f, 22f),
+            step1Value / 100f,
+            $"COMPRESOR HEPA · {step1Value:F0}%",
+            accent);
+
+        step1Value = DrawSlider(
+            new Rect(col[0].x + 12f, y1 + 78f, col[0].width - 24f, 22f),
+            step1Value, !p1Done, accent);
+
+        if (DrawButton(
+            new Rect(col[0].x + 12f, y1 + 104f, col[0].width - 24f, 36f),
+            p1Done ? "✓ PRESIÓN LISTA · 1 ATM" : "COMPRIMIR CO₂ AL 100%",
+            accent, !p1Done, !p1Done))
         {
             step1Value = 100f;
-            statusBanner = "PASO 2: Calienta el reactor cerámico SOXE a 800 °C para separar los átomos de oxígeno.";
-            statusBannerColor = new Color(1f, 0.82f, 0.25f, 1f);
+            SetStatus("OBJETIVO 2 · Calienta el reactor SOXE a 800 °C.", Warning);
         }
 
-        // Mini-diagrama moléculas CO2
-        Rect diag1 = new Rect(bay1.x + 14f, bay1.y + 238f, bay1.width - 28f, bay1.height - 252f);
-        DrawBoxWithBorder(diag1, new Color(0.05f, 0.09f, 0.14f, 1f), new Color(0.2f, 0.45f, 0.65f, 1f), 1.5f);
-        GUI.Label(new Rect(diag1.x + 8f, diag1.y + 8f, diag1.width - 16f, diag1.height - 16f),
-            "<b>Fórmula Real NASA (Perseverance):</b>\n• Entrada: Aire marciano (CO₂)\n• Filtro HEPA retiene el polvo de óxido de hierro.\n• Estado: " + (p1Done ? "<color=#4ade80>COMPRIMIDO</color>" : "<color=#facc15>ESPERANDO COMPRESIÓN</color>"),
-            bodyStyle);
+        DrawNasaNote(
+            new Rect(col[0].x + 12f, y1 + 150f, col[0].width - 24f, col[0].yMax - y1 - 162f),
+            "DATO NASA",
+            "El aire de Marte es casi todo CO₂ y su presión es apenas el <b>0.6%</b> de la terrestre. El HEPA evita que el polvo de óxido de hierro dañe el reactor.",
+            accent);
 
-        // PASO 2: Horno Cerámico SOXE 800 °C
-        DrawStepBay(bay2, "PASO 2: HORNO SOXE A 800 °C", p2Done, p1Done && !p2Done);
-        GUI.Label(new Rect(bay2.x + 12f, bay2.y + 38f, bay2.width - 24f, 76f),
-            "El reactor tiene aislamiento de <b>oro Kapton</b> para no derretir la nave mientras calienta celdas cerámicas de circonio (YSZ) hasta <b>800 °C</b>.",
-            bodyStyle);
+        // PASO 2: Reactor SOXE a 800 °C.
+        DrawStepCard(
+            col[1], 2,
+            "HORNO SOXE",
+            "Celdas cerámicas de circonio (YSZ) con aislamiento de <b>oro Kapton</b> separan el oxígeno a 800 °C.",
+            p2Done, p1Done && !p2Done, accent);
 
+        float y2 = col[1].y + 118f;
         float tempC = Mathf.Lerp(20f, 800f, step2Value / 100f);
-        DrawProgressBar(new Rect(bay2.x + 14f, bay2.y + 122f, bay2.width - 28f, 24f), step2Value / 100f,
-            $"Temperatura SOXE: {tempC:F0} °C / 800 °C", new Color(1f, 0.62f, 0.18f, 1f));
+        DrawStatRow(
+            new Rect(col[1].x + 12f, y2, col[1].width - 24f, 42f),
+            "REACTOR", "800 °C", Warning,
+            "AISLANTE", "Kapton MLI", accent);
 
-        GUI.enabled = p1Done;
-        step2Value = GUI.HorizontalSlider(new Rect(bay2.x + 16f, bay2.y + 158f, bay2.width - 32f, 24f), step2Value, 0f, 100f);
-        if (GUI.Button(new Rect(bay2.x + 14f, bay2.y + 190f, bay2.width - 28f, 36f),
-            p2Done ? "✓ HORNO CERÁMICO A 800 °C" : "CALENTAR HORNO A 800 °C", buttonStyle))
+        DrawProgressBar(
+            new Rect(col[1].x + 12f, y2 + 50f, col[1].width - 24f, 22f),
+            step2Value / 100f,
+            $"TEMPERATURA · {tempC:F0} / 800 °C",
+            Warning);
+
+        step2Value = DrawSlider(
+            new Rect(col[1].x + 12f, y2 + 78f, col[1].width - 24f, 22f),
+            step2Value, p1Done && !p2Done, Warning);
+
+        if (DrawButton(
+            new Rect(col[1].x + 12f, y2 + 104f, col[1].width - 24f, 36f),
+            p2Done ? "✓ HORNO A 800 °C" : "CALENTAR HORNO A 800 °C",
+            Warning, !p2Done, p1Done && !p2Done))
         {
             step2Value = 100f;
-            statusBanner = "PASO 3: Activa la corriente de electrólisis para separar 2CO₂ → 2CO + O₂ respirable.";
-            statusBannerColor = new Color(0.28f, 0.98f, 0.56f, 1f);
+            SetStatus("OBJETIVO 3 · Ejecuta la electrólisis y llena el tanque de O₂.", Success);
         }
-        GUI.enabled = true;
 
-        Rect diag2 = new Rect(bay2.x + 14f, bay2.y + 238f, bay2.width - 28f, bay2.height - 252f);
-        DrawBoxWithBorder(diag2, new Color(0.05f, 0.09f, 0.14f, 1f), new Color(0.75f, 0.48f, 0.15f, 1f), 1.5f);
-        GUI.Label(new Rect(diag2.x + 8f, diag2.y + 8f, diag2.width - 16f, diag2.height - 16f),
-            "<b>Reacción Química a 800 °C:</b>\n2 CO₂ + electricidad → 2 CO + <b>O₂</b>\n• El cátodo cerámico solo deja pasar iones de oxígeno (O²⁻) puros.",
-            bodyStyle);
+        DrawNasaNote(
+            new Rect(col[1].x + 12f, y2 + 150f, col[1].width - 24f, col[1].yMax - y2 - 162f),
+            "REACCIÓN REAL",
+            "<b>2 CO₂ + electricidad → 2 CO + O₂</b>\nEl cátodo cerámico solo deja pasar iones de oxígeno (O²⁻).",
+            Warning);
 
-        // PASO 3: Electrólisis y llenado de O2
-        DrawStepBay(bay3, "PASO 3: ELECTRÓLISIS Y RECARGA O₂", o2Actual >= 99f, p2Done);
-        GUI.Label(new Rect(bay3.x + 12f, bay3.y + 38f, bay3.width - 24f, 64f),
-            "Aplica voltaje para recombinar iones O²⁻ en <b>Oxígeno respirable (O₂)</b> hacia los tanques esféricos del traje PLSS.",
-            bodyStyle);
+        // PASO 3: Electrólisis y recarga del tanque de O2.
+        bool p3Done = o2Actual >= 99f;
+        DrawStepCard(
+            col[2], 3,
+            "ELECTRÓLISIS O₂",
+            "El oxígeno separado se recombina y pasa al tanque del traje PLSS listo para respirar.",
+            p3Done, p2Done, accent);
 
-        DrawProgressBar(new Rect(bay3.x + 14f, bay3.y + 108f, bay3.width - 28f, 24f), o2Actual / 100f,
-            $"Tanque de Oxígeno (O₂): {o2Actual:F0}%", new Color(0.22f, 0.92f, 0.52f, 1f));
-        DrawProgressBar(new Rect(bay3.x + 14f, bay3.y + 138f, bay3.width - 28f, 22f), eActual / 100f,
-            $"Energía de la Nave (⚡): {eActual:F0}%", new Color(0.98f, 0.80f, 0.22f, 1f));
+        float y3 = col[2].y + 118f;
+        DrawStatRow(
+            new Rect(col[2].x + 12f, y3, col[2].width - 24f, 42f),
+            "OXÍGENO", $"{o2Actual:F0}%", Success,
+            "ENERGÍA", $"{eActual:F0}%", Warning);
 
-        GUI.enabled = p2Done;
-        if (GUI.Button(new Rect(bay3.x + 14f, bay3.y + 174f, bay3.width - 28f, 48f),
-            "⚡ EJECUTAR ELECTRÓLISIS\n(RECARGAR OXÍGENO AL 100%)", primaryActionBtnStyle))
+        DrawProgressBar(
+            new Rect(col[2].x + 12f, y3 + 50f, col[2].width - 24f, 22f),
+            o2Actual / 100f,
+            $"TANQUE O₂ · {o2Actual:F0}%",
+            Success);
+
+        DrawProgressBar(
+            new Rect(col[2].x + 12f, y3 + 78f, col[2].width - 24f, 18f),
+            eActual / 100f,
+            $"ENERGÍA DISPONIBLE · {eActual:F0}%",
+            Warning);
+
+        if (DrawButton(
+            new Rect(col[2].x + 12f, y3 + 108f, col[2].width - 24f, 44f),
+            "⚡ EJECUTAR ELECTRÓLISIS\nRECARGAR OXÍGENO",
+            Success, true, p2Done))
         {
             if (flr != null)
             {
                 for (int i = 0; i < 30 && flr.OxigenoActual < 99.9f; i++)
                     flr.RecargarOxigenoMoxieContinuo(0.25f);
             }
-            tarjetaTitulo = "¡OXÍGENO GENERADO DESDE EL AIRE DE MARTE (MOXIE)!";
-            tarjetaCuerpo =
-                "¡Completaste el proceso real del experimento MOXIE (Mars Oxygen ISRU Experiment) de la NASA!\n\n" +
-                "• 1. Captación HEPA: Tomaste el aire marciano (95% CO₂) y lo comprimiste a 1 atmósfera.\n" +
-                "• 2. Horno SOXE a 800 °C: Calentaste el electrolito cerámico de circonio recubierto en oro Kapton.\n" +
-                "• 3. Separación Electroquímica (2CO₂ → 2CO + O₂): Extrajiste oxígeno puro respirable para el astronauta.\n\n" +
-                $"Estado actual: Oxígeno { (flr != null ? flr.OxigenoActual : 100f):F0}%  |  Energía restante: {(flr != null ? flr.EnergiaActual : 100f):F0}%";
-            mostrarTarjetaEducativa = true;
+
+            PrepararTarjeta(
+                "OXÍGENO GENERADO DESDE EL AIRE DE MARTE",
+                "Experimento MOXIE · NASA Perseverance",
+                $"O₂ {(flr != null ? flr.OxigenoActual : 100f):F0}%  ·  ENERGÍA {(flr != null ? flr.EnergiaActual : 100f):F0}%",
+                "CAPTACIÓN HEPA — Aire marciano (95% CO₂) filtrado y comprimido a 1 atm.",
+                "HORNO SOXE — Celdas de circonio YSZ a 800 °C con aislamiento Kapton.",
+                "ELECTRÓLISIS — 2CO₂ → 2CO + O₂ respirable almacenado en el PLSS.");
+            SetStatus("PROCESO COMPLETO · El tanque de O₂ está listo para una nueva EVA.", Success);
         }
-        GUI.enabled = true;
+
+        DrawNasaNote(
+            new Rect(col[2].x + 12f, y3 + 166f, col[2].width - 24f, col[2].yMax - y3 - 178f),
+            "POR QUÉ IMPORTA",
+            "MOXIE demuestra que una base marciana puede producir su propio oxígeno sin transportarlo desde la Tierra.",
+            Success);
     }
 
     // =========================================================================
@@ -715,95 +1369,139 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
         float aguaActual = flr != null ? flr.AguaActual : 100f;
         float reservaBrine = flr != null ? flr.ReservaOrinaHumedad : 45f;
         float eActual = flr != null ? flr.EnergiaActual : 100f;
-
-        float colW = (area.width - 24f) / 3f;
-        Rect bay1 = new Rect(area.x, area.y, colW, area.height);
-        Rect bay2 = new Rect(bay1.xMax + 12f, area.y, colW, area.height);
-        Rect bay3 = new Rect(bay2.xMax + 12f, area.y, colW, area.height);
+        Color accent = StationAccent;
+        Rect[] col = SplitColumns(area);
 
         bool p1Done = step1Value >= 95f;
         bool p2Done = p1Done && step2Value >= 95f;
 
-        // PASO 1: Admisión y pretratamiento
-        DrawStepBay(bay1, "PASO 1: ADMISIÓN Y PRETRATAMIENTO", p1Done, !p1Done);
-        GUI.Label(new Rect(bay1.x + 12f, bay1.y + 38f, bay1.width - 24f, 76f),
-            "En el espacio y en Marte no se desperdicia ni una gota: se recolecta la <b>orina y el sudor/humedad condensada</b> de la cabina y se estabiliza químicamente.",
-            bodyStyle);
+        // PASO 1: Admisión y pretratamiento.
+        DrawStepCard(
+            col[0], 1,
+            "ADMISIÓN",
+            "Se recolectan <b>orina, sudor y humedad</b> de la cabina y se estabilizan para evitar bacterias.",
+            p1Done, !p1Done, accent);
 
-        DrawProgressBar(new Rect(bay1.x + 14f, bay1.y + 122f, bay1.width - 28f, 24f), step1Value / 100f,
-            $"Válvula de Admisión: {step1Value:F0}% (Reserva: {reservaBrine:F0}%)", new Color(0.95f, 0.75f, 0.20f, 1f));
+        float y1 = col[0].y + 118f;
+        DrawStatRow(
+            new Rect(col[0].x + 12f, y1, col[0].width - 24f, 42f),
+            "RESERVA", $"{reservaBrine:F0}%", Warning,
+            "VÁLVULA", $"{step1Value:F0}%", accent);
 
-        step1Value = GUI.HorizontalSlider(new Rect(bay1.x + 16f, bay1.y + 158f, bay1.width - 32f, 24f), step1Value, 0f, 100f);
-        if (GUI.Button(new Rect(bay1.x + 14f, bay1.y + 190f, bay1.width - 28f, 36f),
-            p1Done ? "✓ VÁLVULA ABIERTA AL 100%" : "ABRIR VÁLVULA DE ENTRADA", buttonStyle))
+        DrawProgressBar(
+            new Rect(col[0].x + 12f, y1 + 50f, col[0].width - 24f, 22f),
+            step1Value / 100f,
+            $"VÁLVULA DE ADMISIÓN · {step1Value:F0}%",
+            accent);
+
+        step1Value = DrawSlider(
+            new Rect(col[0].x + 12f, y1 + 78f, col[0].width - 24f, 22f),
+            step1Value, !p1Done, accent);
+
+        if (DrawButton(
+            new Rect(col[0].x + 12f, y1 + 104f, col[0].width - 24f, 36f),
+            p1Done ? "✓ ADMISIÓN ABIERTA" : "ABRIR VÁLVULA DE ENTRADA",
+            accent, !p1Done, !p1Done))
         {
             step1Value = 100f;
-            statusBanner = "PASO 2: Acelera la centrífuga al vacío para separar el vapor de agua pura de las sales.";
-            statusBannerColor = new Color(0.38f, 0.85f, 1f, 1f);
+            SetStatus("OBJETIVO 2 · Acelera la centrífuga al vacío para separar el agua.", accent);
         }
 
-        Rect diag1 = new Rect(bay1.x + 14f, bay1.y + 238f, bay1.width - 28f, bay1.height - 252f);
-        DrawBoxWithBorder(diag1, new Color(0.05f, 0.09f, 0.14f, 1f), new Color(0.75f, 0.58f, 0.15f, 1f), 1.5f);
-        GUI.Label(new Rect(diag1.x + 8f, diag1.y + 8f, diag1.width - 16f, diag1.height - 16f),
-            $"<b>Reserva Reciclable en Cabina:</b> {reservaBrine:F0}%\n• Incluye condensado de respiración, sudor del traje EVA y orina pretratada.",
-            bodyStyle);
+        DrawNasaNote(
+            new Rect(col[0].x + 12f, y1 + 150f, col[0].width - 24f, col[0].yMax - y1 - 162f),
+            "CIRCUITO CERRADO",
+            "En la ISS se recupera hasta el <b>98%</b> del agua: cada gota de sudor, respiración u orina vuelve al sistema.",
+            accent);
 
-        // PASO 2: Centrífuga de Destilación por Compresión de Vapor (VCD)
-        DrawStepBay(bay2, "PASO 2: CENTRÍFUGA AL VACÍO (VCD)", p2Done, p1Done && !p2Done);
-        GUI.Label(new Rect(bay2.x + 12f, bay2.y + 38f, bay2.width - 24f, 76f),
-            "En baja gravedad el vapor no sube solo. La NASA usa un <b>tambor centrífugo rotatorio</b> al vacío que hierve el agua a baja temperatura y deja atrás la salmuera.",
-            bodyStyle);
+        // PASO 2: Destilación centrífuga al vacío.
+        DrawStepCard(
+            col[1], 2,
+            "CENTRÍFUGA VCD",
+            "En baja gravedad el vapor no sube solo: un tambor giratorio lo separa al vacío y retiene la salmuera.",
+            p2Done, p1Done && !p2Done, accent);
 
-        DrawProgressBar(new Rect(bay2.x + 14f, bay2.y + 122f, bay2.width - 28f, 24f), step2Value / 100f,
-            $"Rotación Centrífuga: {step2Value * 2.4f:F0} RPM", new Color(0.32f, 0.78f, 1f, 1f));
+        float y2 = col[1].y + 118f;
+        DrawStatRow(
+            new Rect(col[1].x + 12f, y2, col[1].width - 24f, 42f),
+            "EBULLICIÓN", "~40 °C", accent,
+            "GIRO", $"{step2Value * 2.4f:F0} RPM", Warning);
 
-        GUI.enabled = p1Done;
-        step2Value = GUI.HorizontalSlider(new Rect(bay2.x + 16f, bay2.y + 158f, bay2.width - 32f, 24f), step2Value, 0f, 100f);
-        if (GUI.Button(new Rect(bay2.x + 14f, bay2.y + 190f, bay2.width - 28f, 36f),
-            p2Done ? "✓ CENTRÍFUGA A 240 RPM" : "ACELERAR CENTRÍFUGA VCD", buttonStyle))
+        DrawProgressBar(
+            new Rect(col[1].x + 12f, y2 + 50f, col[1].width - 24f, 22f),
+            step2Value / 100f,
+            $"ROTACIÓN CENTRÍFUGA · {step2Value:F0}%",
+            accent);
+
+        step2Value = DrawSlider(
+            new Rect(col[1].x + 12f, y2 + 78f, col[1].width - 24f, 22f),
+            step2Value, p1Done && !p2Done, accent);
+
+        if (DrawButton(
+            new Rect(col[1].x + 12f, y2 + 104f, col[1].width - 24f, 36f),
+            p2Done ? "✓ CENTRÍFUGA A 240 RPM" : "ACELERAR CENTRÍFUGA VCD",
+            accent, !p2Done, p1Done && !p2Done))
         {
             step2Value = 100f;
-            statusBanner = "PASO 3: Activa el filtro catalítico y lámpara UV para obtener agua 100% potable.";
-            statusBannerColor = new Color(0.28f, 0.98f, 0.56f, 1f);
+            SetStatus("OBJETIVO 3 · Pule el destilado con filtros y luz UV.", Success);
         }
-        GUI.enabled = true;
 
-        Rect diag2 = new Rect(bay2.x + 14f, bay2.y + 238f, bay2.width - 28f, bay2.height - 252f);
-        DrawBoxWithBorder(diag2, new Color(0.05f, 0.09f, 0.14f, 1f), new Color(0.25f, 0.58f, 0.85f, 1f), 1.5f);
-        GUI.Label(new Rect(diag2.x + 8f, diag2.y + 8f, diag2.width - 16f, diag2.height - 16f),
-            "<b>Destilación VCD (ISS / Artemis):</b>\n• Al bajar la presión, el agua hierve a ~40 °C ahorrando energía.\n• La fuerza centrífuga pega los residuos a la pared y extrae vapor limpio en el centro.",
-            bodyStyle);
+        DrawNasaNote(
+            new Rect(col[1].x + 12f, y2 + 150f, col[1].width - 24f, col[1].yMax - y2 - 162f),
+            "AHORRO ENERGÉTICO",
+            "Al bajar la presión, el agua hierve cerca de <b>40 °C</b>. La centrífuga pega los residuos a la pared y deja vapor limpio en el centro.",
+            accent);
 
-        // PASO 3: Filtro WPA y Mineralización
-        DrawStepBay(bay3, "PASO 3: PURIFICACIÓN WPA Y UV", false, p2Done);
-        GUI.Label(new Rect(bay3.x + 12f, bay3.y + 38f, bay3.width - 24f, 64f),
-            "El destilado pasa por lechos de <b>intercambio iónico, oxidación catalítica y luz UV</b>, quedando más pura que el agua de la Tierra.",
-            bodyStyle);
+        // PASO 3: Pulido WPA + UV.
+        DrawStepCard(
+            col[2], 3,
+            "PULIDO WPA + UV",
+            "Intercambio iónico, oxidación catalítica y luz ultravioleta eliminan cualquier contaminante.",
+            aguaActual >= 99f, p2Done, accent);
 
-        DrawProgressBar(new Rect(bay3.x + 14f, bay3.y + 108f, bay3.width - 28f, 24f), aguaActual / 100f,
-            $"Depósito Agua Potable (💧): {aguaActual:F0}%", new Color(0.25f, 0.82f, 1f, 1f));
-        DrawProgressBar(new Rect(bay3.x + 14f, bay3.y + 138f, bay3.width - 28f, 22f), reservaBrine / 100f,
-            $"Reserva Filtrable Disponible: {reservaBrine:F0}%", new Color(0.95f, 0.75f, 0.22f, 1f));
+        float y3 = col[2].y + 118f;
+        DrawStatRow(
+            new Rect(col[2].x + 12f, y3, col[2].width - 24f, 42f),
+            "AGUA POTABLE", $"{aguaActual:F0}%", accent,
+            "RESERVA", $"{reservaBrine:F0}%", Warning);
 
-        GUI.enabled = p2Done;
-        if (GUI.Button(new Rect(bay3.x + 14f, bay3.y + 174f, bay3.width - 28f, 48f),
-            "💧 PURIFICAR Y RECUPERAR AGUA\n(SISTEMA ECLSS UPA + WPA)", primaryActionBtnStyle))
+        DrawProgressBar(
+            new Rect(col[2].x + 12f, y3 + 50f, col[2].width - 24f, 22f),
+            aguaActual / 100f,
+            $"DEPÓSITO DE AGUA · {aguaActual:F0}%",
+            accent);
+
+        DrawProgressBar(
+            new Rect(col[2].x + 12f, y3 + 78f, col[2].width - 24f, 18f),
+            reservaBrine / 100f,
+            $"RESERVA FILTRABLE · {reservaBrine:F0}%",
+            Warning);
+
+        if (DrawButton(
+            new Rect(col[2].x + 12f, y3 + 108f, col[2].width - 24f, 44f),
+            "💧 PURIFICAR Y RECUPERAR AGUA\nECLSS UPA + WPA",
+            accent, true, p2Done))
         {
             if (flr != null)
             {
                 for (int i = 0; i < 30 && flr.ReservaOrinaHumedad > 1f && flr.AguaActual < 99.9f; i++)
                     flr.FiltrarOrinaRecuperarAguaContinuo(0.25f);
             }
-            tarjetaTitulo = "¡RECICLAJE DE AGUA COMPLETADO (ECLSS UPA)!";
-            tarjetaCuerpo =
-                "¡Aprendiste cómo reciclan los astronautas hasta el 98% del agua en la Estación Espacial Internacional y misiones lunares/marcianas!\n\n" +
-                "• 1. Recolección cerrada: Cada gota de humedad del aire, sudor del traje y orina se recupera.\n" +
-                "• 2. Destilación Centrífuga al Vacío (VCD): Separa el vapor de agua en baja gravedad girando a alta velocidad.\n" +
-                "• 3. Procesador WPA + UV: Elimina cualquier contaminante y entrega agua pura para beber, regar cultivos y enfriar el traje.\n\n" +
-                $"Agua Potable actual: {(flr != null ? flr.AguaActual : 100f):F0}%  |  Energía: {(flr != null ? flr.EnergiaActual : 100f):F0}%";
-            mostrarTarjetaEducativa = true;
+
+            PrepararTarjeta(
+                "AGUA RECICLADA EN CIRCUITO CERRADO",
+                "ECLSS · UPA + WPA · ISS / Artemis",
+                $"AGUA {(flr != null ? flr.AguaActual : 100f):F0}%  ·  RESERVA {(flr != null ? flr.ReservaOrinaHumedad : 0f):F0}%  ·  ENERGÍA {(flr != null ? flr.EnergiaActual : 100f):F0}%",
+                "RECOLECCIÓN — Orina, sudor y condensado se estabilizan sin perder una gota.",
+                "DESTILACIÓN VCD — Al vacío, el agua hierve a ~40 °C y deja atrás la salmuera.",
+                "PULIDO WPA + UV — Intercambio iónico y luz ultravioleta entregan agua potable.");
+            SetStatus("PROCESO COMPLETO · Agua disponible para beber, cultivos y refrigeración.", Success);
         }
-        GUI.enabled = true;
+
+        DrawNasaNote(
+            new Rect(col[2].x + 12f, y3 + 166f, col[2].width - 24f, col[2].yMax - y3 - 178f),
+            "CALIDAD DEL AGUA",
+            "El agua reciclada del ECLSS supera los estándares potables terrestres. También enfría el traje y riega los cultivos.",
+            Success);
     }
 
     // =========================================================================
@@ -814,120 +1512,179 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
         bool tieneMuestra = MarsSampleNode2D.HasHeldSample;
         var heldDiscovery = MarsSampleNode2D.HeldDiscovery;
         bool bloqueoCME = CommsTowerCMEEvent.HaySobrecargaActivaPorCME;
-
-        float colW = (area.width - 24f) / 3f;
-        Rect bay1 = new Rect(area.x, area.y, colW, area.height);
-        Rect bay2 = new Rect(bay1.xMax + 12f, area.y, colW, area.height);
-        Rect bay3 = new Rect(bay2.xMax + 12f, area.y, colW, area.height);
+        Color accent = StationAccent;
+        Rect[] col = SplitColumns(area);
 
         bool p1Done = step1Toggle;
         bool p2Done = p1Done && step2Value >= 95f;
 
-        // PASO 1: Sellado de Caja de Guantes (Bio-Aislamiento)
-        DrawStepBay(bay1, "PASO 1: ESCLUSA GLOVEBOX (1/1)", p1Done, !p1Done);
-        GUI.Label(new Rect(bay1.x + 12f, bay1.y + 38f, bay1.width - 24f, 76f),
-            "Igual que en el <b>Lunar Receiving Laboratory del programa Apollo</b>, la muestra entra en una cámara sellada con guantes de neopreno para no contaminar la roca ni la nave.",
-            bodyStyle);
+        // PASO 1: Glovebox de bio-aislamiento.
+        DrawStepCard(
+            col[0], 1,
+            "GLOVEBOX",
+            "La muestra entra en una cámara sellada con guantes de neopreno para no contaminar la roca ni la nave.",
+            p1Done, !p1Done, accent);
 
-        string sampleStatus = tieneMuestra
-            ? $"En contenedor EVA: {MarsSampleNode2D.HeldSampleLabel}"
-            : "Sin muestra en mano (Recoge 1 afuera)";
-        DrawProgressBar(new Rect(bay1.x + 14f, bay1.y + 122f, bay1.width - 28f, 24f), p1Done ? 1f : 0f,
-            sampleStatus, new Color(0.28f, 0.92f, 0.56f, 1f));
+        float y1 = col[0].y + 118f;
+        DrawStatRow(
+            new Rect(col[0].x + 12f, y1, col[0].width - 24f, 42f),
+            "CONTENEDOR EVA", tieneMuestra ? "1 / 1" : "0 / 1", tieneMuestra ? Success : Warning,
+            "CÁMARA", p1Done ? "SELLADA" : "ABIERTA", p1Done ? Success : accent);
 
-        if (GUI.Button(new Rect(bay1.x + 14f, bay1.y + 162f, bay1.width - 28f, 42f),
-            p1Done ? "✓ CÁMARA SELLADA AL VACÍO" : "INSERTAR TUBO Y SELLAR CÁMARA", buttonStyle))
+        DrawProgressBar(
+            new Rect(col[0].x + 12f, y1 + 50f, col[0].width - 24f, 22f),
+            p1Done ? 1f : 0f,
+            tieneMuestra ? $"MUESTRA · {MarsSampleNode2D.HeldSampleLabel}" : "SIN MUESTRA EN MANO",
+            tieneMuestra ? Success : new Color(0.55f, 0.63f, 0.72f, 1f));
+
+        if (DrawButton(
+            new Rect(col[0].x + 12f, y1 + 82f, col[0].width - 24f, 40f),
+            p1Done ? "✓ CÁMARA SELLADA AL VACÍO" : "INSERTAR TUBO Y SELLAR CÁMARA",
+            accent, !p1Done, !p1Done))
         {
             step1Toggle = true;
-            statusBanner = "PASO 2: Ejecuta el análisis científico con el instrumento real de la NASA.";
-            statusBannerColor = new Color(0.35f, 0.96f, 0.62f, 1f);
+            SetStatus("OBJETIVO 2 · Ejecuta el instrumento científico asignado a la muestra.", accent);
         }
 
-        Rect diag1 = new Rect(bay1.x + 14f, bay1.y + 218f, bay1.width - 28f, bay1.height - 232f);
-        DrawBoxWithBorder(diag1, new Color(0.05f, 0.09f, 0.14f, 1f), new Color(0.22f, 0.68f, 0.45f, 1f), 1.5f);
-        GUI.Label(new Rect(diag1.x + 8f, diag1.y + 8f, diag1.width - 16f, diag1.height - 16f),
-            $"<b>Progreso Geológico:</b> {MarsSampleNode2D.CollectedSamples} / {MarsSampleNode2D.TotalSamples} muestras.\n• Protección Planetaria NASA: evita mezclar microorganismos terrestres con muestras marcianas.",
-            bodyStyle);
+        DrawNasaNote(
+            new Rect(col[0].x + 12f, y1 + 134f, col[0].width - 24f, col[0].yMax - y1 - 146f),
+            "PROTECCIÓN PLANETARIA",
+            $"Protocolo del Lunar Receiving Laboratory (Apollo).<br><b>{MarsSampleNode2D.CollectedSamples} / {MarsSampleNode2D.TotalSamples}</b> muestras catalogadas.",
+            accent);
 
-        // PASO 2: Laboratorio Científico NASA (MAHLI / SAM / CheMin) + Foto real NASA
-        string instrumentLabel = heldDiscovery != null ? heldDiscovery.instrument : "MAHLI / SAM / CheMin";
-        DrawStepBay(bay2, $"PASO 2: INSTRUMENTO {instrumentLabel}", p2Done, p1Done && !p2Done);
+        // PASO 2: Instrumento NASA + minijuego.
+        DrawStepCard(
+            col[1], 2,
+            "ESPECTRÓMETRO",
+            "Curiosity analiza la muestra con cámara macro, cromatografía de gases o difracción de rayos X.",
+            p2Done, p1Done && !p2Done, accent);
+
+        float y2 = col[1].y + 118f;
+        Rect photo = new Rect(col[1].x + 12f, y2, col[1].width - 24f, 86f);
+        DrawBoxWithBorder(photo, new Color(0.028f, 0.048f, 0.072f, 1f), new Color(0.22f, 0.32f, 0.42f, 1f), 1f);
 
         Texture2D refPhoto = heldDiscovery != null ? heldDiscovery.LoadReference() : null;
         if (refPhoto != null)
         {
-            GUI.DrawTexture(new Rect(bay2.x + 14f, bay2.y + 38f, bay2.width - 28f, 96f), refPhoto, ScaleMode.ScaleToFit);
+            GUI.DrawTexture(
+                new Rect(photo.x + 4f, photo.y + 4f, photo.width - 8f, photo.height - 8f),
+                refPhoto,
+                ScaleMode.ScaleToFit);
         }
         else
         {
-            GUI.Label(new Rect(bay2.x + 12f, bay2.y + 38f, bay2.width - 24f, 96f),
-                "Aquí puedes verificar los hallazgos obtenidos con los instrumentos de Curiosity: <b>MAHLI</b> (cámara macro), <b>SAM</b> (gases) y <b>CheMin</b> (rayos X).",
+            GUI.Label(
+                new Rect(photo.x + 10f, photo.y + 8f, photo.width - 20f, photo.height - 16f),
+                heldDiscovery != null
+                    ? $"<b>{heldDiscovery.title}</b>\nReferencia oficial: {heldDiscovery.credit}"
+                    : "La fotografía oficial NASA aparece aquí cuando llevas una muestra al laboratorio.",
                 bodyStyle);
         }
 
-        GUI.enabled = p1Done;
-        if (heldDiscovery != null)
-        {
-            if (GUI.Button(new Rect(bay2.x + 14f, bay2.y + 142f, bay2.width - 28f, 36f),
-                $"🔬 ABRIR MINIJUEGO {heldDiscovery.instrument} (NASA)", buttonStyle))
-            {
-                step2Value = 100f;
-                CerrarConsola();
-                MarsMissionHUD.OpenExternalAnalysis(heldDiscovery);
-                return;
-            }
-        }
-
-        step2Value = GUI.HorizontalSlider(new Rect(bay2.x + 16f, bay2.y + 186f, bay2.width - 32f, 20f), step2Value, 0f, 100f);
-        if (GUI.Button(new Rect(bay2.x + 14f, bay2.y + 210f, bay2.width - 28f, 34f),
-            p2Done ? "✓ VERIFICACIÓN COMPLETADA" : "CONFIRMAR LECTURA DE DATOS", buttonStyle))
+        bool puedeMinijuego = p1Done && heldDiscovery != null;
+        if (DrawButton(
+            new Rect(col[1].x + 12f, y2 + 94f, col[1].width - 24f, 34f),
+            heldDiscovery != null
+                ? $"🔬 ABRIR MINIJUEGO {heldDiscovery.instrument}"
+                : "🔬 MINIJUEGO CON MUESTRA",
+            accent, puedeMinijuego, puedeMinijuego))
         {
             step2Value = 100f;
-            statusBanner = "PASO 3: Cataloga la muestra para vaciar tu contenedor (0/1) y salir por otra.";
-            statusBannerColor = new Color(0.28f, 0.98f, 0.56f, 1f);
+            CerrarConsola();
+            MarsMissionHUD.OpenExternalAnalysis(heldDiscovery);
+            return;
         }
-        GUI.enabled = true;
 
-        Rect diag2 = new Rect(bay2.x + 14f, bay2.y + 252f, bay2.width - 28f, bay2.height - 266f);
-        DrawBoxWithBorder(diag2, new Color(0.05f, 0.09f, 0.14f, 1f), new Color(0.22f, 0.68f, 0.45f, 1f), 1.5f);
-        string infoTexto = heldDiscovery != null
-            ? $"<b>{heldDiscovery.title}</b> ({heldDiscovery.credit})\n{heldDiscovery.description}"
-            : "Recoge muestras reales en Marte [E] para ejecutar los minijuegos de <b>MAHLI</b>, <b>SAM</b> y <b>CheMin</b> y ver su fotografía oficial NASA.";
-        GUI.Label(new Rect(diag2.x + 8f, diag2.y + 8f, diag2.width - 16f, diag2.height - 16f), infoTexto, bodyStyle);
+        step2Value = DrawSlider(
+            new Rect(col[1].x + 12f, y2 + 136f, col[1].width - 24f, 20f),
+            step2Value, p1Done && !p2Done, accent);
 
-        // PASO 3: Catalogación y Liberación del Contenedor (1/1 -> 0/1)
-        DrawStepBay(bay3, "PASO 3: CATALOGAR MUESTRA", false, p2Done);
-        GUI.Label(new Rect(bay3.x + 12f, bay3.y + 38f, bay3.width - 24f, 76f),
-            bloqueoCME
-                ? "<color=#ff6b6b>¡INTERFERENCIA CME ACTIVA!</color> La Antena HGA encendida induce ruido electromagnético. Apágala afuera primero."
-                : "Guarda el núcleo sellado en la bóveda de retorno de la nave y libera tu contenedor EVA para recoger la siguiente muestra.",
-            bodyStyle);
+        if (DrawButton(
+            new Rect(col[1].x + 12f, y2 + 160f, col[1].width - 24f, 34f),
+            p2Done ? "✓ LECTURA CONFIRMADA" : "CONFIRMAR LECTURA DE DATOS",
+            accent, !p2Done, p1Done && !p2Done))
+        {
+            step2Value = 100f;
+            SetStatus("OBJETIVO 3 · Cataloga la muestra y libera el contenedor EVA.", Success);
+        }
 
-        GUI.enabled = p2Done && !bloqueoCME;
-        if (GUI.Button(new Rect(bay3.x + 14f, bay3.y + 150f, bay3.width - 28f, 52f),
+        DrawNasaNote(
+            new Rect(col[1].x + 12f, y2 + 204f, col[1].width - 24f, col[1].yMax - y2 - 216f),
+            heldDiscovery != null ? "HALLAZGO" : "CÓMO CONTINUAR",
+            heldDiscovery != null
+                ? $"<b>{heldDiscovery.title}</b><br>{heldDiscovery.description}"
+                : "Recoge una muestra en Marte con [E], analízala y tráela de vuelta a la nave.",
+            accent);
+
+        // PASO 3: Catalogación y liberación del contenedor.
+        DrawStepCard(
+            col[2], 3,
+            "CATALOGAR",
+            "Guarda el núcleo sellado en la bóveda de retorno y libera el contenedor para la siguiente muestra.",
+            false, p2Done, accent);
+
+        float y3 = col[2].y + 118f;
+        DrawStatRow(
+            new Rect(col[2].x + 12f, y3, col[2].width - 24f, 42f),
+            "CATALOGADAS", $"{MarsSampleNode2D.CollectedSamples} / {MarsSampleNode2D.TotalSamples}", Success,
+            "ESTADO", bloqueoCME ? "BLOQUEADO" : tieneMuestra ? "LISTO" : "EN ESPERA",
+            bloqueoCME ? Danger : tieneMuestra ? Success : new Color(0.60f, 0.68f, 0.76f, 1f));
+
+        DrawProgressBar(
+            new Rect(col[2].x + 12f, y3 + 50f, col[2].width - 24f, 22f),
+            MarsSampleNode2D.TotalSamples > 0
+                ? MarsSampleNode2D.CollectedSamples / (float)MarsSampleNode2D.TotalSamples
+                : 0f,
+            $"REGISTRO CIENTÍFICO · {MarsSampleNode2D.CollectedSamples} / {MarsSampleNode2D.TotalSamples}",
+            Success);
+
+        bool puedeCatalogar = p2Done && !bloqueoCME;
+        if (DrawButton(
+            new Rect(col[2].x + 12f, y3 + 84f, col[2].width - 24f, 52f),
             tieneMuestra
-                ? "🔬 CATALOGAR Y GUARDAR MUESTRA\n(LIBERAR CONTENEDOR EVA)"
-                : "🔬 COMPLETAR REGISTRO EN NAVE", primaryActionBtnStyle))
+                ? "🔬 CATALOGAR Y GUARDAR\nLIBERAR CONTENEDOR EVA"
+                : "🔬 COMPLETAR REGISTRO EN NAVE",
+            Success, true, puedeCatalogar))
         {
             if (tieneMuestra)
             {
                 MarsSampleNode2D.TryDeliverHeldSampleToShip(out string msg);
-                tarjetaTitulo = heldDiscovery != null
-                    ? $"MUESTRA CATALOGADA: {heldDiscovery.title.ToUpperInvariant()}"
-                    : "¡MUESTRA MARCIANA ANALIZADA Y CATALOGADA!";
-                tarjetaCuerpo = heldDiscovery != null
-                    ? $"{msg}\n\n• Instrumento: {heldDiscovery.instrument} ({heldDiscovery.credit})\n• Resumen NASA: {heldDiscovery.description}\n• Contenedor EVA libre (0/1): ya puedes salir a recoger otra muestra."
-                    : $"{msg}\n\n• Contenedor EVA libre (0/1): ¡Ya puedes salir a la superficie marciana a recoger la siguiente muestra!";
+                PrepararTarjeta(
+                    heldDiscovery != null
+                        ? $"MUESTRA CATALOGADA · {heldDiscovery.title}"
+                        : "MUESTRA MARCIANA CATALOGADA",
+                    heldDiscovery != null
+                        ? $"{heldDiscovery.instrument} · {heldDiscovery.credit}"
+                        : "Bóveda de retorno · Módulo Apollo LM",
+                    $"MUESTRAS {MarsSampleNode2D.CollectedSamples} / {MarsSampleNode2D.TotalSamples}  ·  CONTENEDOR LIBRE (0/1)",
+                    heldDiscovery != null
+                        ? $"INSTRUMENTO — {heldDiscovery.instrument}: {heldDiscovery.credit}."
+                        : "REGISTRO — La muestra quedó guardada en la bóveda de retorno.",
+                    heldDiscovery != null
+                        ? $"HALLAZGO — {heldDiscovery.title}."
+                        : "CONTENEDOR EVA — Libre para recoger otra muestra.",
+                    "SIGUIENTE PASO — Sal a la superficie marciana y busca una nueva muestra.");
+                SetStatus("MUESTRA GUARDADA · Contenedor EVA libre para otra recolección.", Success);
             }
             else
             {
-                tarjetaTitulo = "LABORATORIO LISTO PARA NUEVAS MUESTRAS";
-                tarjetaCuerpo =
-                    "Recoge una muestra en la superficie de Marte con [E] para jugar su minijuego NASA (MAHLI / SAM / CheMin), ver su fotografía oficial y luego traerla aquí para catalogarla.";
+                PrepararTarjeta(
+                    "LABORATORIO LISTO PARA NUEVAS MUESTRAS",
+                    "Glovebox + espectrómetro · Protección planetaria",
+                    "CONTENEDOR EVA LIBRE (0/1)",
+                    "RECOGE — Usa [E] sobre una muestra en la superficie de Marte.",
+                    "ANALIZA — Juega el minijuego NASA (MAHLI / SAM / CheMin).",
+                    "CATALOGA — Trae la muestra a la nave y regístrala aquí.");
             }
-            mostrarTarjetaEducativa = true;
         }
-        GUI.enabled = true;
+
+        DrawNasaNote(
+            new Rect(col[2].x + 12f, y3 + 148f, col[2].width - 24f, col[2].yMax - y3 - 160f),
+            bloqueoCME ? "ALERTA CME" : "CURIOSITY",
+            bloqueoCME
+                ? "<b>Interferencia electromagnética activa.</b> Apaga la Antena HGA en la superficie antes de catalogar."
+                : "Cada muestra desbloquea una ficha con fotografía, instrumento y explicación científica real.",
+            bloqueoCME ? Danger : accent);
     }
 
     // =========================================================================
@@ -940,101 +1697,162 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
         int nivelActual = flr != null ? flr.NivelControlTermico : 1;
         float eActual = flr != null ? flr.EnergiaActual : 100f;
         float aActual = flr != null ? flr.AguaActual : 100f;
-
-        float colW = (area.width - 24f) / 3f;
-        Rect bay1 = new Rect(area.x, area.y, colW, area.height);
-        Rect bay2 = new Rect(bay1.xMax + 12f, area.y, colW, area.height);
-        Rect bay3 = new Rect(bay2.xMax + 12f, area.y, colW, area.height);
+        Color accent = StationAccent;
+        Rect[] col = SplitColumns(area);
 
         bool p1Done = step1Value >= 95f;
         bool p2Done = p1Done && step2Value >= 95f;
 
-        // PASO 1: Purga de tubos LCVG
-        DrawStepBay(bay1, "PASO 1: PURGAR TUBOS LCVG", p1Done, !p1Done);
-        GUI.Label(new Rect(bay1.x + 12f, bay1.y + 38f, bay1.width - 24f, 76f),
-            "En el espacio el aire no enfría el cuerpo. El traje interior <b>LCVG</b> tiene <b>91 metros de tubitos de agua</b> pegados a la piel que absorben el calor corporal y solar.",
-            bodyStyle);
+        // PASO 1: Purga de capilares LCVG.
+        DrawStepCard(
+            col[0], 1,
+            "PURGA LCVG",
+            "El traje interior lleva <b>91 m de capilares de agua</b> junto a la piel. Sin ellos, el cuerpo no puede ceder calor.",
+            p1Done, !p1Done, accent);
 
-        DrawProgressBar(new Rect(bay1.x + 14f, bay1.y + 122f, bay1.width - 28f, 24f), step1Value / 100f,
-            $"Purga de Burbujas LCVG: {step1Value:F0}%", new Color(0.28f, 0.82f, 1f, 1f));
+        float y1 = col[0].y + 118f;
+        DrawStatRow(
+            new Rect(col[0].x + 12f, y1, col[0].width - 24f, 42f),
+            "CIRCUITO", "91 m", accent,
+            "BURBUJAS", $"{Mathf.Max(0f, 100f - step1Value):F0}%", Warning);
 
-        step1Value = GUI.HorizontalSlider(new Rect(bay1.x + 16f, bay1.y + 158f, bay1.width - 32f, 24f), step1Value, 0f, 100f);
-        if (GUI.Button(new Rect(bay1.x + 14f, bay1.y + 190f, bay1.width - 28f, 36f),
-            p1Done ? "✓ CIRCUITO LCVG SIN BURBUJAS" : "PURGAR CIRCUITO HIDRÁULICO", buttonStyle))
+        DrawProgressBar(
+            new Rect(col[0].x + 12f, y1 + 50f, col[0].width - 24f, 22f),
+            step1Value / 100f,
+            $"PURGA HIDRÁULICA · {step1Value:F0}%",
+            accent);
+
+        step1Value = DrawSlider(
+            new Rect(col[0].x + 12f, y1 + 78f, col[0].width - 24f, 22f),
+            step1Value, !p1Done, accent);
+
+        if (DrawButton(
+            new Rect(col[0].x + 12f, y1 + 104f, col[0].width - 24f, 36f),
+            p1Done ? "✓ LCVG SIN BURBUJAS" : "PURGAR CIRCUITO HIDRÁULICO",
+            accent, !p1Done, !p1Done))
         {
             step1Value = 100f;
-            statusBanner = "PASO 2: Recarga de agua el sublimador de placa porosa de la mochila PLSS.";
-            statusBannerColor = new Color(1f, 0.75f, 0.25f, 1f);
+            SetStatus("OBJETIVO 2 · Recarga el sublimador de la mochila PLSS.", Warning);
         }
 
-        // PASO 2: Sublimador de Placa Porosa
-        DrawStepBay(bay2, "PASO 2: SUBLIMADOR DE HIELO", p2Done, p1Done && !p2Done);
-        GUI.Label(new Rect(bay2.x + 12f, bay2.y + 38f, bay2.width - 24f, 76f),
-            "En la mochila PLSS del Apollo, el agua caliente pasa por una <b>placa metálica porosa</b> expuesta al vacío: se congela y se <b>sublima en vapor</b>, expulsando el calor al espacio.",
-            bodyStyle);
+        DrawNasaNote(
+            new Rect(col[0].x + 12f, y1 + 150f, col[0].width - 24f, col[0].yMax - y1 - 162f),
+            "SIN CONVECCIÓN",
+            "En el espacio no hay aire que enfríe el cuerpo. El agua del LCVG es el único camino para evacuar el calor corporal y solar.",
+            accent);
 
-        DrawProgressBar(new Rect(bay2.x + 14f, bay2.y + 122f, bay2.width - 28f, 24f), step2Value / 100f,
-            $"Carga del Sublimador: {step2Value:F0}%", new Color(1f, 0.65f, 0.22f, 1f));
+        // PASO 2: Sublimador de placa porosa.
+        DrawStepCard(
+            col[1], 2,
+            "SUBLIMADOR PLSS",
+            "El agua caliente se expone al vacío a través de una placa porosa: se congela y se sublima llevándose el calor.",
+            p2Done, p1Done && !p2Done, accent);
 
-        GUI.enabled = p1Done;
-        step2Value = GUI.HorizontalSlider(new Rect(bay2.x + 16f, bay2.y + 158f, bay2.width - 32f, 24f), step2Value, 0f, 100f);
-        if (GUI.Button(new Rect(bay2.x + 14f, bay2.y + 190f, bay2.width - 28f, 36f),
-            p2Done ? "✓ SUBLIMADOR RECARGADO" : "RECARGAR PLACA POROSA AL 100%", buttonStyle))
+        float y2 = col[1].y + 118f;
+        DrawStatRow(
+            new Rect(col[1].x + 12f, y2, col[1].width - 24f, 42f),
+            "MOCHILA", "PLSS", Warning,
+            "CARGA", $"{step2Value:F0}%", accent);
+
+        DrawProgressBar(
+            new Rect(col[1].x + 12f, y2 + 50f, col[1].width - 24f, 22f),
+            step2Value / 100f,
+            $"PLACA POROSA · {step2Value:F0}%",
+            Warning);
+
+        step2Value = DrawSlider(
+            new Rect(col[1].x + 12f, y2 + 78f, col[1].width - 24f, 22f),
+            step2Value, p1Done && !p2Done, Warning);
+
+        if (DrawButton(
+            new Rect(col[1].x + 12f, y2 + 104f, col[1].width - 24f, 36f),
+            p2Done ? "✓ SUBLIMADOR RECARGADO" : "RECARGAR PLACA POROSA",
+            Warning, !p2Done, p1Done && !p2Done))
         {
             step2Value = 100f;
-            statusBanner = "PASO 3: Completa el mantenimiento al 100% o instala capas Kapton para subir de nivel.";
-            statusBannerColor = new Color(0.28f, 0.98f, 0.56f, 1f);
+            SetStatus("OBJETIVO 3 · Repara el sistema o instala capas Kapton MLI.", Success);
         }
-        GUI.enabled = true;
 
-        // PASO 3: Reparar al 100% y Mejorar Nivel Kapton (Nv.1 -> 3)
-        DrawStepBay(bay3, $"PASO 3: CALIBRAR Y MEJORAR (NV.{nivelActual})", termicoActual >= 99f, p2Done);
-        DrawProgressBar(new Rect(bay3.x + 14f, bay3.y + 42f, bay3.width - 28f, 24f), termicoActual / 100f,
-            $"Salud Control Térmico: {termicoActual:F0}% (Nv.{nivelActual}/3)", new Color(1f, 0.58f, 0.20f, 1f));
-        DrawProgressBar(new Rect(bay3.x + 14f, bay3.y + 72f, bay3.width - 28f, 20f), aActual / 100f,
-            $"Agua disponible: {aActual:F0}%  |  Energía: {eActual:F0}%", new Color(0.28f, 0.82f, 1f, 1f));
+        DrawNasaNote(
+            new Rect(col[1].x + 12f, y2 + 150f, col[1].width - 24f, col[1].yMax - y2 - 162f),
+            "TECNOLOGÍA APOLLO",
+            "El sublimador poroso ya se usaba en el PLSS del Apollo y sigue siendo la base de los trajes EVA actuales.",
+            Warning);
 
-        GUI.enabled = p2Done;
-        if (GUI.Button(new Rect(bay3.x + 14f, bay3.y + 108f, bay3.width - 28f, 44f),
-            "🔧 COMPLETAR MANTENIMIENTO (100%)\n(-Energía -Agua)", primaryActionBtnStyle))
+        // PASO 3: Reparación y mejora Kapton.
+        bool p3Done = termicoActual >= 99f;
+        DrawStepCard(
+            col[2], 3,
+            $"KAPTON MLI · NV.{nivelActual}",
+            "Capas reflectantes de Kapton reducen el consumo de agua y energía del sistema térmico.",
+            p3Done, p2Done, accent);
+
+        float y3 = col[2].y + 118f;
+        DrawStatRow(
+            new Rect(col[2].x + 12f, y3, col[2].width - 24f, 42f),
+            "CONTROL TÉRMICO", $"{termicoActual:F0}%", p3Done ? Success : Warning,
+            "NIVEL", $"{nivelActual} / {DONKIFLRManager.MaxNivelControlTermico}", accent);
+
+        DrawProgressBar(
+            new Rect(col[2].x + 12f, y3 + 50f, col[2].width - 24f, 20f),
+            termicoActual / 100f,
+            $"SALUD TÉRMICA · {termicoActual:F0}%",
+            p3Done ? Success : Warning);
+
+        DrawProgressBar(
+            new Rect(col[2].x + 12f, y3 + 74f, col[2].width - 24f, 18f),
+            aActual / 100f,
+            $"AGUA {aActual:F0}%  ·  ENERGÍA {eActual:F0}%",
+            accent);
+
+        if (DrawButton(
+            new Rect(col[2].x + 12f, y3 + 102f, col[2].width - 24f, 38f),
+            "🔧 MANTENIMIENTO AL 100%",
+            Warning, false, p2Done && !p3Done))
         {
             if (flr != null)
             {
                 for (int i = 0; i < 25 && (flr.EstadoControlTermico < 99.9f || flr.IntegridadTraje < 99.9f); i++)
                     flr.RealizarMantenimientoTermicoContinuo(0.25f);
             }
-            statusBanner = $"✓ Control Térmico restaurado al {(flr != null ? flr.EstadoControlTermico : 100f):F0}%. Ya puedes mejorarlo de nivel si deseas.";
-            statusBannerColor = new Color(0.28f, 0.98f, 0.56f, 1f);
+            SetStatus($"✓ Sistema térmico restaurado al {(flr != null ? flr.EstadoControlTermico : 100f):F0}%.", Success);
         }
 
         bool puedeMejorar = flr != null && flr.EstadoControlTermico >= 95f && flr.NivelControlTermico < DONKIFLRManager.MaxNivelControlTermico;
-        GUI.enabled = p2Done && puedeMejorar;
         string upgradeLabel = (flr != null && flr.NivelControlTermico >= DONKIFLRManager.MaxNivelControlTermico)
-            ? "★ BLINDAJE KAPTON EN NIVEL MÁXIMO (NV.3)"
-            : $"🛡️ MEJORAR BLINDAJE KAPTON A NV.{nivelActual + 1}\n(-16% ⚡  -14% 💧)";
+            ? "★ KAPTON EN NIVEL MÁXIMO · NV.3"
+            : $"🛡️ INSTALAR KAPTON · NV.{nivelActual + 1}\n-16% ENERGÍA  ·  -14% AGUA";
 
-        if (GUI.Button(new Rect(bay3.x + 14f, bay3.y + 162f, bay3.width - 28f, 48f), upgradeLabel, primaryActionBtnStyle))
+        if (DrawButton(
+            new Rect(col[2].x + 12f, y3 + 146f, col[2].width - 24f, 46f),
+            upgradeLabel,
+            Success, true, p2Done && puedeMejorar))
         {
             if (flr != null)
             {
                 if (flr.IntentarMejorarControlTermico(out string upgMsg))
                 {
-                    tarjetaTitulo = $"¡TRAJE MEJORADO A NIVEL TÉRMICO {flr.NivelControlTermico}!";
-                    tarjetaCuerpo =
-                        $"{upgMsg}\n\n" +
-                        "• 1. Prenda de Enfriamiento Líquido (LCVG): Purgaste los 91 m de capilares internos.\n" +
-                        "• 2. Sublimador Poroso PLSS: Renovaste las placas que evaporan hielo al vacío durante una tormenta solar (FLR).\n" +
-                        "• 3. Aislamiento Multicapa Kapton (MLI): Añadiste láminas reflectantes doradas para reducir el gasto de agua y energía afuera.";
-                    mostrarTarjetaEducativa = true;
+                    PrepararTarjeta(
+                        $"TRAJE BLINDADO A NIVEL TÉRMICO {flr.NivelControlTermico}",
+                        "PLSS / LCVG · Aislamiento multicapa Kapton",
+                        $"TÉRMICO {flr.EstadoControlTermico:F0}%  ·  AGUA {flr.AguaActual:F0}%  ·  ENERGÍA {flr.EnergiaActual:F0}%",
+                        "LCVG — 91 m de capilares de agua enfrían el cuerpo dentro del traje.",
+                        "SUBLIMADOR PLSS — El hielo pasa directo a vapor y expulsa el calor al vacío.",
+                        "KAPTON MLI — Capas reflectantes reducen el consumo de agua y energía.");
+                    SetStatus("MEJORA INSTALADA · El traje consume menos agua y energía.", Success);
                 }
                 else
                 {
-                    statusBanner = upgMsg;
-                    statusBannerColor = new Color(1f, 0.45f, 0.35f, 1f);
+                    SetStatus(upgMsg, Danger);
                 }
             }
         }
-        GUI.enabled = true;
+
+        DrawNasaNote(
+            new Rect(col[2].x + 12f, y3 + 204f, col[2].width - 24f, col[2].yMax - y3 - 216f),
+            "DATO NASA",
+            "El Kapton soporta de <b>-269 °C a 400 °C</b>. Sus capas doradas protegen la nave y el traje de la radiación solar.",
+            Success);
     }
 
     // =========================================================================
@@ -1042,69 +1860,113 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
     // =========================================================================
     private void DibujarProcesoEscotillaEVA(Rect area)
     {
-        float colW = (area.width - 24f) / 3f;
-        Rect bay1 = new Rect(area.x, area.y, colW, area.height);
-        Rect bay2 = new Rect(bay1.xMax + 12f, area.y, colW, area.height);
-        Rect bay3 = new Rect(bay2.xMax + 12f, area.y, colW, area.height);
+        Color accent = StationAccent;
+        Rect[] col = SplitColumns(area);
 
         bool p1Done = step1Toggle;
         bool p2Done = p1Done && step2Value >= 95f;
 
-        // PASO 1: Presurizar traje a 4.3 psi
-        DrawStepBay(bay1, "PASO 1: PRESURIZAR TRAJE PLSS", p1Done, !p1Done);
-        GUI.Label(new Rect(bay1.x + 12f, bay1.y + 38f, bay1.width - 24f, 82f),
-            "Antes de abrir la escotilla del <b>Módulo Lunar Apollo</b>, los astronautas sellan su casco y presurizan el traje a <b>4.3 psi (0.30 atm)</b> con oxígeno puro para evitar la descompresión.",
-            bodyStyle);
+        // PASO 1: Presurizar el traje.
+        DrawStepCard(
+            col[0], 1,
+            "PRESURIZAR PLSS",
+            "Sella el visor y presuriza el traje a <b>4.3 psi</b> con oxígeno puro antes de abrir la escotilla.",
+            p1Done, !p1Done, accent);
 
-        if (GUI.Button(new Rect(bay1.x + 14f, bay1.y + 142f, bay1.width - 28f, 44f),
-            p1Done ? "✓ TRAJE SELLADO A 4.3 PSI" : "SELLAR VISOR Y PRESURIZAR TRAJE", buttonStyle))
+        float y1 = col[0].y + 118f;
+        DrawStatRow(
+            new Rect(col[0].x + 12f, y1, col[0].width - 24f, 42f),
+            "TRAJE", "4.3 psi", accent,
+            "MARTE", "0.09 psi", Warning);
+
+        if (DrawButton(
+            new Rect(col[0].x + 12f, y1 + 58f, col[0].width - 24f, 44f),
+            p1Done ? "✓ TRAJE SELLADO · 4.3 PSI" : "SELLAR VISOR Y PRESURIZAR",
+            accent, !p1Done, !p1Done))
         {
             step1Toggle = true;
-            statusBanner = "PASO 2: Abre la válvula de venteo (Dump Valve) para igualar la presión con Marte.";
-            statusBannerColor = new Color(1f, 0.78f, 0.25f, 1f);
+            SetStatus("OBJETIVO 2 · Abre la válvula de venteo para igualar la presión con Marte.", Warning);
         }
 
-        // PASO 2: Válvula de Venteo (Forward Hatch Dump Valve)
-        DrawStepBay(bay2, "PASO 2: VÁLVULA DE VENTEO", p2Done, p1Done && !p2Done);
-        GUI.Label(new Rect(bay2.x + 12f, bay2.y + 38f, bay2.width - 24f, 82f),
-            "En el Apollo LM la escotilla abre <b>hacia adentro</b>. Mientras haya presión dentro, miles de kilos de fuerza bloquean la puerta hasta abrir la <b>válvula de descarga</b>.",
-            bodyStyle);
+        DrawNasaNote(
+            new Rect(col[0].x + 12f, y1 + 120f, col[0].width - 24f, col[0].yMax - y1 - 132f),
+            "SEGURIDAD EVA",
+            "La presurización evita la enfermedad por descompresión. El oxígeno puro reduce el nitrógeno disuelto en la sangre.",
+            accent);
 
+        // PASO 2: Válvula de venteo.
+        DrawStepCard(
+            col[1], 2,
+            "VENTEO CABINA",
+            "La escotilla Apollo abre hacia adentro. Mientras haya presión, miles de kilos la mantienen bloqueada.",
+            p2Done, p1Done && !p2Done, accent);
+
+        float y2 = col[1].y + 118f;
         float cabinPsi = Mathf.Lerp(4.8f, 0.09f, step2Value / 100f);
-        DrawProgressBar(new Rect(bay2.x + 14f, bay2.y + 126f, bay2.width - 28f, 24f), step2Value / 100f,
-            $"Presión Esclusa: {cabinPsi:F2} psi (Marte: 0.09 psi)", new Color(1f, 0.56f, 0.24f, 1f));
+        DrawStatRow(
+            new Rect(col[1].x + 12f, y2, col[1].width - 24f, 42f),
+            "ESCOTILLA", $"{cabinPsi:F2} psi", Warning,
+            "EXTERIOR", "0.09 psi", accent);
 
-        GUI.enabled = p1Done;
-        step2Value = GUI.HorizontalSlider(new Rect(bay2.x + 16f, bay2.y + 160f, bay2.width - 32f, 24f), step2Value, 0f, 100f);
-        if (GUI.Button(new Rect(bay2.x + 14f, bay2.y + 192f, bay2.width - 28f, 38f),
-            p2Done ? "✓ PRESIÓN IGUALADA CON MARTE" : "ABRIR VÁLVULA DE DESCARGA AL 100%", buttonStyle))
+        DrawProgressBar(
+            new Rect(col[1].x + 12f, y2 + 50f, col[1].width - 24f, 22f),
+            step2Value / 100f,
+            $"DESPRESURIZACIÓN · {step2Value:F0}%",
+            Warning);
+
+        step2Value = DrawSlider(
+            new Rect(col[1].x + 12f, y2 + 78f, col[1].width - 24f, 22f),
+            step2Value, p1Done && !p2Done, Warning);
+
+        if (DrawButton(
+            new Rect(col[1].x + 12f, y2 + 104f, col[1].width - 24f, 38f),
+            p2Done ? "✓ PRESIÓN IGUALADA" : "ABRIR VÁLVULA DE DESCARGA",
+            Warning, !p2Done, p1Done && !p2Done))
         {
             step2Value = 100f;
-            statusBanner = "PASO 3: Destraba el volante de cierre y sal por la escalera frontal hacia Marte.";
-            statusBannerColor = new Color(0.28f, 0.98f, 0.56f, 1f);
+            SetStatus("OBJETIVO 3 · Destraba el volante y baja a la superficie marciana.", Success);
         }
-        GUI.enabled = true;
 
-        // PASO 3: Abrir escotilla y salir
-        DrawStepBay(bay3, "PASO 3: ABRIR ESCOTILLA Y SALIR", false, p2Done);
-        GUI.Label(new Rect(bay3.x + 12f, bay3.y + 38f, bay3.width - 24f, 76f),
-            "Al igualarse la presión, el volante mecánico libera los pestillos y puedes bajar por la escalera de 9 peldaños hacia la superficie marciana.",
-            bodyStyle);
+        DrawNasaNote(
+            new Rect(col[1].x + 12f, y2 + 152f, col[1].width - 24f, col[1].yMax - y2 - 164f),
+            "APOLLO LM",
+            "La cabina se despresurizaba antes de cada EVA. La válvula de descarga liberaba el aire al vacío de forma controlada.",
+            Warning);
 
-        GUI.enabled = p2Done;
-        if (GUI.Button(new Rect(bay3.x + 14f, bay3.y + 132f, bay3.width - 28f, 54f),
-            "🚀 DESTRABAR ESCOTILLA EVA\nY SALIR A MARTE", primaryActionBtnStyle))
+        // PASO 3: Abrir escotilla y salir.
+        DrawStepCard(
+            col[2], 3,
+            "SALIDA A MARTE",
+            "Al igualarse la presión, el volante libera los pestillos y la escalera de 9 peldaños queda disponible.",
+            false, p2Done, accent);
+
+        float y3 = col[2].y + 118f;
+        DrawStatRow(
+            new Rect(col[2].x + 12f, y3, col[2].width - 24f, 42f),
+            "ESCOTILLA", p2Done ? "LIBRE" : "BLOQUEADA", p2Done ? Success : Danger,
+            "DESTINO", "SUPERFICIE", accent);
+
+        if (DrawButton(
+            new Rect(col[2].x + 12f, y3 + 56f, col[2].width - 24f, 52f),
+            "🚀 DESTRABAR ESCOTILLA\nSALIR A MARTE",
+            Success, true, p2Done))
         {
             EjecutarSalidaAMarte();
         }
-        GUI.enabled = true;
 
-        // Botón de salida directa rápida por si hay emergencia CME afuera
-        if (GUI.Button(new Rect(bay3.x + 14f, bay3.y + 204f, bay3.width - 28f, 36f),
-            "⚡ Salida Rápida de Emergencia (1 clic)", buttonStyle))
+        if (DrawButton(
+            new Rect(col[2].x + 12f, y3 + 116f, col[2].width - 24f, 34f),
+            "⚡ SALIDA RÁPIDA DE EMERGENCIA",
+            Danger, false, true))
         {
             EjecutarSalidaAMarte();
         }
+
+        DrawNasaNote(
+            new Rect(col[2].x + 12f, y3 + 162f, col[2].width - 24f, col[2].yMax - y3 - 174f),
+            "CHECKLIST EVA",
+            "Antes de salir: traje presurizado, PLSS cargado y presión de cabina igualada. La prisa es el peor enemigo.",
+            Danger);
     }
 
     private void EjecutarSalidaAMarte()
@@ -1125,90 +1987,184 @@ public sealed class MarsSpaceshipStation2D : MonoBehaviour
     {
         var flr = DONKIFLRManager.Instance;
         var cme = DONKICMEManager.Instance;
+        Color accent = StationAccent;
 
         float leftW = area.width * 0.44f;
         Rect leftBox = new Rect(area.x, area.y, leftW, area.height);
-        Rect rightBox = new Rect(leftBox.xMax + 14f, area.y, area.width - leftW - 14f, area.height);
+        Rect rightBox = new Rect(leftBox.xMax + 12f, area.y, area.width - leftW - 12f, area.height);
 
-        DrawStepBay(leftBox, "COMPUTADOR APOLLO AGC / DSKY (MIT)", true, false);
-        Rect dskyScreen = new Rect(leftBox.x + 16f, leftBox.y + 42f, leftBox.width - 32f, 165f);
-        DrawBoxWithBorder(dskyScreen, new Color(0.02f, 0.14f, 0.06f, 1f), new Color(0.22f, 0.88f, 0.42f, 1f), 2f);
+        // ---- Panel izquierdo: AGC / DSKY ----
+        DrawBoxWithBorder(leftBox, new Color(0.040f, 0.065f, 0.090f, 0.99f), accent, 1.5f);
+        DrawHeaderStrip(leftBox, "COMPUTADOR AGC", "MIT · Apollo 1969", accent);
+
+        Rect screen = new Rect(leftBox.x + 12f, leftBox.y + 50f, leftBox.width - 24f, 185f);
+        DrawBoxWithBorder(screen, new Color(0.015f, 0.120f, 0.052f, 1f), new Color(0.22f, 0.88f, 0.42f, 1f), 1.5f);
+
+        Color prevScreen = GUI.color;
+        GUI.color = new Color(0f, 0f, 0f, 0.18f);
+        for (int i = 1; i < 6; i++)
+        {
+            float ly = screen.y + screen.height * i / 6f;
+            GUI.DrawTexture(new Rect(screen.x + 2f, ly, screen.width - 4f, 1f), solidTex);
+        }
+        GUI.color = prevScreen;
 
         string dskyText = dskySelectedProgram switch
         {
-            1 => "PROG 64  —  LANDING APPROACH\nVERB 16  NOUN 68 (MARS LANDER)\n" +
-                 $"LAT: +18.38° N (JEZERO)   GRAV: 0.38 G\nMUESTRAS EVA: {MarsSampleNode2D.CollectedSamples} / {MarsSampleNode2D.TotalSamples}",
-            2 => "PROG 00  —  ECLSS LIFE SUPPORT\nVERB 16  NOUN 36 (CABIN STATUS)\n" +
-                 $"ENERGIA: {(flr != null ? flr.EnergiaActual : 100f):F0}%   OXIGENO: {(flr != null ? flr.OxigenoActual : 100f):F0}%\n" +
-                 $"AGUA: {(flr != null ? flr.AguaActual : 100f):F0}%      TERMICO: {(flr != null ? flr.EstadoControlTermico : 100f):F0}% (NV.{(flr != null ? flr.NivelControlTermico : 1)})",
-            _ => "PROG 37  —  NASA DONKI SPACE WEATHER\nVERB 06  NOUN 91 (SOLAR TELEMETRY)\n" +
-                 $"CME: {(cme != null && cme.HayTormentaCMEActiva ? $"ACTIVA ({cme.VelocidadActualKmS:F0} km/s)" : "DESPEJADO")}\n" +
-                 $"FLR: {(flr != null && flr.HayTormentaFLRActiva ? $"CLASE {flr.ClaseActual} ACTIVA" : $"PROB/DIA {(flr != null ? flr.ProbabilidadEventoPorDia * 100f : 35f):F0}%")}"
+            1 => "PROG 64 · LANDING APPROACH\nVERB 16   NOUN 68\n\n" +
+                 $"LAT  +18.38° N · JEZERO\nGRAV 0.38 G\nMUESTRAS  {MarsSampleNode2D.CollectedSamples} / {MarsSampleNode2D.TotalSamples}",
+            2 => "PROG 00 · ECLSS LIFE SUPPORT\nVERB 16   NOUN 36\n\n" +
+                 $"O₂   {(flr != null ? flr.OxigenoActual : 100f):F0}%      H₂O  {(flr != null ? flr.AguaActual : 100f):F0}%\n" +
+                 $"⚡   {(flr != null ? flr.EnergiaActual : 100f):F0}%      TÉRM {(flr != null ? flr.EstadoControlTermico : 100f):F0}%\n" +
+                 $"NIVEL TÉRM.  {(flr != null ? flr.NivelControlTermico : 1)} / {DONKIFLRManager.MaxNivelControlTermico}",
+            _ => "PROG 37 · SPACE WEATHER\nVERB 06   NOUN 91\n\n" +
+                 $"CME  {(cme != null && cme.HayTormentaCMEActiva ? $"ACTIVA · {cme.VelocidadActualKmS:F0} km/s" : "DESPEJADO")}\n" +
+                 $"FLR  {(flr != null && flr.HayTormentaFLRActiva ? $"CLASE {flr.ClaseActual}" : $"PROB/DÍA {(flr != null ? flr.ProbabilidadEventoPorDia * 100f : 35f):F0}%")}\n" +
+                 "ENLACE  ANTENA HGA"
         };
-        GUI.Label(new Rect(dskyScreen.x + 12f, dskyScreen.y + 10f, dskyScreen.width - 24f, dskyScreen.height - 20f), dskyText, monoGreenStyle);
 
-        GUI.Label(new Rect(leftBox.x + 16f, dskyScreen.yMax + 10f, leftBox.width - 32f, 44f),
-            "El <b>Apollo Guidance Computer (AGC)</b> fue el primer computador con circuitos integrados. Se operaba con códigos de <b>VERBO</b> (acción) y <b>NOMBRE</b> (dato):",
+        GUI.Label(
+            new Rect(screen.x + 14f, screen.y + 8f, screen.width - 28f, screen.height - 16f),
+            dskyText,
+            monoGreenStyle);
+
+        GUI.Label(
+            new Rect(leftBox.x + 12f, screen.yMax + 8f, leftBox.width - 24f, 34f),
+            "VERBO = acción  ·  NOMBRE = dato",
             bodyStyle);
 
-        float btnY = dskyScreen.yMax + 60f;
-        if (GUI.Button(new Rect(leftBox.x + 16f, btnY, leftBox.width - 32f, 34f), "PROG 64 — Navegación y Muestras EVA", buttonStyle))
+        float buttonY = screen.yMax + 48f;
+        if (DrawButton(
+            new Rect(leftBox.x + 12f, buttonY, leftBox.width - 24f, 32f),
+            "64 · NAVEGACIÓN",
+            accent, dskySelectedProgram == 1, true))
             dskySelectedProgram = 1;
-        if (GUI.Button(new Rect(leftBox.x + 16f, btnY + 40f, leftBox.width - 32f, 34f), "VERB 16 / NOUN 36 — Soporte Vital (O₂ / H₂O / ⚡)", buttonStyle))
+
+        if (DrawButton(
+            new Rect(leftBox.x + 12f, buttonY + 38f, leftBox.width - 24f, 32f),
+            "00 · SOPORTE VITAL",
+            accent, dskySelectedProgram == 2, true))
             dskySelectedProgram = 2;
-        if (GUI.Button(new Rect(leftBox.x + 16f, btnY + 80f, leftBox.width - 32f, 34f), "VERB 06 / NOUN 91 — Radar Clima Espacial DONKI", buttonStyle))
+
+        if (DrawButton(
+            new Rect(leftBox.x + 12f, buttonY + 76f, leftBox.width - 24f, 32f),
+            "37 · CLIMA DONKI",
+            accent, dskySelectedProgram == 3, true))
             dskySelectedProgram = 3;
 
-        DrawStepBay(rightBox, "ARQUITECTURA INTERNA DEL MÓDULO LUNAR APOLLO (LM)", false, true);
-        GUI.Label(new Rect(rightBox.x + 14f, rightBox.y + 42f, rightBox.width - 28f, rightBox.height - 54f),
-            "<b>¿Cómo era por dentro el Módulo Lunar Apollo (LM-5 \"Eagle\")?</b>\n\n" +
-            "• <b>1. Ventanas Triangulares Inclinadas:</b> Estaban inclinadas hacia abajo con una retícula graduada (LPD) para que el Comandante viera los cráteres durante el descenso.\n\n" +
-            "• <b>2. Sillas y Puestos de Mando:</b> En la Luna (1/6 G) el LM original usaba cables y apoyabrazos para ahorrar peso, mientras que en el Módulo de Mando y aterrizadores marcianos (0.38 G) la tripulación cuenta con <b>2 asientos anatómicos con arnés de 4 puntos</b> frente al panel PGNCS.\n\n" +
-            "• <b>3. Bahías Laterales Presurizadas:</b> A babor (izquierda) operan los sistemas de soporte vital (<b>MOXIE O₂</b> y <b>Filtro UPA de Agua</b>) y a estribor (derecha) el <b>Laboratorio Glovebox</b> y el <b>Banco Térmico PLSS</b>.",
-            bodyStyle);
+        DrawNasaNote(
+            new Rect(leftBox.x + 12f, buttonY + 114f, leftBox.width - 24f, leftBox.yMax - buttonY - 126f),
+            "TELEMETRÍA EN VIVO",
+            "El DSKY mostraba cinco dígitos por registro. Aquí resume el estado real de la misión.",
+            accent);
+
+        // ---- Panel derecho: arquitectura del LM, sintetizada ----
+        DrawBoxWithBorder(rightBox, new Color(0.040f, 0.065f, 0.090f, 0.99f), new Color(0.24f, 0.33f, 0.43f, 1f), 1.2f);
+        DrawHeaderStrip(rightBox, "EL LM POR DENTRO", "Módulo Lunar Apollo", accent);
+
+        float cardY = rightBox.y + 52f;
+        DrawInfoCard(
+            new Rect(rightBox.x + 12f, cardY, rightBox.width - 24f, 98f),
+            "01",
+            "VENTANAS LPD",
+            "Triangulares e inclinadas hacia abajo, con retícula graduada para el descenso manual.",
+            accent);
+
+        DrawInfoCard(
+            new Rect(rightBox.x + 12f, cardY + 106f, rightBox.width - 24f, 98f),
+            "02",
+            "PUESTOS DE MANDO",
+            "Dos asientos anatómicos con arnés de 4 puntos frente al panel de guía PGNCS.",
+            accent);
+
+        DrawInfoCard(
+            new Rect(rightBox.x + 12f, cardY + 212f, rightBox.width - 24f, 98f),
+            "03",
+            "CABINAS",
+            "Babor: MOXIE y UPA. Estribor: glovebox científico y banco térmico PLSS.",
+            accent);
+
+        DrawNasaNote(
+            new Rect(rightBox.x + 12f, cardY + 324f, rightBox.width - 24f, rightBox.yMax - cardY - 336f),
+            "DATO CLAVE",
+            "El AGC del Apollo tenía unos <b>2 KB de RAM</b> y aun así guió al hombre a la Luna en 1969.",
+            Success);
     }
 
-    private void DibujarTarjetaEducativaModal()
+    private void DibujarTarjetaEducativaModal(float virtualW, float virtualH)
     {
-        float w = Mathf.Min(680f, Screen.width - 40f);
-        float h = Mathf.Min(390f, Screen.height - 40f);
-        Rect card = new Rect((Screen.width - w) * 0.5f, (Screen.height - h) * 0.5f, w, h);
+        float w = Mathf.Min(790f, virtualW - 32f);
+        float h = Mathf.Min(510f, virtualH - 32f);
+        Rect card = new Rect((virtualW - w) * 0.5f, (virtualH - h) * 0.5f, w, h);
+        Color accent = StationAccent;
 
-        DrawBoxWithBorder(card, new Color(0.08f, 0.13f, 0.20f, 0.98f), new Color(0.28f, 0.96f, 0.56f, 1f), 3f);
-        GUI.Label(new Rect(card.x + 20f, card.y + 18f, card.width - 40f, 32f), tarjetaTitulo, headerStyle);
-        GUI.Label(new Rect(card.x + 24f, card.y + 62f, card.width - 48f, card.height - 130f), tarjetaCuerpo, bodyStyle);
+        DrawBoxWithBorder(card, new Color(0.060f, 0.095f, 0.135f, 0.99f), Success, 2.5f);
 
-        if (GUI.Button(new Rect(card.x + (card.width - 240f) * 0.5f, card.yMax - 54f, 240f, 38f),
-            "✓ ENTENDIDO — CONTINUAR", primaryActionBtnStyle))
+        Color prev = GUI.color;
+        GUI.color = Success;
+        GUI.DrawTexture(new Rect(card.x + 2f, card.y + 2f, card.width - 4f, 3f), solidTex);
+        GUI.color = prev;
+
+        DrawPill(new Rect(card.x + 24f, card.y + 18f, 198f, 22f), "✓ PROCESO COMPLETADO", Success, true);
+        DrawPill(new Rect(card.x + 230f, card.y + 18f, 118f, 22f), StationTag, accent, false);
+
+        var titleStyle = new GUIStyle(headerStyle)
+        {
+            fontSize = 21,
+            wordWrap = true,
+            alignment = TextAnchor.UpperLeft
+        };
+        GUI.Label(new Rect(card.x + 24f, card.y + 50f, card.width - 48f, 50f), tarjetaTitulo, titleStyle);
+        GUI.Label(new Rect(card.x + 24f, card.y + 101f, card.width - 48f, 20f), tarjetaSubtitulo, subHeaderStyle);
+
+        float y = card.y + 128f;
+        for (int i = 0; i < tarjetaPuntosCount; i++)
+        {
+            Rect row = new Rect(card.x + 24f, y, card.width - 48f, 66f);
+            DrawBoxWithBorder(row, new Color(0.040f, 0.070f, 0.100f, 0.98f), new Color(0.20f, 0.31f, 0.41f, 1f), 1f);
+
+            Rect chip = new Rect(row.x + 10f, row.y + 10f, 26f, 26f);
+            DrawBoxWithBorder(chip, new Color(0.035f, 0.085f, 0.075f, 1f), Success, 1f);
+
+            Color prevChip = chipStyle.normal.textColor;
+            chipStyle.normal.textColor = Success;
+            GUI.Label(new Rect(chip.x, chip.y + 4f, chip.width, 20f), (i + 1).ToString(), chipStyle);
+            chipStyle.normal.textColor = prevChip;
+
+            GUI.Label(new Rect(row.x + 46f, row.y + 7f, row.width - 58f, 52f), tarjetaPuntos[i], bulletStyle);
+            y += 74f;
+        }
+
+        Rect stateBar = new Rect(card.x + 24f, card.yMax - 104f, card.width - 48f, 34f);
+        DrawBoxWithBorder(stateBar, new Color(0.035f, 0.060f, 0.090f, 1f), new Color(Success.r, Success.g, Success.b, 0.55f), 1f);
+
+        Color prevTitle = noteTitleStyle.normal.textColor;
+        noteTitleStyle.normal.textColor = Success;
+        GUI.Label(new Rect(stateBar.x + 12f, stateBar.y + 4f, 62f, 16f), "ESTADO", noteTitleStyle);
+        noteTitleStyle.normal.textColor = prevTitle;
+
+        Color prevBody = bodyStyle.normal.textColor;
+        bodyStyle.normal.textColor = TextMain;
+        GUI.Label(new Rect(stateBar.x + 78f, stateBar.y + 3f, stateBar.width - 90f, 24f), tarjetaEstado, bodyStyle);
+        bodyStyle.normal.textColor = prevBody;
+
+        if (DrawButton(
+            new Rect(card.x + 24f, card.yMax - 58f, 256f, 38f),
+            "VOLVER A LA CONSOLA",
+            accent, false, true))
+        {
+            mostrarTarjetaEducativa = false;
+            consolaAbierta = true;
+            SetStatus("Proceso completado · Puedes repetirlo o revisar la telemetría.", Success);
+        }
+
+        if (DrawButton(
+            new Rect(card.xMax - 288f, card.yMax - 58f, 264f, 38f),
+            "✓ ENTENDIDO · CERRAR",
+            Success, true, true))
         {
             CerrarConsola();
         }
-    }
-
-    private void DrawStepBay(Rect rect, string title, bool done, bool active)
-    {
-        Color border = done
-            ? new Color(0.24f, 0.92f, 0.52f, 1f)
-            : (active ? new Color(0.32f, 0.86f, 1f, 1f) : new Color(0.25f, 0.32f, 0.42f, 1f));
-        DrawBoxWithBorder(rect, new Color(0.08f, 0.12f, 0.18f, 0.96f), border, done || active ? 2.5f : 1.5f);
-
-        Rect head = new Rect(rect.x + 6f, rect.y + 6f, rect.width - 12f, 26f);
-        DrawBoxWithBorder(head, new Color(0.05f, 0.08f, 0.13f, 1f), border, 1f);
-        GUI.Label(new Rect(head.x + 8f, head.y + 2f, head.width - 16f, 22f), title, stepTitleStyle);
-    }
-
-    private void DrawProgressBar(Rect rect, float t01, string label, Color barColor)
-    {
-        t01 = Mathf.Clamp01(t01);
-        DrawBoxWithBorder(rect, new Color(0.04f, 0.07f, 0.11f, 1f), new Color(0.28f, 0.36f, 0.46f, 1f), 1.5f);
-        if (t01 > 0.005f)
-        {
-            Color prev = GUI.color;
-            GUI.color = barColor;
-            GUI.DrawTexture(new Rect(rect.x + 2f, rect.y + 2f, (rect.width - 4f) * t01, rect.height - 4f), solidTex);
-            GUI.color = prev;
-        }
-        GUI.Label(rect, label, badgeStyle);
     }
 
     private static void DrawBoxWithBorder(Rect rect, Color bg, Color border, float bw)

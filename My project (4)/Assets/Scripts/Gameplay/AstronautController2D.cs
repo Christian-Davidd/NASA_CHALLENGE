@@ -257,16 +257,13 @@ public sealed class AstronautController2D : MonoBehaviour
         float searchRadius = ActiveInteractionRadius;
         var hits = Physics2D.OverlapCircleAll(transform.position, searchRadius);
 
-        foreach (var hit in hits)
+        var shipStation = FindNearestShipStation(hits, false);
+        if (shipStation != null)
         {
-            var shipStation = hit.GetComponent<MarsSpaceshipStation2D>();
-            if (shipStation != null)
-            {
-                statusMessage = shipStation.InteractTapFromPlayer();
-                statusUntil = Time.time + 3.5f;
-                poseUntil = Time.time + interactionPoseDuration;
-                return;
-            }
+            statusMessage = shipStation.InteractTapFromPlayer();
+            statusUntil = Time.time + 3.5f;
+            poseUntil = Time.time + interactionPoseDuration;
+            return;
         }
 
         MarsScenePortal2D closestPortal = null;
@@ -397,17 +394,36 @@ public sealed class AstronautController2D : MonoBehaviour
             }
         }
 
+        var shipStation = FindNearestShipStation(hits, true);
+        if (shipStation != null)
+        {
+            statusMessage = shipStation.InteractHoldFromPlayer(Time.deltaTime);
+            statusUntil = Time.time + 1.2f;
+            poseUntil = Time.time + 0.15f;
+            return;
+        }
+    }
+
+    private MarsSpaceshipStation2D FindNearestShipStation(Collider2D[] hits, bool requireHoldSupport)
+    {
+        MarsSpaceshipStation2D nearest = null;
+        float bestDistance = float.MaxValue;
+
         foreach (var hit in hits)
         {
-            var shipStation = hit.GetComponent<MarsSpaceshipStation2D>();
-            if (shipStation != null && shipStation.SupportsHoldInteraction)
+            var candidate = hit.GetComponent<MarsSpaceshipStation2D>();
+            if (candidate == null) continue;
+            if (requireHoldSupport && !candidate.SupportsHoldInteraction) continue;
+
+            float distance = Vector2.Distance(transform.position, hit.ClosestPoint(transform.position));
+            if (distance < bestDistance)
             {
-                statusMessage = shipStation.InteractHoldFromPlayer(Time.deltaTime);
-                statusUntil = Time.time + 1.2f;
-                poseUntil = Time.time + 0.15f;
-                return;
+                bestDistance = distance;
+                nearest = candidate;
             }
         }
+
+        return nearest;
     }
 
     private void UpdateSprite()
