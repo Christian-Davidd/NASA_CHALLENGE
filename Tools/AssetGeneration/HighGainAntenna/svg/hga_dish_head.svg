@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="896" height="896" viewBox="0 0 896 896">
+  <defs>
+  <radialGradient id="dishConcave" cx="44%" cy="42%" r="62%">
+    <stop offset="0%" stop-color="#d2c7b1"/>
+    <stop offset="45%" stop-color="#ebe3d2"/>
+    <stop offset="86%" stop-color="#faf6ec"/>
+    <stop offset="100%" stop-color="#ded4be"/>
+  </radialGradient>
+  <linearGradient id="rimBevel" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#ffffff"/>
+    <stop offset="50%" stop-color="#e5dcc9"/>
+    <stop offset="100%" stop-color="#b5aa95"/>
+  </linearGradient>
+  <linearGradient id="strutGrad" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#d2d8de"/>
+    <stop offset="100%" stop-color="#6b737c"/>
+  </linearGradient>
+</defs>
+  
+  <!-- Rear housing shell giving true 3D thickness to the tilted parabolic dish -->
+  <polygon points="764.6,594.6 569.8,762.4 294.2,762.4 99.4,594.6 99.4,357.4 294.2,189.6 569.8,189.6 764.6,357.4" fill="#8b8273" stroke="#2a221e" stroke-width="10" stroke-linejoin="round"/>
+  <!-- Outer bevel rim of octagonal parabolic dish -->
+  <polygon points="776.0,556.3 583.9,720.9 312.1,720.9 120.0,556.3 120.0,323.7 312.1,159.1 583.9,159.1 776.0,323.7" fill="url(#rimBevel)" stroke="#2a221e" stroke-width="10" stroke-linejoin="round"/>
+  <!-- Concave segmented dish face -->
+  <polygon points="736.3,541.8 567.4,685.8 328.6,685.8 159.7,541.8 159.7,338.2 328.6,194.2 567.4,194.2 736.3,338.2" fill="url(#dishConcave)" stroke="#2a221e" stroke-width="6" stroke-linejoin="round"/>
+
+  <!-- 8 radial panel seams & concentric octagonal structural ribs -->
+  <g stroke="#b3a790" stroke-width="4" fill="none">
+    <line x1="736.3" y1="541.8" x2="523.8" y2="466.8"/><line x1="567.4" y1="685.8" x2="479.4" y2="504.7"/><line x1="328.6" y1="685.8" x2="416.6" y2="504.7"/><line x1="159.7" y1="541.8" x2="372.2" y2="466.8"/><line x1="159.7" y1="338.2" x2="372.2" y2="413.2"/><line x1="328.6" y1="194.2" x2="416.6" y2="375.3"/><line x1="567.4" y1="194.2" x2="479.4" y2="375.3"/><line x1="736.3" y1="338.2" x2="523.8" y2="413.2"/>
+    <polygon points="619.8,500.5 519.2,586.0 376.8,586.0 276.2,500.5 276.2,379.5 376.8,294.0 519.2,294.0 619.8,379.5"/>
+    <polygon points="523.8,466.8 479.4,504.7 416.6,504.7 372.2,466.8 372.2,413.2 416.6,375.3 479.4,375.3 523.8,413.2" fill="#c8bda8" stroke="#857b68" stroke-width="5"/>
+  </g>
+
+  <!-- Rim rivets matching technical blueprint -->
+  <g fill="#8c8374">
+    <circle cx="592.1" cy="490.9" r="5"/><circle cx="507.7" cy="562.9" r="5"/><circle cx="388.3" cy="562.9" r="5"/><circle cx="303.9" cy="490.9" r="5"/><circle cx="303.9" cy="389.1" r="5"/><circle cx="388.3" cy="317.1" r="5"/><circle cx="507.7" cy="317.1" r="5"/><circle cx="592.1" cy="389.1" r="5"/>
+  </g>
+
+  <!-- Central transceiver emitter well -->
+  <ellipse cx="448" cy="440" rx="52" ry="44" fill="#687078" stroke="#2a221e" stroke-width="6"/>
+  <ellipse cx="448" cy="436" rx="32" ry="27" fill="#3a4046" stroke="#2a221e" stroke-width="5"/>
+
+  <!-- 4 Quadrupod Support Struts converging to the Feed Horn pointing up-right toward satellite orbit -->
+  <g stroke="#2a221e" stroke-linejoin="round" stroke-linecap="round">
+    
+      <line x1="252" y1="266" x2="486" y2="392" stroke="#2a221e" stroke-width="24"/>
+      <line x1="252" y1="266" x2="486" y2="392" stroke="url(#strutGrad)" stroke-width="12"/>
+      <circle cx="252" cy="266" r="14" fill="#aeb6be" stroke="#2a221e" stroke-width="6"/>
+    
+      <line x1="644" y1="266" x2="486" y2="392" stroke="#2a221e" stroke-width="24"/>
+      <line x1="644" y1="266" x2="486" y2="392" stroke="url(#strutGrad)" stroke-width="12"/>
+      <circle cx="644" cy="266" r="14" fill="#aeb6be" stroke="#2a221e" stroke-width="6"/>
+    
+      <line x1="644" y1="610" x2="486" y2="392" stroke="#2a221e" stroke-width="24"/>
+      <line x1="644" y1="610" x2="486" y2="392" stroke="url(#strutGrad)" stroke-width="12"/>
+      <circle cx="644" cy="610" r="14" fill="#aeb6be" stroke="#2a221e" stroke-width="6"/>
+    
+      <line x1="252" y1="610" x2="486" y2="392" stroke="#2a221e" stroke-width="24"/>
+      <line x1="252" y1="610" x2="486" y2="392" stroke="url(#strutGrad)" stroke-width="12"/>
+      <circle cx="252" cy="610" r="14" fill="#aeb6be" stroke="#2a221e" stroke-width="6"/>
+    
+  </g>
+
+  <!-- Feed Horn Tip / Sub-reflector pointing toward the sky -->
+  <g stroke="#2a221e" stroke-width="7">
+    <ellipse cx="486" cy="398" rx="42" ry="36" fill="#7c848d"/>
+    <ellipse cx="492" cy="388" rx="34" ry="28" fill="#d9dfe5"/>
+    <circle cx="496" cy="384" r="16" fill="#0ea5e9"/>
+    <circle cx="496" cy="384" r="7" fill="#e0f2fe" stroke="none"/>
+  </g>
+
+</svg>

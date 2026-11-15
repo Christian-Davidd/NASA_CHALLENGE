@@ -256,6 +256,12 @@ public sealed class DONKICMEManager : MonoBehaviour
         OnCMEIniciada?.Invoke(EventoActivo, VelocidadActualKmS);
     }
 
+    public void AcelerarFinDeTormenta(float maxSegundosRestantes)
+    {
+        if (!HayTormentaCMEActiva) return;
+        TiempoRestanteEvento = Mathf.Min(TiempoRestanteEvento, Mathf.Max(0.5f, maxSegundosRestantes));
+    }
+
     public void FinalizarNubeDePlasma()
     {
         if (!HayTormentaCMEActiva) return;

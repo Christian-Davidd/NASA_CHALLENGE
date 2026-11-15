@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="768" height="512" viewBox="0 0 768 512">
+  <defs>
+  <linearGradient id="plasmaCore" x1="0.2" y1="0" x2="0.8" y2="1">
+    <stop offset="0%" stop-color="#f0abfc"/>
+    <stop offset="28%" stop-color="#d946ef"/>
+    <stop offset="68%" stop-color="#7e22ce"/>
+    <stop offset="100%" stop-color="#2e1065"/>
+  </linearGradient>
+  <linearGradient id="plasmaDeep" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#a855f7"/>
+    <stop offset="55%" stop-color="#6b21a8"/>
+    <stop offset="100%" stop-color="#1e0b36"/>
+  </linearGradient>
+  <linearGradient id="cloudMassGrad" x1="0.2" y1="1" x2="0.6" y2="0">
+    <stop offset="0%" stop-color="#24084a"/>
+    <stop offset="38%" stop-color="#6b21a8"/>
+    <stop offset="76%" stop-color="#c026d3"/>
+    <stop offset="100%" stop-color="#f5d0fe"/>
+  </linearGradient>
+  <radialGradient id="billowGlow" cx="45%" cy="24%" r="72%">
+    <stop offset="0%" stop-color="#fdf4ff" stop-opacity="0.92"/>
+    <stop offset="32%" stop-color="#e879f9" stop-opacity="0.78"/>
+    <stop offset="68%" stop-color="#7e22ce" stop-opacity="0.65"/>
+    <stop offset="100%" stop-color="#3b0764" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="mistBlob" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#d946ef" stop-opacity="0.46"/>
+    <stop offset="48%" stop-color="#7e22ce" stop-opacity="0.26"/>
+    <stop offset="100%" stop-color="#3b0764" stop-opacity="0"/>
+  </radialGradient>
+  <filter id="neonAura" x="-30%" y="-30%" width="160%" height="160%">
+    <feGaussianBlur stdDeviation="10" result="blur"/>
+    <feMerge>
+      <feMergeNode in="blur"/>
+      <feMergeNode in="SourceGraphic"/>
+    </feMerge>
+  </filter>
+  <filter id="cloudBloom" x="-25%" y="-25%" width="150%" height="150%">
+    <feGaussianBlur stdDeviation="12" result="blur"/>
+    <feMerge>
+      <feMergeNode in="blur"/>
+      <feMergeNode in="SourceGraphic"/>
+    </feMerge>
+  </filter>
+  <filter id="softBlur" x="-40%" y="-40%" width="180%" height="180%">
+    <feGaussianBlur stdDeviation="24"/>
+  </filter>
+</defs>
+  
+  <ellipse cx="384" cy="366" rx="285" ry="62" fill="#2e1065" opacity="0.45" filter="url(#softBlur)"/>
+  
+    <g filter="url(#cloudBloom)">
+      <ellipse cx="384.0" cy="198.0" rx="140.0" ry="114.0" fill="#2e0759"/><ellipse cx="262.0" cy="248.0" rx="118.0" ry="98.0" fill="#2e0759"/><ellipse cx="506.0" cy="246.0" rx="120.0" ry="100.0" fill="#2e0759"/><ellipse cx="182.0" cy="314.0" rx="94.0" ry="74.0" fill="#2e0759"/><ellipse cx="586.0" cy="312.0" rx="96.0" ry="76.0" fill="#2e0759"/><ellipse cx="298.0" cy="318.0" rx="116.0" ry="82.0" fill="#2e0759"/><ellipse cx="470.0" cy="318.0" rx="118.0" ry="82.0" fill="#2e0759"/><ellipse cx="384.0" cy="294.0" rx="134.0" ry="98.0" fill="#2e0759"/>
+      <ellipse cx="384.0" cy="198.0" rx="134.0" ry="108.0" fill="url(#cloudMassGrad)"/><ellipse cx="262.0" cy="248.0" rx="112.0" ry="92.0" fill="url(#cloudMassGrad)"/><ellipse cx="506.0" cy="246.0" rx="114.0" ry="94.0" fill="url(#cloudMassGrad)"/><ellipse cx="182.0" cy="314.0" rx="88.0" ry="68.0" fill="url(#cloudMassGrad)"/><ellipse cx="586.0" cy="312.0" rx="90.0" ry="70.0" fill="url(#cloudMassGrad)"/><ellipse cx="298.0" cy="318.0" rx="110.0" ry="76.0" fill="url(#cloudMassGrad)"/><ellipse cx="470.0" cy="318.0" rx="112.0" ry="76.0" fill="url(#cloudMassGrad)"/><ellipse cx="384.0" cy="294.0" rx="128.0" ry="92.0" fill="url(#cloudMassGrad)"/>
+      <ellipse cx="370.6" cy="185.0" rx="123.3" ry="95.0" fill="url(#billowGlow)"/><path d="M309.0 161.3 Q373.3 105.1 443.0 150.5" fill="none" stroke="#fae8ff" stroke-width="10.0" stroke-linecap="round" opacity="0.82"/><ellipse cx="250.8" cy="237.0" rx="103.0" ry="81.0" fill="url(#billowGlow)"/><path d="M199.3 216.7 Q253.0 168.9 311.3 207.5" fill="none" stroke="#fae8ff" stroke-width="8.4" stroke-linecap="round" opacity="0.82"/><ellipse cx="494.6" cy="234.7" rx="104.9" ry="82.7" fill="url(#billowGlow)"/><path d="M442.2 214.0 Q496.9 165.2 556.2 204.6" fill="none" stroke="#fae8ff" stroke-width="8.5" stroke-linecap="round" opacity="0.82"/><ellipse cx="173.2" cy="305.8" rx="81.0" ry="59.8" fill="url(#billowGlow)"/><path d="M132.7 290.9 Q175.0 255.5 220.7 284.1" fill="none" stroke="#fae8ff" stroke-width="6.6" stroke-linecap="round" opacity="0.82"/><ellipse cx="577.0" cy="303.6" rx="82.8" ry="61.6" fill="url(#billowGlow)"/><path d="M535.6 288.2 Q578.8 251.8 625.6 281.2" fill="none" stroke="#fae8ff" stroke-width="6.8" stroke-linecap="round" opacity="0.82"/><ellipse cx="287.0" cy="308.9" rx="101.2" ry="66.9" fill="url(#billowGlow)"/><path d="M236.4 292.2 Q289.2 252.6 346.4 284.6" fill="none" stroke="#fae8ff" stroke-width="8.3" stroke-linecap="round" opacity="0.82"/><ellipse cx="458.8" cy="308.9" rx="103.0" ry="66.9" fill="url(#billowGlow)"/><path d="M407.3 292.2 Q461.0 252.6 519.3 284.6" fill="none" stroke="#fae8ff" stroke-width="8.4" stroke-linecap="round" opacity="0.82"/><ellipse cx="371.2" cy="283.0" rx="117.8" ry="81.0" fill="url(#billowGlow)"/><path d="M312.3 262.7 Q373.8 214.9 440.3 253.5" fill="none" stroke="#fae8ff" stroke-width="9.6" stroke-linecap="round" opacity="0.82"/>
+      <!-- Deep plasma underbelly & swirling base vapor -->
+      <ellipse cx="385.0" cy="376.0" rx="268.8" ry="26" fill="#1e063d" opacity="0.72"/>
+      <path d="M164.6 376.0 Q385.0 396.0 605.4 376.0"
+            fill="none" stroke="#e879f9" stroke-width="5" stroke-linecap="round" opacity="0.65"/>
+    </g>
+  
+  <circle cx="492.0" cy="219.4" r="5.8" fill="#f5d0fe" opacity="0.84"/><circle cx="208.9" cy="137.1" r="5.9" fill="#f5d0fe" opacity="0.91"/><circle cx="569.3" cy="297.5" r="7.1" fill="#e879f9" opacity="0.68"/><circle cx="534.5" cy="277.5" r="7.1" fill="#f5d0fe" opacity="0.83"/><circle cx="405.9" cy="167.7" r="7.4" fill="#f5d0fe" opacity="0.91"/><circle cx="113.9" cy="280.0" r="6.8" fill="#f5d0fe" opacity="0.75"/><circle cx="279.0" cy="162.3" r="3.4" fill="#e879f9" opacity="0.91"/><circle cx="379.7" cy="305.4" r="6.6" fill="#e879f9" opacity="0.95"/><circle cx="451.4" cy="94.6" r="5.2" fill="#f5d0fe" opacity="0.98"/><circle cx="521.7" cy="70.2" r="5.3" fill="#f5d0fe" opacity="0.90"/><circle cx="491.9" cy="164.8" r="3.8" fill="#f5d0fe" opacity="0.79"/><circle cx="614.1" cy="116.9" r="3.1" fill="#f5d0fe" opacity="0.99"/><circle cx="461.9" cy="133.3" r="6.6" fill="#f5d0fe" opacity="0.84"/><circle cx="373.3" cy="140.5" r="4.5" fill="#f5d0fe" opacity="0.66"/><circle cx="105.7" cy="148.0" r="5.7" fill="#f5d0fe" opacity="0.56"/><circle cx="276.9" cy="126.3" r="2.3" fill="#f5d0fe" opacity="0.84"/><circle cx="184.9" cy="212.5" r="4.1" fill="#f5d0fe" opacity="0.88"/><circle cx="253.3" cy="230.5" r="5.0" fill="#f5d0fe" opacity="0.76"/><circle cx="183.5" cy="127.3" r="4.1" fill="#e879f9" opacity="0.62"/><circle cx="279.2" cy="188.8" r="3.7" fill="#f5d0fe" opacity="0.83"/>
+
+</svg>

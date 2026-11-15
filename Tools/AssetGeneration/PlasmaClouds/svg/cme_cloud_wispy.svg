@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="320" viewBox="0 0 640 320">
+  <defs>
+  <linearGradient id="plasmaCore" x1="0.2" y1="0" x2="0.8" y2="1">
+    <stop offset="0%" stop-color="#f0abfc"/>
+    <stop offset="28%" stop-color="#d946ef"/>
+    <stop offset="68%" stop-color="#7e22ce"/>
+    <stop offset="100%" stop-color="#2e1065"/>
+  </linearGradient>
+  <linearGradient id="plasmaDeep" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#a855f7"/>
+    <stop offset="55%" stop-color="#6b21a8"/>
+    <stop offset="100%" stop-color="#1e0b36"/>
+  </linearGradient>
+  <linearGradient id="cloudMassGrad" x1="0.2" y1="1" x2="0.6" y2="0">
+    <stop offset="0%" stop-color="#24084a"/>
+    <stop offset="38%" stop-color="#6b21a8"/>
+    <stop offset="76%" stop-color="#c026d3"/>
+    <stop offset="100%" stop-color="#f5d0fe"/>
+  </linearGradient>
+  <radialGradient id="billowGlow" cx="45%" cy="24%" r="72%">
+    <stop offset="0%" stop-color="#fdf4ff" stop-opacity="0.92"/>
+    <stop offset="32%" stop-color="#e879f9" stop-opacity="0.78"/>
+    <stop offset="68%" stop-color="#7e22ce" stop-opacity="0.65"/>
+    <stop offset="100%" stop-color="#3b0764" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="mistBlob" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#d946ef" stop-opacity="0.46"/>
+    <stop offset="48%" stop-color="#7e22ce" stop-opacity="0.26"/>
+    <stop offset="100%" stop-color="#3b0764" stop-opacity="0"/>
+  </radialGradient>
+  <filter id="neonAura" x="-30%" y="-30%" width="160%" height="160%">
+    <feGaussianBlur stdDeviation="10" result="blur"/>
+    <feMerge>
+      <feMergeNode in="blur"/>
+      <feMergeNode in="SourceGraphic"/>
+    </feMerge>
+  </filter>
+  <filter id="cloudBloom" x="-25%" y="-25%" width="150%" height="150%">
+    <feGaussianBlur stdDeviation="12" result="blur"/>
+    <feMerge>
+      <feMergeNode in="blur"/>
+      <feMergeNode in="SourceGraphic"/>
+    </feMerge>
+  </filter>
+  <filter id="softBlur" x="-40%" y="-40%" width="180%" height="180%">
+    <feGaussianBlur stdDeviation="24"/>
+  </filter>
+</defs>
+  
+  
+    <g filter="url(#cloudBloom)">
+      <ellipse cx="336.0" cy="144.0" rx="98.0" ry="80.0" fill="#2e0759"/><ellipse cx="238.0" cy="178.0" rx="84.0" ry="68.0" fill="#2e0759"/><ellipse cx="438.0" cy="184.0" rx="78.0" ry="64.0" fill="#2e0759"/><ellipse cx="144.0" cy="212.0" rx="62.0" ry="46.0" fill="#2e0759"/><ellipse cx="522.0" cy="214.0" rx="58.0" ry="44.0" fill="#2e0759"/><ellipse cx="326.0" cy="208.0" rx="116.0" ry="62.0" fill="#2e0759"/>
+      <ellipse cx="336.0" cy="144.0" rx="92.0" ry="74.0" fill="url(#cloudMassGrad)"/><ellipse cx="238.0" cy="178.0" rx="78.0" ry="62.0" fill="url(#cloudMassGrad)"/><ellipse cx="438.0" cy="184.0" rx="72.0" ry="58.0" fill="url(#cloudMassGrad)"/><ellipse cx="144.0" cy="212.0" rx="56.0" ry="40.0" fill="url(#cloudMassGrad)"/><ellipse cx="522.0" cy="214.0" rx="52.0" ry="38.0" fill="url(#cloudMassGrad)"/><ellipse cx="326.0" cy="208.0" rx="110.0" ry="56.0" fill="url(#cloudMassGrad)"/>
+      <ellipse cx="326.8" cy="135.1" rx="84.6" ry="65.1" fill="url(#billowGlow)"/><path d="M284.5 118.8 Q328.6 80.4 376.5 111.4" fill="none" stroke="#fae8ff" stroke-width="6.9" stroke-linecap="round" opacity="0.82"/><ellipse cx="230.2" cy="170.6" rx="71.8" ry="54.6" fill="url(#billowGlow)"/><path d="M194.3 156.9 Q231.8 124.7 272.3 150.7" fill="none" stroke="#fae8ff" stroke-width="5.8" stroke-linecap="round" opacity="0.82"/><ellipse cx="430.8" cy="177.0" rx="66.2" ry="51.0" fill="url(#billowGlow)"/><path d="M397.7 164.3 Q432.2 134.1 469.7 158.5" fill="none" stroke="#fae8ff" stroke-width="5.4" stroke-linecap="round" opacity="0.82"/><ellipse cx="138.4" cy="207.2" rx="51.5" ry="35.2" fill="url(#billowGlow)"/><ellipse cx="516.8" cy="209.4" rx="47.8" ry="33.4" fill="url(#billowGlow)"/><path d="M492.9 201.1 Q517.8 181.3 544.9 197.3" fill="none" stroke="#fae8ff" stroke-width="3.9" stroke-linecap="round" opacity="0.82"/><ellipse cx="315.0" cy="201.3" rx="101.2" ry="49.3" fill="url(#billowGlow)"/><path d="M264.4 189.0 Q317.2 159.8 374.4 183.4" fill="none" stroke="#fae8ff" stroke-width="8.3" stroke-linecap="round" opacity="0.82"/>
+      <!-- Deep plasma underbelly & swirling base vapor -->
+      <ellipse cx="331.0" cy="246.0" rx="230.4" ry="26" fill="#1e063d" opacity="0.72"/>
+      <path d="M142.1 246.0 Q331.0 266.0 519.9 246.0"
+            fill="none" stroke="#e879f9" stroke-width="5" stroke-linecap="round" opacity="0.65"/>
+    </g>
+  
+  <circle cx="240.2" cy="123.0" r="5.5" fill="#f5d0fe" opacity="0.79"/><circle cx="128.4" cy="61.8" r="4.6" fill="#f5d0fe" opacity="0.93"/><circle cx="199.8" cy="194.7" r="2.4" fill="#e879f9" opacity="0.65"/><circle cx="550.9" cy="68.2" r="6.1" fill="#f5d0fe" opacity="0.59"/><circle cx="415.3" cy="198.5" r="2.0" fill="#e879f9" opacity="0.75"/><circle cx="431.1" cy="85.1" r="4.3" fill="#f5d0fe" opacity="0.73"/><circle cx="567.5" cy="102.6" r="2.6" fill="#f5d0fe" opacity="0.59"/><circle cx="483.6" cy="139.9" r="6.1" fill="#e879f9" opacity="0.74"/><circle cx="569.6" cy="67.6" r="4.6" fill="#f5d0fe" opacity="0.70"/><circle cx="567.0" cy="187.6" r="6.8" fill="#e879f9" opacity="0.84"/><circle cx="403.6" cy="59.9" r="6.3" fill="#e879f9" opacity="0.71"/><circle cx="479.5" cy="205.5" r="7.0" fill="#e879f9" opacity="0.65"/><circle cx="118.8" cy="116.2" r="3.8" fill="#e879f9" opacity="0.55"/><circle cx="541.7" cy="61.6" r="3.6" fill="#f5d0fe" opacity="0.57"/><circle cx="280.3" cy="166.5" r="6.7" fill="#f5d0fe" opacity="0.64"/><circle cx="302.4" cy="208.8" r="6.2" fill="#f5d0fe" opacity="0.87"/>
+
+</svg>

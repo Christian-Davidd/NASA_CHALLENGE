@@ -23,69 +23,77 @@ public sealed class MarsMissionHUD : MonoBehaviour
         var tower = CommsTowerCMEEvent.Instance;
         bool hayCME = cme != null && cme.HayTormentaCMEActiva;
         bool hayInterferencia = hayCME && (tower == null || tower.TieneInterferenciaCME);
+        bool enModoSeguro = tower != null && !tower.TransmisorEncendido;
 
-        // 1. [PERSONA 1] Efecto visual en el cielo + interferencia electromagnética en pantalla
-        if (hayInterferencia)
+        // 1. [PERSONA 1] Banner superior de tormenta / Modo Seguro / Reencendido
+        if (hayCME || enModoSeguro)
         {
-            DibujarEfectoCieloEInterferencia(cme);
+            DibujarBannerTormentaOProteccion(cme, tower, hayCME, hayInterferencia, enModoSeguro);
         }
 
         // 2. [PERSONA 3 & 1] Panel de Estado Actual del Clima Espacial (Arriba Izquierda)
-        DibujarPanelClimaEspacial(cme, tower, hayInterferencia);
+        DibujarPanelClimaEspacial(cme, tower, hayCME, hayInterferencia);
 
         // 3. [PERSONA 2] Panel de Contador de Muestras y Cultivos (Arriba Derecha)
         DibujarPanelMuestrasYCultivos();
     }
 
-    private void DibujarEfectoCieloEInterferencia(DONKICMEManager cme)
+    private void DibujarBannerTormentaOProteccion(
+        DONKICMEManager cme,
+        CommsTowerCMEEvent tower,
+        bool hayCME,
+        bool hayInterferencia,
+        bool enModoSeguro)
     {
         Color prev = GUI.color;
-
-        // Tinte atmosférico de Nube de Plasma en el cielo / pantalla
         float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * 4.2f);
-        GUI.color = new Color(0.58f, 0.14f, 0.78f, Mathf.Lerp(0.12f, 0.24f, pulse));
-        GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), solidTex);
+        var plasma = PlasmaCloudOverlayController.Instance;
 
-        // Resplandor superior del cielo marciano ionizado
-        GUI.color = new Color(0.85f, 0.20f, 0.65f, Mathf.Lerp(0.18f, 0.34f, pulse));
-        GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height * 0.22f), solidTex);
+        float bannerW = Mathf.Min(700f, Screen.width - 660f);
+        if (bannerW < 440f) bannerW = 480f;
+        Rect bannerRect = new Rect((Screen.width - bannerW) * 0.5f, 14f, bannerW, 66f);
 
-        // Líneas horizontales de interferencia electromagnética (scanlines dinámicas)
-        GUI.color = new Color(0.95f, 0.45f, 1.0f, 0.14f);
-        float offset = (Time.time * 90f) % 28f;
-        for (float y = offset; y < Screen.height; y += 28f)
-        {
-            GUI.DrawTexture(new Rect(0, y, Screen.width, 2f), solidTex);
-        }
-
-        // Banner central superior de Alerta de Interferencia Electromagnética
-        float bannerW = Mathf.Min(680f, Screen.width - 660f);
-        if (bannerW < 420f) bannerW = 460f;
-        Rect bannerRect = new Rect((Screen.width - bannerW) * 0.5f, 14f, bannerW, 64f);
-
-        GUI.color = new Color(0.14f, 0.04f, 0.18f, 0.94f);
+        GUI.color = new Color(0.10f, 0.06f, 0.16f, 0.94f);
         GUI.DrawTexture(bannerRect, solidTex);
 
-        GUI.color = Color.Lerp(new Color(1f, 0.25f, 0.55f, 1f), new Color(0.3f, 0.9f, 1f, 1f), pulse);
+        Color barColor;
+        string linea1;
+        string linea2;
+        float vel = cme != null && cme.VelocidadActualKmS > 0f ? cme.VelocidadActualKmS : 780f;
+        float rest = cme != null ? cme.TiempoRestanteEvento : 0f;
+        int cobPct = plasma != null ? Mathf.RoundToInt(plasma.CoberturaPorcentaje) : 0;
+
+        if (hayInterferencia)
+        {
+            barColor = Color.Lerp(new Color(1f, 0.25f, 0.55f, 1f), new Color(0.3f, 0.9f, 1f, 1f), pulse);
+            alertBannerStyle.normal.textColor = new Color(1f, 0.55f, 0.85f, 1f);
+            linea1 = $"⚡ ALERTA CME ({vel:F0} km/s | Cobertura {cobPct}%) — ¡RIESGO ELÉCTRICO EN ANTENA!";
+            linea2 = $"Ve a la Antena HGA y presiona [E] para Apagado Seguro ({rest:F0}s)";
+        }
+        else if (hayCME && enModoSeguro)
+        {
+            barColor = new Color(1f, 0.78f, 0.25f, 1f);
+            alertBannerStyle.normal.textColor = new Color(1f, 0.86f, 0.40f, 1f);
+            linea1 = $"🛡️ TORMENTA CME ({vel:F0} km/s) — ANTENA PROTEGIDA EN MODO SEGURO";
+            linea2 = $"El transmisor está a salvo. Espera a que pase la nube ({rest:F0}s) para reencender";
+        }
+        else
+        {
+            barColor = new Color(0.28f, 0.95f, 0.58f, 1f);
+            alertBannerStyle.normal.textColor = new Color(0.45f, 1f, 0.72f, 1f);
+            linea1 = "☀️ CIELO DESPEJADO — TRANSMISOR LISTO PARA REENCENDER";
+            linea2 = "Ve a la Antena HGA y presiona [E] para encenderlo paso a paso (sin límite de tiempo)";
+        }
+
+        GUI.color = barColor;
         GUI.DrawTexture(new Rect(bannerRect.x, bannerRect.y, bannerRect.width, 4f), solidTex);
         GUI.color = prev;
 
-        float vel = cme != null ? cme.VelocidadActualKmS : 780f;
-        float rest = cme != null ? cme.TiempoRestanteEvento : 0f;
-
-        GUI.Label(
-            new Rect(bannerRect.x + 12f, bannerRect.y + 8f, bannerRect.width - 24f, 24f),
-            $"⚡ ALERTA CME: NUBE DE PLASMA ({vel:F0} km/s) — INTERFERENCIA ELECTROMAGNÉTICA",
-            alertBannerStyle
-        );
-        GUI.Label(
-            new Rect(bannerRect.x + 12f, bannerRect.y + 34f, bannerRect.width - 24f, 22f),
-            $"Ve a [TORRE DE COMUNICACIONES] y presiona [E] para calibrar los círculos ({rest:F0}s restantes)",
-            alertSubStyle
-        );
+        GUI.Label(new Rect(bannerRect.x + 12f, bannerRect.y + 8f, bannerRect.width - 24f, 24f), linea1, alertBannerStyle);
+        GUI.Label(new Rect(bannerRect.x + 12f, bannerRect.y + 34f, bannerRect.width - 24f, 22f), linea2, alertSubStyle);
     }
 
-    private void DibujarPanelClimaEspacial(DONKICMEManager cme, CommsTowerCMEEvent tower, bool hayInterferencia)
+    private void DibujarPanelClimaEspacial(DONKICMEManager cme, CommsTowerCMEEvent tower, bool hayCME, bool hayInterferencia)
     {
         Rect rect = new Rect(16f, 16f, 330f, 134f);
         Color prev = GUI.color;
@@ -95,18 +103,22 @@ public sealed class MarsMissionHUD : MonoBehaviour
 
         Color accent = hayInterferencia
             ? new Color(1f, 0.28f, 0.58f, 1f)
-            : new Color(0.22f, 0.85f, 0.98f, 1f);
+            : (hayCME ? new Color(1f, 0.78f, 0.25f, 1f) : new Color(0.22f, 0.85f, 0.98f, 1f));
         GUI.color = accent;
         GUI.DrawTexture(new Rect(rect.x, rect.y, rect.width, 3f), solidTex);
         GUI.color = prev;
 
-        string estadoClima = hayInterferencia
+        string estadoClima = hayCME
             ? "TORMENTA CME (Nube de Plasma)"
             : "DESPEJADO (Viento Solar Estable)";
 
-        string estadoTorre = (tower != null && tower.TieneInterferenciaCME)
-            ? "¡INTERFERENCIA EM! (Calibrar con E)"
-            : "EN LÍNEA (Señal Estable)";
+        string estadoTorre;
+        if (tower != null && tower.TieneInterferenciaCME)
+            estadoTorre = "¡RIESGO EM! (Apagar con [E])";
+        else if (tower != null && !tower.TransmisorEncendido)
+            estadoTorre = tower.NecesitaReencendido ? "MODO SEGURO (Reencender con [E])" : "MODO SEGURO (Protegida)";
+        else
+            estadoTorre = "EN LÍNEA (Señal Estable)";
 
         string fuente = cme != null ? cme.FuenteDatosActual : "Inicializando...";
         string proxTexto = (cme != null && cme.HayTormentaCMEActiva)
@@ -115,7 +127,7 @@ public sealed class MarsMissionHUD : MonoBehaviour
 
         GUI.Label(new Rect(rect.x + 12f, rect.y + 8f, rect.width - 24f, 22f), "ESTADO ACTUAL DEL CLIMA ESPACIAL", panelTitleStyle);
         GUI.Label(new Rect(rect.x + 12f, rect.y + 32f, rect.width - 24f, 22f), $"Clima: {estadoClima}", bodyTextStyle);
-        GUI.Label(new Rect(rect.x + 12f, rect.y + 54f, rect.width - 24f, 22f), $"Torre Comms: {estadoTorre}", bodyTextStyle);
+        GUI.Label(new Rect(rect.x + 12f, rect.y + 54f, rect.width - 24f, 22f), $"Antena HGA: {estadoTorre}", bodyTextStyle);
         GUI.Label(new Rect(rect.x + 12f, rect.y + 76f, rect.width - 24f, 22f), proxTexto, bodyTextStyle);
         GUI.Label(new Rect(rect.x + 12f, rect.y + 98f, rect.width - 24f, 28f), $"NASA: {fuente}", bodyTextStyle);
     }
