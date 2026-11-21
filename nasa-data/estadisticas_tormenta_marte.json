@@ -1,7 +1,7 @@
 {
-  "ultima_actualizacion_utc": "2026-11-20T20:09:58Z",
+  "ultima_actualizacion_utc": "2026-11-21T07:00:22Z",
   "fuente": "https://ccmc.gsfc.nasa.gov/DONKI/WS/get/FLR",
-  "ventana_datos_nasa": "2026-11-13 a 2026-11-20",
+  "ventana_datos_nasa": "2026-11-14 a 2026-11-21",
   "total_llamaradas_semana": 9,
   "tasa_media_por_dia": 1.32,
   "probabilidad_evento_por_dia": 0.7331,
