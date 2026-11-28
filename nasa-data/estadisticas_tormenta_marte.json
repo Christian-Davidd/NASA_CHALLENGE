@@ -1,11 +1,11 @@
 {
-  "ultima_actualizacion_utc": "2026-11-27T21:13:07Z",
+  "ultima_actualizacion_utc": "2026-11-28T07:41:49Z",
   "fuente": "https://ccmc.gsfc.nasa.gov/DONKI/WS/get/FLR",
-  "ventana_datos_nasa": "2026-11-20 a 2026-11-27",
-  "total_llamaradas_semana": 1,
-  "tasa_media_por_dia": 0.15,
-  "probabilidad_evento_por_dia": 0.1365,
-  "duracion_media_tormenta_seg": 16.9,
+  "ventana_datos_nasa": "2026-11-21 a 2026-11-28",
+  "total_llamaradas_semana": 2,
+  "tasa_media_por_dia": 0.29,
+  "probabilidad_evento_por_dia": 0.2544,
+  "duracion_media_tormenta_seg": 16.1,
   "configuracion_tiempo_juego": {
     "duracion_max_partida_seg": 420.0,
     "total_dias_juego": 5,
